@@ -1,4 +1,5 @@
-# boredcore - A RISC-V core that needs something to work on.
+# boredcore
+A RISC-V core that needs something to work on.
 
 ## Design
 - 4-stage in-order pipelined processor
