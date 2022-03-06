@@ -117,7 +117,7 @@ if __name__ == "__main__":
     ctrlAddrLen     = 17    # (i.e. funct7 + funct3 + op)
     deadBits        = [True]*ctrlAddrLen
     ctrl            = [Controller(x.name, x.value, '') for x in (sorted([x for x in Rv32icontroller]))]
-    print(f"Instruction count: {len(ctrl)}\n-----------------------------------")
+    print(f"Instruction count: {len(ctrl)}\n==================")
     for instr in ctrl:
         print(
             f"{instr.instrName:<12}: 0b{(instr.instrAddr>>10):07b}" +
@@ -128,50 +128,55 @@ if __name__ == "__main__":
             if ((1 << bitpos) & instr.instrAddr) > 0:
                 deadBits[bitpos] = False
 
-    # TODO: double check these...
-    uCodeAssign(ctrl, "LB", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "FENCE", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "ADDI", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "AUIPC", uCodeFmt(AluOp.ADD,AluSrcA.FROM_PC,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SB", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    # [R-type]:
     uCodeAssign(ctrl, "ADD", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "LUI", uCodeFmt(AluOp.PASS_B,AluSrcA.FROM_PC,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "BEQ", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "JALR", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "JAL", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "ECALL", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "LH", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SLLI", uCodeFmt(AluOp.SLL,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SH", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SLL", uCodeFmt(AluOp.SLL,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "BNE", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "LW", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SLTI", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SW", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SLT", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SLTIU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SLTU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "LBU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "XORI", uCodeFmt(AluOp.XOR,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "XOR", uCodeFmt(AluOp.XOR,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "BLT", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "LHU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SRLI", uCodeFmt(AluOp.SRL,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "SRL", uCodeFmt(AluOp.SRL,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "BGE", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "ORI", uCodeFmt(AluOp.OR,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "OR", uCodeFmt(AluOp.OR,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "BLTU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "ANDI", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "AND", uCodeFmt(AluOp.AND,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "BGEU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
-    uCodeAssign(ctrl, "EBREAK", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
     uCodeAssign(ctrl, "SUB", uCodeFmt(AluOp.SUB,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
-    uCodeAssign(ctrl, "SRAI", uCodeFmt(AluOp.SRA,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SLL", uCodeFmt(AluOp.SLL,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
+    uCodeAssign(ctrl, "SLT", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SLTU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "XOR", uCodeFmt(AluOp.XOR,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
+    uCodeAssign(ctrl, "SRL", uCodeFmt(AluOp.SRL,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
     uCodeAssign(ctrl, "SRA", uCodeFmt(AluOp.SRA,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
+    uCodeAssign(ctrl, "OR", uCodeFmt(AluOp.OR,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
+    uCodeAssign(ctrl, "AND", uCodeFmt(AluOp.AND,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
+    # [I-Type]:
+    uCodeAssign(ctrl, "JALR", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "LB", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "LH", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "LW", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "LBU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "LHU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "ADDI", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SLTI", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SLTIU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "XORI", uCodeFmt(AluOp.XOR,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "ORI", uCodeFmt(AluOp.OR,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "ANDI", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "FENCE", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
+    uCodeAssign(ctrl, "ECALL", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SLLI", uCodeFmt(AluOp.SLL,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SRLI", uCodeFmt(AluOp.SRL,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SRAI", uCodeFmt(AluOp.SRA,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "EBREAK", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    # [S-type]:
+    uCodeAssign(ctrl, "SB", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SH", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "SW", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    # [B-type]:
+    uCodeAssign(ctrl, "BEQ", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "BNE", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "BLT", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "BGE", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "BLTU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "BGEU", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
+    # [U-type]
+    uCodeAssign(ctrl, "LUI", uCodeFmt(AluOp.PASS_B,AluSrcA.FROM_PC,AluSrcB.FROM_IMM))
+    uCodeAssign(ctrl, "AUIPC", uCodeFmt(AluOp.ADD,AluSrcA.FROM_PC,AluSrcB.FROM_IMM))
+    # [J-type]
+    uCodeAssign(ctrl, "JAL", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_IMM))
 
     # Eliminate dead addr. bits (help optimize decoder in HDL)
-    print(f"\nDeadbits removed:\n-----------------")
+    print(f"\nDeadbits removed:\n=================")
     for i in range(ctrlAddrLen):
         print(f"Bit[{i:>4}]:  {'[REMOVED]' if deadBits[i] else ''}")
         if deadBits[i]:
@@ -185,17 +190,17 @@ if __name__ == "__main__":
                             )
                             break
 
-    # Dump and generate stuff
+    # Dump/generate stuff
     finalAddrWidth      = len([x for x in deadBits if x != True])
     defaultCase         = next((x for x in ctrl if x.instrName == 'ECALL'), None)
     if args.dump:
         ucodeDataFile   = open('g_ucode.dat', 'w')
         ucodeFile       = open('g_ucode.v', 'w')
-        print(f"\nDumping microcode to file(s): [ {ucodeDataFile.name} ] & [ {ucodeFile.name} ]\n")
+        print(f"\nDumping microcode to file(s): [ {ucodeDataFile.name} ] & [ {ucodeFile.name} ]")
     else:
         ucodeDataFile   = sys.stdout
         ucodeFile       = sys.stdout
-        print("\nFinal values:\n--------------------------------------------------------")
+        print("\n[ Final controller module]:\n===========================")
 
     print(f"module decoder(\n    input clk, input [{ctrlAddrLen-1}:0]inAddr, ", file=ucodeFile)
     print(f"    output reg [{ctrl[0].uCodeLen-1}:0]decoderOut\n)", file=ucodeFile)
@@ -203,9 +208,11 @@ if __name__ == "__main__":
     print(f"    wire[{finalAddrWidth-1}:0]ucodeAddr;", file=ucodeFile)
     print(f"    always@* begin", file=ucodeFile)
     print(f"        case(inAddr)", file=ucodeFile)
+
+    uCodeFmtStr = ''
     for instr in ctrl:
         i = ctrl.index(instr)
-        uCodeFmtStr = f"{instr.uCode}"
+        uCodeFmtStr += f"{instr.uCode}\n" if instr != ctrl[-1] else f"{instr.uCode}"
         uCodeDecoderFmtStr = (
             f"        /* {instr.instrName:<8} */ " +
             f"{finalAddrWidth}\'b{instr.instrAddr:0{finalAddrWidth}b}" +
@@ -216,8 +223,8 @@ if __name__ == "__main__":
             f"default{'         ':>}" +
             f" : ucodeAddr = \'d{str(ctrl.index(defaultCase))+';':<4}"
         )
-        print(uCodeFmtStr, file=ucodeDataFile)
         print(uCodeDecoderFmtStr, file=ucodeFile)
+
     print(uCodeDecoderDefaultFmtStr, file=ucodeFile)
     print(f"        endcase", file=ucodeFile)
     print(f"    end", file=ucodeFile)
@@ -228,6 +235,12 @@ if __name__ == "__main__":
     print(f"        decoderOut <= ucode[ucodeAddr]", file=ucodeFile)
     print(f"    end", file=ucodeFile)
     print(f"endmodule", file=ucodeFile)
+
+    if not args.dump:
+        print(f"\n[ ucode data ]:\n===============")
+    print(uCodeFmtStr, file=ucodeDataFile)
     if args.dump:
         ucodeDataFile.close()
         ucodeFile.close()
+
+print("\n[Done].")
