@@ -103,6 +103,24 @@ def uCodeAssign(controller, name, uCode):
 def uCodeFmt(aluOp, aluSrcA, aluSrcB):
     return f"{aluOp.value:04b}{aluSrcA.value:02b}{aluSrcB.value:02b}"
 
+def uCodeAddrBitRanges(bits, dead=False):
+    i = 0
+    base = 0
+    ranges = []
+    while i < len(bits):
+        if bits[i] is dead:
+            base = i
+            for j in range(i, len(bits)):
+                if bits[j] is not dead:
+                    ranges.append(f'{j-1}:{base}')
+                    base = j
+                    i = j - 1
+                    break
+                if i == j == len(bits)-1 and bits[j] is dead:
+                    ranges.append(f'{j}:{base}')
+        i +=1
+    return ranges
+
 if __name__ == "__main__":
     # Define args/opts
     parser = argparse.ArgumentParser(allow_abbrev=False)
@@ -115,7 +133,7 @@ if __name__ == "__main__":
 
     # Begin
     ctrlAddrLen     = 17    # (i.e. funct7 + funct3 + op)
-    deadBits        = [True]*ctrlAddrLen
+    ucodeAddrBits   = [True]*ctrlAddrLen
     ctrl            = [Controller(x.name, x.value, '') for x in (sorted([x for x in Rv32icontroller]))]
     print(f"Instruction count: {len(ctrl)}\n==================")
     for instr in ctrl:
@@ -126,7 +144,7 @@ if __name__ == "__main__":
         # Find dead bits
         for bitpos in range(ctrlAddrLen):
             if ((1 << bitpos) & instr.instrAddr) > 0:
-                deadBits[bitpos] = False
+                ucodeAddrBits[bitpos] = False
 
     # [R-type]:
     uCodeAssign(ctrl, "ADD", uCodeFmt(AluOp.ADD,AluSrcA.FROM_RS1,AluSrcB.FROM_RS2))
@@ -178,12 +196,12 @@ if __name__ == "__main__":
     # Eliminate dead addr. bits (help optimize decoder in HDL)
     print(f"\nDeadbits removed:\n=================")
     for i in range(ctrlAddrLen):
-        print(f"Bit[{i:>4}]:  {'[REMOVED]' if deadBits[i] else ''}")
-        if deadBits[i]:
+        print(f"Bit[{i:>4}]:  {'[REMOVED]' if ucodeAddrBits[i] else ''}")
+        if ucodeAddrBits[i]:
             for instr in ctrl:
                 if instr.instrAddr >= (1 << i):
                     for j in range(i, ctrlAddrLen):
-                        if not deadBits[j]:
+                        if not ucodeAddrBits[j]:
                             lowerTmp = ((1 << i) - 1) & instr.instrAddr
                             ctrl[ctrl.index(instr)].instrAddr = (
                                 ((instr.instrAddr >> j-i) & (1 << i)) | lowerTmp
@@ -191,8 +209,16 @@ if __name__ == "__main__":
                             break
 
     # Dump/generate stuff
-    finalAddrWidth      = len([x for x in deadBits if x != True])
+    finalAddrWidth      = len([x for x in ucodeAddrBits if x != True])
     defaultCase         = next((x for x in ctrl if x.instrName == 'ECALL'), None)
+    goodBitsLst         = uCodeAddrBitRanges(ucodeAddrBits, dead=False)
+    finalAddrCat        = '{'
+    for i in reversed(range(len(goodBitsLst))):
+        finalAddrCat += f"[{goodBitsLst[i]}]inAddr"
+        if i > 0:
+            finalAddrCat += ","
+    finalAddrCat += "}"
+
     if args.dump:
         ucodeDataFile   = open('g_ucode.dat', 'w')
         ucodeFile       = open('g_ucode.v', 'w')
@@ -207,7 +233,7 @@ if __name__ == "__main__":
     print(f"    reg [{ctrl[0].uCodeLen-1}:0]ucode[0:{len(ctrl)-1}];", file=ucodeFile)
     print(f"    wire[{finalAddrWidth-1}:0]ucodeAddr;", file=ucodeFile)
     print(f"    always@* begin", file=ucodeFile)
-    print(f"        case(inAddr)", file=ucodeFile)
+    print(f"        case({finalAddrCat})", file=ucodeFile)
 
     uCodeFmtStr = ''
     for instr in ctrl:

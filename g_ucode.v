@@ -5,7 +5,7 @@ module decoder(
     reg [7:0]ucode[0:39];
     wire[11:0]ucodeAddr;
     always@* begin
-        case(inAddr)
+        case({[15:15]inAddr,[10:0]inAddr})
         /* LB       */ 12'b000000000011 : ucodeAddr = 'd0;     // ucode[   0]: 00000001
         /* FENCE    */ 12'b000000001111 : ucodeAddr = 'd1;     // ucode[   1]: 00000000
         /* ADDI     */ 12'b000000010011 : ucodeAddr = 'd2;     // ucode[   2]: 00000001
