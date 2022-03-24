@@ -52,6 +52,7 @@ module ImmGen_tb;
         end
         if (errs > 0)   $display("\nFAILED: %0d", errs);
         else            $display("\nPASSED");
+        // TODO: Use VPI to have $myReturn(...) return the "errs" value?
     end
 
 endmodule

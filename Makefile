@@ -2,6 +2,10 @@ CC      := iverilog
 SIM_DIR := ./sim_build
 FLAGS   := -Wall
 FLAGS   += -I..
+ifdef VCD
+FLAGS	+= -DDUMP_VCD
+endif
+LINE	:= =====================================================================================
 
 # Gather sources to set-up objects/output bins
 TEST_BASE := ./tests
@@ -9,27 +13,29 @@ vpath %.v $(TEST_BASE)
 SOURCES	:= $(shell find $(TEST_BASE) -type f -name "*.v" -exec basename {} \;)
 OUTPUTS := $(SOURCES:%.v=$(SIM_DIR)/%)
 
+#ifdef DOCKER
+#	@printf "Using Docker for test-prep..."
+#else
+#	@printf ""
+#endif
+
 $(SIM_DIR)/%: %.v
 	@mkdir -p $(SIM_DIR) $(dir $@)
 	$(CC) $(FLAGS) -o $@ $^
 
 .PHONY: all
 all:
-	@echo "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later..."
+	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: tests
 tests: $(OUTPUTS)
-# TODO: Move this somewhere else later...
-ifdef DOCKER
-	@echo "Using Docker for test-prep..."
-else
-	@echo ""
-endif
-	@echo "All done."
+	@printf "\nAll done building tests.\n"
 
-.PHONY: vcd
-vcd: FLAGS += -DDUMP_VCD
-vcd: tests
+# Maybe I should just use/try VUnit at this point 😅
+.PHONY: runtests
+runtests: tests
+	@printf "Running tests...\n"
+	@$(foreach out, $(OUTPUTS), printf "\n[ $(out) ]:\n$(LINE)\n" && $(out) && printf "$(LINE)\n")
 
 .PHONY: clean
 clean:
