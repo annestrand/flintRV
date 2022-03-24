@@ -1,33 +1,27 @@
+`include "types.v"
 
-module alu
+module IntegerAlu
 #(parameter WIDTH = 32)
 (
-  input [WIDTH-1:0]a,b,
-  input [3:0]sel,
-  output reg [WIDTH-1:0]f,
-  output zflag
+  input         [WIDTH-1:0] a, b,   // input operands
+  input         [2:0]       op,     // ALU operation
+  input                     opAlt,  // ALU alternate operation modifier bit: ( funct7[6] )
+  output reg    [WIDTH-1:0] result, // ALU output
+  output                    zflag   // Zero-flag
 );
-    localparam [3:0]
-        ADD         = 4'd0,
-        SUB         = 4'd1,
-        AND         = 4'd2,
-        OR          = 4'd3,
-        XOR         = 4'd4,
-        SLL         = 4'd5,
-        SRL         = 4'd6,
-        SRA         = 4'd7;
-
     always @(*) begin
-        case (sel)
-            ADD : f = a + b;
-            SUB : f = a + ((~b) + 1);
-            AND : f = a & b;
-            OR  : f = a | b;
-            XOR : f = a ^ b;
-            SLL : f = a << b;
-            SRL : f = a >> b;
-            SRA : f = a >>> b;
+        case (op)
+            default : result = a + b;           // TODO: Replace w/ dedicated 2's comp adder/subtractor
+            // Operations
+            `ADD    : result = a + b;           // TODO: Replace w/ dedicated 2's comp adder/subtractor
+            `SUB    : result = a + ((~b) + 1);  // TODO: Replace w/ dedicated 2's comp adder/subtractor
+            `AND    : result = a & b;
+            `OR     : result = a | b;
+            `XOR    : result = a ^ b;
+            `SLL    : result = a << b;
+            `SRL    : result = a >> b;          // TODO: Replace with dedicated right shifter
+            `SRA    : result = a >>> b;         // TODO: Replace with dedicated right shifter
         endcase
     end
-    assign zflag = (f == 'd0) ? (1) : (0);
+    assign zflag = (result == 'd0) ? 1 : 0;
 endmodule

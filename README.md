@@ -1,5 +1,5 @@
 # boredcore
-A RISC-V core that needs something to work on.
+Codename working private repo for pineapplecore 🍍
 
 ## Design
 - 4-stage in-order pipelined processor
@@ -8,4 +8,9 @@ A RISC-V core that needs something to work on.
     - (TODO): which extensions?
 
 ## Testing 🧪
-(TODO)
+Functional Verification:
+- `iverilog`    : Unit testing sub-modules (maaaaybe TB for the final core to use VPI to interact with CPU)
+- `Verilator`   : Full-design run on RISC-V programs/benchmarks
+
+Formal Verification:
+- `SymbiYosys`  : Formal verify critical pieces of sub-module logic

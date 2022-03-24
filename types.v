@@ -10,3 +10,13 @@
 `define U_LUI   5'b01101 // _11
 `define U_AUIPC 5'b00101 // _11
 `define J       5'b11011 // _11
+
+// Integer ALU Types (encoded from funct3)
+`define ADD 3'b000 // funct7[6] == 0
+`define SUB 3'b000 // funct7[6] == 1
+`define SLL 3'b001
+`define XOR 3'b100
+`define SRL 3'b101 // funct7[6] == 0
+`define SRA 3'b101 // funct7[6] == 1
+`define OR  3'b110
+`define AND 3'b111

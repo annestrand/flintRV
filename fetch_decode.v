@@ -2,14 +2,13 @@
 
 module ImmGen
 (
-    input   [21:0]signExt,
-    input   [4:0]opcode,
-    input   [31:0]instr,
-    output  reg [31:0]imm
+    input       [21:0]  signExt,
+    input       [4:0]   opcode,
+    input       [31:0]  instr,
+    output reg  [31:0]  imm
 );
     always @(*) begin
         case (opcode)
-        // Non-immediate cases
             default: imm = 32'd0;
         // Immediate cases
             `I_JUMP, `I_LOAD, `I_ARITH, `I_SYS, `I_SYNC: begin
@@ -24,8 +23,4 @@ module ImmGen
         endcase
     end
 
-initial begin $dumpfile("../sim_build/ImmGen.vcd"); $dumpvars(0,ImmGen); end
 endmodule
-
-// ====================================================================================================================
-
