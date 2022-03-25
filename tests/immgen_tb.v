@@ -10,7 +10,7 @@ module ImmGen_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("./sim_build/immgen.vcd");
+        $dumpfile("./sim_build/immgen_tb.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD
@@ -30,7 +30,7 @@ module ImmGen_tb;
     end
 
     // Test loop
-    integer i, errs = 0;
+    integer i = 0, errs = 0;
     initial begin
         signExt = 'd0;
         opcode  = 'd0;
@@ -40,7 +40,7 @@ module ImmGen_tb;
             opcode  = test_opcodes[i];
             instr   = test_instrs[i];
             #20;
-            $display("Time[ %0t ]: i = 0x%h, signExt = 0x%h, opcode = 0x%h, instr = 0x%h",
+            $display("Time[ %0t ]: i = %0d, signExt = %0d, opcode = 0x%h, instr = 0x%h",
                 $time, i, signExt, opcode, instr
             );
             if (imm != gold_imms[i]) begin

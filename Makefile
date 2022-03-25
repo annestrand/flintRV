@@ -35,7 +35,11 @@ tests: $(OUTPUTS)
 .PHONY: runtests
 runtests: tests
 	@printf "Running tests...\n"
-	@$(foreach out, $(OUTPUTS), printf "\n[ $(out) ]:\n$(LINE)\n" && $(out) && printf "$(LINE)\n")
+	@for out in $(OUTPUTS); do \
+	    printf "\n[ $$out ]\n$(LINE)\n"; \
+		./$$out; \
+		printf "$(LINE)\n"; \
+	done
 
 .PHONY: clean
 clean:
