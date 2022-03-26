@@ -10,7 +10,7 @@ module ImmGen_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("./sim_build/immgen_tb.vcd");
+        $dumpfile("build/immgen_tb.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD

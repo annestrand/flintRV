@@ -12,10 +12,10 @@ endmodule
 // ====================================================================================================================
 module RCA // Ripple-Carry Adder (slow but more resource efficient)
 (
-    input signed    [WIDTH-1:0] a, b,   // Operand inputs
-    input                       subEn,  // Use as subtractor
-    output signed   [WIDTH-1:0] result, // Output
-    output                      cout    // Carry bit
+    input   [WIDTH-1:0] a, b,   // Operand inputs
+    input               subEn,  // Use as subtractor
+    output  [WIDTH-1:0] result, // Output
+    output              cout    // Carry bit
 );
     parameter WIDTH = 32;
 
@@ -39,10 +39,10 @@ endmodule
 // ====================================================================================================================
 module CLA  // Carry Lookahead Adder (fast but more resource expensive)
 (
-    input signed    [WIDTH-1:0] a, b,   // Operand inputs
-    input                       subEn,  // Use as subtractor
-    output signed   [WIDTH-1:0] result, // Output
-    output                      cout    // Carry bit
+    input   [WIDTH-1:0] a, b,   // Operand inputs
+    input               subEn,  // Use as subtractor
+    output  [WIDTH-1:0] result, // Output
+    output              cout    // Carry bit
 );
     parameter WIDTH = 32;
 
@@ -74,11 +74,11 @@ endmodule
 // ====================================================================================================================
 module IntegerAlu // IALU
 (
-  input signed      [WIDTH-1:0] a, b,   // input operands
-  input             [2:0]       op,     // ALU operation
-  input                         opAlt,  // ALU alternate operation modifier bit: ( funct7[6] )
-  output reg signed [WIDTH-1:0] result, // ALU output
-  output                        zflag   // Zero-flag
+  input         [WIDTH-1:0] a, b,   // input operands
+  input         [2:0]       op,     // ALU operation
+  input                     opAlt,  // ALU alternate operation modifier bit: ( funct7[6] )
+  output reg    [WIDTH-1:0] result, // ALU output
+  output                    zflag   // Zero-flag
 );
     parameter WIDTH = 32;
 

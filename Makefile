@@ -1,5 +1,5 @@
 CC      := iverilog
-SIM_DIR := ./sim_build
+SIM_DIR := build
 FLAGS   := -Wall
 FLAGS   += -I..
 ifdef VCD

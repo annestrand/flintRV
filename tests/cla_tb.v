@@ -11,7 +11,7 @@ module CLA_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("./sim_build/cla_tb.vcd");
+        $dumpfile("build/cla_tb.vcd");
         $dumpvars(0, CLA_tb);
     end
 `endif // DUMP_VCD
