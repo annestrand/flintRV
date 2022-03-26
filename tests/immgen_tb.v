@@ -43,7 +43,7 @@ module ImmGen_tb;
             $display("Time[ %0t ]: i = %0d, signExt = %0d, opcode = 0x%h, instr = 0x%h",
                 $time, i, signExt, opcode, instr
             );
-            if (imm != gold_imms[i]) begin
+            if ($signed(imm) != $signed(gold_imms[i])) begin
                 $display("ERROR: imm(0x%h) != gold_imm[%0d](0x%h)!",
                     imm, i, gold_imms[i]
                 );

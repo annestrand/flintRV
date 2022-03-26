@@ -49,7 +49,7 @@ module CLA_tb;
             $display("Time[ %0t ]: i = %0d, a = %0d, b = %0d, subEn = %0d",
                 $time, i, a, b, subEn
             );
-            if (result != gold_result[i]) begin
+            if ($signed(result) != $signed(gold_result[i])) begin
                 $display("ERROR: result(%0d) != gold_result[%0d](%0d)!",
                     result, i, gold_result[i]
                 );
