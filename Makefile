@@ -24,17 +24,20 @@ TB_SOURCES    := $(shell find tests -type f -name "*.v" -exec basename {} \;)
 TB_OUTPUTS    := $(TB_SOURCES:%.v=$(OUTPUT)/%.sim)
 
 # Test assembly files
-SCRIPTS      := $(shell find scripts -type f -name "*_tb.py" -exec basename {} \;)
-TEST_ASM     := $(SCRIPTS:%.py=$(OUTPUT)/%.py.s)
-TEST_ELFS    := $(SCRIPTS:%.py=$(OUTPUT)/%.py.elf)
-TEST_MEMH    := $(SCRIPTS:%.py=$(OUTPUT)/%.py.mem)
+TEST_PY      := $(shell find scripts -type f -name "*_tb.py" -exec basename {} \;)
+TEST_PY_ASM  := $(shell find scripts -type f -name "*_tb_asm.py" -exec basename {} \;)
+TEST_ASM     := $(TEST_PY:%.py=$(OUTPUT)/%.s)
+TEST_ELFS    := $(TEST_PY:%.py=$(OUTPUT)/%.elf)
+TEST_MEMH    := $(TEST_PY:%.py=$(OUTPUT)/%.mem)
 
 # Testbench ASM
-$(TEST_ASM): $(SCRIPTS)
+.SECONDARY:
+$(OUTPUT)/%.s: %.py
 	$(PYTHON) $<
 
 # Testbench ELF
-$(TEST_ELFS): $(TEST_ASM)
+.SECONDARY:
+$(OUTPUT)/%.elf: $(OUTPUT)/%.s
 ifdef DOCKER
 	$(DOCKER_CMD) $(AS) -o $@ $<
 else
@@ -42,7 +45,8 @@ else
 endif
 
 # Testbench Objcopy
-$(TEST_MEMH): $(TEST_ELFS)
+.SECONDARY:
+$(OUTPUT)/%.mem: $(OUTPUT)/%.elf
 ifdef DOCKER
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 else
@@ -50,11 +54,12 @@ else
 endif
 
 # Testbench iverilog
-$(TB_OUTPUTS): $(TB_SOURCES) $(TEST_MEMH)
+$(OUTPUT)/%.sim: %.v $(TEST_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
 all:
+	@echo $(TEST_PY)
 	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: build-dir

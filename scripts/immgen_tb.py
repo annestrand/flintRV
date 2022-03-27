@@ -7,6 +7,7 @@ from common import Imm32Ranges
 randImmI    = random.randint(Imm32Ranges.I_MIN.value//2, Imm32Ranges.I_MAX.value//2)
 randImmU    = random.randint(0, Imm32Ranges.UJ_MAX_U.value//2)
 randShamt   = random.randint(0,31)
+randBranch  = random.randint(-20, 0) * 4
 
 # Try each immediate-based RV32I instruction with random operands as the test vector
 test_assembly = f'''
@@ -39,6 +40,6 @@ test_assembly = f'''
 '''
 
 if __name__ == "__main__":
-    outfile = f"{os.path.join('build', os.path.basename(__file__))}.s"
+    outfile = f"{os.path.join('build', os.path.splitext(os.path.basename(__file__))[0])}.s"
     with open(outfile, 'w') as fp:
         print(test_assembly, file=fp)
