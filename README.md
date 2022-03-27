@@ -1,5 +1,5 @@
-# boredcore
-Codename working private repo for pineapplecore 🍍
+# pineapplecore 🍍
+Another RISCV core.
 
 ⚠ Repo still subject to change (WIP) ⚠
 
