@@ -12,7 +12,7 @@ Codename working private repo for pineapplecore 🍍
 ## Dependencies
 - GNU Make
 - Icarus Verilog (optional - for testing)
-- Python >= 3.7 (optional - for testing)
+- Python >= 3.6 (optional - for testing)
 
 ## Testing 🧪
 Functional Verification:
