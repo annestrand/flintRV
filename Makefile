@@ -19,7 +19,6 @@ LINE                := =========================================================
 
 vpath %.v          tests
 vpath %.py         scripts
-vpath %.asm.py     scripts
 
 TB_SOURCES         := $(shell find tests -type f -name "*.v" -exec basename {} \;)
 TB_OUTPUTS         := $(TB_SOURCES:%.v=$(OUTPUT)/%)
@@ -76,7 +75,7 @@ build-dir:
 tests: build-dir $(TB_OUTPUTS)
 	@printf "\nAll done building tests.\n"
 
-# Maybe I should just use/try VUnit at this point 😅
+# Maybe I should maybe just use/try VUnit at this point 😅
 .PHONY: runtests
 runtests: tests
 	@printf "Running tests...\n"

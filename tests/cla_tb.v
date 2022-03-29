@@ -27,6 +27,7 @@ module CLA_tb;
     // Test loop
     integer i = 0, errs = 0, subfail = 0;
     initial begin
+        $display("Running random Carry Lookahead Adder (CLA) tests...\n");
         a       = 'd0;
         b       = 'd0;
         subEn   = 'd0;
