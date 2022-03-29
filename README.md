@@ -11,8 +11,9 @@ Another RISCV core.
 
 ## Dependencies ✅
 - GNU Make
-- Icarus Verilog (optional - for testing)
-- Python >= 3.6  (optional - for testing)
+- GCC RISC-V compiler/cross-compiler toolcahin  (optional - for testing)
+- Icarus Verilog                                (optional - for testing)
+- Python >= 3.6                                 (optional - for testing)
 
 ## Make configs ⚙
 Below are a table of Make config variables:
