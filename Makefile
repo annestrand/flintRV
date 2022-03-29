@@ -15,24 +15,30 @@ ifdef VCD
 FLAGS	            += -DDUMP_VCD
 endif
 DOCKER_CMD          := docker exec -w /src pineapplecore-toolchain
-LINE	:= =====================================================================================
+LINE                := =====================================================================================
 
-# Gather sources to set-up objects/output bins
-vpath %.v     tests
-vpath %.py    scripts
-TB_SOURCES    := $(shell find tests -type f -name "*.v" -exec basename {} \;)
-TB_OUTPUTS    := $(TB_SOURCES:%.v=$(OUTPUT)/%.sim)
+vpath %.v          tests
+vpath %.py         scripts
+vpath %.asm.py     scripts
 
-# Test assembly files
-TEST_PY      := $(shell find scripts -type f -name "*_tb.py" -exec basename {} \;)
-TEST_PY_ASM  := $(shell find scripts -type f -name "*_tb_asm.py" -exec basename {} \;)
-TEST_ASM     := $(TEST_PY:%.py=$(OUTPUT)/%.s)
-TEST_ELFS    := $(TEST_PY:%.py=$(OUTPUT)/%.elf)
-TEST_MEMH    := $(TEST_PY:%.py=$(OUTPUT)/%.mem)
+TB_SOURCES         := $(shell find tests -type f -name "*.v" -exec basename {} \;)
+TB_OUTPUTS         := $(TB_SOURCES:%.v=$(OUTPUT)/%.sim)
+
+TEST_PY            := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
+TEST_MEMH          := $(TEST_PY:%.mem.py=$(OUTPUT)/%.mem)
+TEST_PY_ASM        := $(shell find scripts -type f -name "*.asm.py" -exec basename {} \;)
+TEST_ASM           := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
+TEST_ASM_ELF       := $(TEST_ASM:%.s=%.elf)
+TEST_ASM_MEMH      := $(TEST_ASM_ELF:%.elf=%.mem)
+
+# Testbench mem
+.SECONDARY:
+$(OUTPUT)/%.mem: %.mem.py
+	$(PYTHON) $<
 
 # Testbench ASM
 .SECONDARY:
-$(OUTPUT)/%.s: %.py
+$(OUTPUT)/%.s: %.asm.py
 	$(PYTHON) $<
 
 # Testbench ELF
@@ -54,12 +60,12 @@ else
 endif
 
 # Testbench iverilog
-$(OUTPUT)/%.sim: %.v $(TEST_MEMH)
+$(OUTPUT)/%.sim: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
 all:
-	@echo $(TEST_PY)
+	@echo $(TEST_MEMH)
 	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: build-dir
