@@ -50,11 +50,11 @@ if __name__ == "__main__":
         for gold in test_gold:
             if len(gold) == 3:
                 imm = gold[2]
-                print(f"{int(imm) & 0xffffffff:08x}", file=fp)
+                print(f"{int(imm) & 0xffffffff:032b}", file=fp)
             else:
                 if '(' in gold[1]:
                     imm = gold[1].split('(')[0]
-                    print(f"{int(imm) & 0xffffffff:08x}", file=fp)
+                    print(f"{int(imm) & 0xffffffff:032b}", file=fp)
                 else:
                     imm = gold[1]
-                    print(f"{int(imm) & 0xffffffff:08x}", file=fp)
+                    print(f"{int(imm) & 0xffffffff:032b}", file=fp)

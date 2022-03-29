@@ -17,20 +17,11 @@ module CLA_tb;
 `endif // DUMP_VCD
 
     // Test vectors
-    reg [31:0]  test_a      [0:2];
-    reg [31:0]  test_b      [0:2];
-    reg [0:0]   test_subEn  [0:2];
-    reg [31:0]  gold_result [0:2];
+    reg [64:0]  test_vector         [0:31];
+    reg [31:0]  test_gold_vector    [0:31];
     initial begin
-        // TODO: Good for now ... replace with $readmemh(...) later
-        test_a[0]       = 1435;
-        test_b[0]       = 145;
-        test_a[1]       = 1435;
-        test_b[1]       = 145;
-        test_subEn[0]   = 0;
-        test_subEn[1]   = 1;
-        gold_result[0]  = 1580; // 1435 + 145
-        gold_result[1]  = 1290; // 1435 - 145
+        $readmemb("build/cla_tb.mem", test_vector);
+        $readmemb("build/cla_tb.gold.mem", test_gold_vector);
     end
 
     // Test loop
@@ -40,18 +31,16 @@ module CLA_tb;
         b       = 'd0;
         subEn   = 'd0;
         #20;
-        for (i=0; i<2; i=i+1) begin
+        for (i=0; i<32; i=i+1) begin
             subfail = 0;
-            a       = test_a[i];
-            b       = test_b[i];
-            subEn   = test_subEn[i];
+            {a,b,subEn} = test_vector[i];
             #20;
             $display("Time[ %0t ]: i = %0d, a = %0d, b = %0d, subEn = %0d",
-                $time, i, a, b, subEn
+                $time, i, $signed(a), $signed(b), subEn
             );
-            if ($signed(result) != $signed(gold_result[i])) begin
+            if ($signed(result) != $signed(test_gold_vector[i])) begin
                 $display("ERROR: result(%0d) != gold_result[%0d](%0d)!",
-                    result, i, gold_result[i]
+                    $signed(result), i, $signed(test_gold_vector[i])
                 );
                 subfail = 1;
             end

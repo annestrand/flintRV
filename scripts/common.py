@@ -15,6 +15,10 @@ class Imm32Ranges(Enum):
     # Unsigned max
     UJ_MAX_U = 2**20
 
+class Int16Range(Enum):
+    MIN16 = -((2**16))
+    MAX16 = ((2**16))-1
+
 def basenameNoExt(outputBaseDir, file):
     '''My testgen scripts use double extensions for naming - helper function for just getting name with no extension'''
     return os.path.join(outputBaseDir, os.path.splitext(os.path.splitext(os.path.basename(file))[0])[0])

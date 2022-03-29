@@ -22,7 +22,7 @@ vpath %.py         scripts
 vpath %.asm.py     scripts
 
 TB_SOURCES         := $(shell find tests -type f -name "*.v" -exec basename {} \;)
-TB_OUTPUTS         := $(TB_SOURCES:%.v=$(OUTPUT)/%.sim)
+TB_OUTPUTS         := $(TB_SOURCES:%.v=$(OUTPUT)/%)
 
 TEST_PY            := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
 TEST_MEMH          := $(TEST_PY:%.mem.py=$(OUTPUT)/%.mem)
@@ -60,7 +60,7 @@ else
 endif
 
 # Testbench iverilog
-$(OUTPUT)/%.sim: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
+$(OUTPUT)/%: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
