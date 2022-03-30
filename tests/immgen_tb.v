@@ -1,12 +1,10 @@
 `include "fetch_decode.v"
 
 module ImmGen_tb;
-    reg     [21:0]  signExt;
-    reg     [4:0]   opcode;
     reg     [31:0]  instr;
     wire    [31:0]  imm;
 
-    ImmGen ImmGen_dut(signExt, opcode, instr, imm);
+    ImmGen ImmGen_dut(instr, imm);
 
 `ifdef DUMP_VCD
     initial begin
@@ -16,17 +14,11 @@ module ImmGen_tb;
 `endif // DUMP_VCD
 
     // Test vectors
-    reg [4:0]   test_opcodes    [0:2];
-    reg [31:0]  test_instrs     [0:2];
-    reg [31:0]  gold_imms       [0:2];
+    reg [31:0]  test_vector         [0:25];
+    reg [31:0]  test_gold_vector    [0:25];
     initial begin
-        // TODO: Good for now ... replace with $readmemh(...) later
-        test_opcodes[0] = 'b00100;      // I-Type
-        test_opcodes[1] = 'b00100;      // I-Type
-        test_instrs[0]  = 'h0a018613;   // addi a2,gp,160
-        test_instrs[1]  = 'h04418513;   // addi a0,gp,68
-        gold_imms[0]    = 'd160;
-        gold_imms[1]    = 'd68;
+        $readmemh("build/immgen_tb.mem", test_vector);
+        $readmemb("build/immgen_tb.gold.mem", test_gold_vector);
     end
 
     // Test loop
@@ -36,7 +28,7 @@ module ImmGen_tb;
         opcode  = 'd0;
         instr   = 'd0;
         #20;
-        for (i=0; i<2; i=i+1) begin
+        for (i=0; i<26; i=i+1) begin
             opcode  = test_opcodes[i];
             instr   = test_instrs[i];
             #20;

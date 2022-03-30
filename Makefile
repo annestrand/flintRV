@@ -8,6 +8,7 @@ endif
 CC                  := $(TOOLCHAIN_PREFIX)-gcc
 AS                  := $(TOOLCHAIN_PREFIX)-as
 OBJCOPY             := $(TOOLCHAIN_PREFIX)-objcopy
+OBJDUMP             := $(TOOLCHAIN_PREFIX)-objdump
 OUTPUT 	            := build
 FLAGS               := -Wall
 FLAGS               += -I..
@@ -15,7 +16,7 @@ ifdef VCD
 FLAGS	            += -DDUMP_VCD
 endif
 DOCKER_CMD          := docker exec -w /src pineapplecore-toolchain
-LINE                := =====================================================================================
+LINE                := ================================================================================================
 
 vpath %.v          tests
 vpath %.py         scripts
@@ -64,7 +65,8 @@ $(OUTPUT)/%: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 
 .PHONY: all
 all:
-	@echo $(TEST_MEMH)
+#	@$(DOCKER_CMD) $(OBJDUMP) -D build/immgen_tb.elf
+	@$(DOCKER_CMD) $(AS) --help
 	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: build-dir
