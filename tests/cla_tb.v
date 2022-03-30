@@ -25,6 +25,7 @@ module CLA_tb;
     end
 
     // Test loop
+    reg [39:0] resultStr;
     integer i = 0, errs = 0, subfail = 0;
     initial begin
         $display("Running random Carry Lookahead Adder (CLA) tests...\n");
@@ -36,16 +37,12 @@ module CLA_tb;
             subfail = 0;
             {a,b,subEn} = test_vector[i];
             #20;
-            $display("Time[ %0t ]: i = %0d, a = %0d, b = %0d, subEn = %0d",
-                $time, i, $signed(a), $signed(b), subEn
+            if ($signed(result) != $signed(test_gold_vector[i]))    resultStr = "ERROR";
+            else                                                    resultStr = "PASS ";
+            $display("Time[ %4t ]: i = %2d | a = %8d | b = %8d | subEn = %1d || result = %8d ... %s",
+                $time, i, $signed(a), $signed(b), subEn, $signed(result), resultStr
             );
-            if ($signed(result) != $signed(test_gold_vector[i])) begin
-                $display("ERROR: result(%0d) != gold_result[%0d](%0d)!",
-                    $signed(result), i, $signed(test_gold_vector[i])
-                );
-                subfail = 1;
-            end
-            if (subfail) errs = errs + 1;
+            if (resultStr == "ERROR") errs = errs + 1;
         end
         if (errs > 0)   $display("\nFAILED: %0d", errs);
         else            $display("\nPASSED");
