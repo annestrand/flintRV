@@ -14,33 +14,34 @@ module ImmGen_tb;
 `endif // DUMP_VCD
 
     // Test vectors
-    reg [31:0]  test_vector         [0:25];
-    reg [31:0]  test_gold_vector    [0:25];
+    reg [31:0]  test_vector         [0:26];
+    reg [31:0]  test_gold_vector    [0:26];
     initial begin
         $readmemh("build/immgen_tb.mem", test_vector);
         $readmemb("build/immgen_tb.gold.mem", test_gold_vector);
     end
 
     // Test loop
+    reg [39:0] resultStr;
     integer i = 0, errs = 0;
     initial begin
-        signExt = 'd0;
-        opcode  = 'd0;
+        $display("Running random ImmGen tests...\n");
         instr   = 'd0;
         #20;
-        for (i=0; i<26; i=i+1) begin
-            opcode  = test_opcodes[i];
-            instr   = test_instrs[i];
+        for (i=0; i<27; i=i+1) begin
+            instr = { // RISC-V Verilog Objcopy seems to output big-endian for some reason, swap to little here
+                test_vector[i][7:0],
+                test_vector[i][15:8],
+                test_vector[i][23:16],
+                test_vector[i][31:24]
+            };
             #20;
-            $display("Time[ %0t ]: i = %0d, signExt = %0d, opcode = 0x%h, instr = 0x%h",
-                $time, i, signExt, opcode, instr
+            if ($signed(imm) != $signed(test_gold_vector[i]))   resultStr = "ERROR";
+            else                                                resultStr = "PASS ";
+            $display("Time[ %3t ]: i = %3d, instr = 0x%8h || imm = %12d ... %s",
+                $time, i, instr, $signed(imm), resultStr
             );
-            if ($signed(imm) != $signed(gold_imms[i])) begin
-                $display("ERROR: imm(0x%h) != gold_imm[%0d](0x%h)!",
-                    imm, i, gold_imms[i]
-                );
-                errs = errs + 1;
-            end
+            if (resultStr == "ERROR") errs = errs + 1;
         end
         if (errs > 0)   $display("\nFAILED: %0d", errs);
         else            $display("\nPASSED");

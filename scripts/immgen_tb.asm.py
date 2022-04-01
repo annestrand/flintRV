@@ -4,34 +4,35 @@ from common import *
 
 # Try each immediate-based RV32I instruction with random operands as the test vector
 test_assembly = f'''
-    jalr    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    lb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    lh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    lw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    lbu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    lhu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    addi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    slti    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    sltiu   x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    xori    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    ori     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    andi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    slli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
-    srli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
-    srai    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
-    sb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    sh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    sw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-    beq     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    bne     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    blt     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    bge     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    bltu    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    bgeu    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-    lui     x{randReg(x0=False)},  {randImmU()}
-    auipc   x{randReg(x0=False)},  {randImmU()}
+# Need to use (L#) for jump labels here to later get imm. value from for gold vector
+L0:     jalr    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L1:     lb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L2:     lh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L3:     lw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L4:     lbu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L5:     lhu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L6:     addi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L7:     slti    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L8:     sltiu   x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L9:     xori    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L10:    ori     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L11:    andi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L12:    slli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
+L13:    srli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
+L14:    srai    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
+L15:    sb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L16:    sh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L17:    sw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L18:    lui     x{randReg(x0=False)},  {randImmU()}
+L19:    auipc   x{randReg(x0=False)},  {randImmU()}
+L20:    jal     x{randReg(x0=False)},  L{random.randint(0,20)}
+        beq     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+        bne     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+        blt     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+        bge     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+        bltu    x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+        bgeu    x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
 '''
-test_gold = test_assembly
 
 if __name__ == "__main__":
     # Input test vector
@@ -40,21 +41,20 @@ if __name__ == "__main__":
         print(test_assembly, file=fp)
 
     # Output/gold test vector
-    test_gold = test_gold.split('\n')
-    test_gold = [x.strip(' ') for x in test_gold]
-    test_gold = [x for x in test_gold if x]
-    test_gold = [x.split(' ') for x in test_gold]
-    test_gold = [[y for y in x if y][1:] for x in test_gold]
     outfileGold = f"{basenameNoExt('build', __file__)}.gold.mem"
+    test_gold   = asmStr2AsmList(test_assembly)
     with open(outfileGold, 'w') as fp:
         for gold in test_gold:
-            if len(gold) == 3:
-                imm = gold[2]
+            if len(gold) == 4:
+                imm = gold[3] if 'b' not in gold[0] else int(gold[3][1:])*4
                 print(f"{int(imm) & 0xffffffff:032b}", file=fp)
             else:
-                if '(' in gold[1]:
-                    imm = gold[1].split('(')[0]
+                if '(' in gold[2]:
+                    imm = gold[2].split('(')[0]
                     print(f"{int(imm) & 0xffffffff:032b}", file=fp)
                 else:
-                    imm = gold[1]
-                    print(f"{int(imm) & 0xffffffff:032b}", file=fp)
+                    imm = gold[2] if 'j' not in gold[0] else int(gold[2][1:])*4
+                    if 'lui' in gold:
+                        print(f"{((int(imm) & 0xffffffff) << 12):032b}", file=fp)
+                    else:
+                        print(f"{int(imm) & 0xffffffff:032b}", file=fp)

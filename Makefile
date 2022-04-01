@@ -65,8 +65,6 @@ $(OUTPUT)/%: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 
 .PHONY: all
 all:
-#	@$(DOCKER_CMD) $(OBJDUMP) -D build/immgen_tb.elf
-	@$(DOCKER_CMD) $(AS) --help
 	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: build-dir
