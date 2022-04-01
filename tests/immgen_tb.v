@@ -38,7 +38,7 @@ module ImmGen_tb;
             #20;
             if ($signed(imm) != $signed(test_gold_vector[i]))   resultStr = "ERROR";
             else                                                resultStr = "PASS ";
-            $display("Time[ %3t ]: i = %3d, instr = 0x%8h || imm = %12d ... %s",
+            $display("Time[ %3t ]: i = %3d, instr = 0x%8h || imm = %b ... %s",
                 $time, i, instr, $signed(imm), resultStr
             );
             if (resultStr == "ERROR") errs = errs + 1;

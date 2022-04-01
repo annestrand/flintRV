@@ -10,7 +10,8 @@ module ImmGen
             default: imm = 32'd0;
         // Immediate cases
             `I_JUMP, `I_LOAD, `I_ARITH, `I_SYS, `I_SYNC: begin
-                imm = {{22{instr[31]}}, 1'b0, instr[29:25], instr[24:21], instr[20]};
+                // TODO: Fix for SRAI...
+                imm = {{22{instr[31]}}, instr[30:20]};
             end
             `S: imm = {{22{instr[31]}}, instr[30:25], instr[11:8], instr[7]};
             `B: imm = {{21{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'd0};
