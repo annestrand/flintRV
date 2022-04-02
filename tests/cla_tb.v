@@ -39,8 +39,8 @@ module CLA_tb;
             #20;
             if ($signed(result) != $signed(test_gold_vector[i]))    resultStr = "ERROR";
             else                                                    resultStr = "PASS ";
-            $display("Time[ %4t ]: i = %2d | a = %8d | b = %8d | subEn = %1d || result = %8d ... %s",
-                $time, i, $signed(a), $signed(b), subEn, $signed(result), resultStr
+            $display("Test[ %2d ]: a = %8d | b = %8d | subEn = %1d || result = %8d ... %s",
+                i, $signed(a), $signed(b), subEn, $signed(result), resultStr
             );
             if (resultStr == "ERROR") errs = errs + 1;
         end
