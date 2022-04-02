@@ -1,22 +1,30 @@
-// RV32I Opcode types (lower 2 bits are always '11' - ignoring)
-`define R       5'b01100 // _11
-`define I_JUMP  5'b11001 // _11
-`define I_LOAD  5'b00000 // _11
-`define I_ARITH 5'b00100 // _11
-`define I_SYS   5'b11100 // _11
-`define I_SYNC  5'b00011 // _11
-`define S       5'b01000 // _11
-`define B       5'b11000 // _11
-`define U_LUI   5'b01101 // _11
-`define U_AUIPC 5'b00101 // _11
-`define J       5'b11011 // _11
+// RV32I Opcode types
+`define R           7'b0110011
+`define I_JUMP      7'b1100111
+`define I_LOAD      7'b0000011
+`define I_ARITH     7'b0010011
+`define I_SYS       7'b1110011
+`define I_FENCE     7'b0001111
+`define S           7'b0100011
+`define B           7'b1100011
+`define U_LUI       7'b0110111
+`define U_AUIPC     7'b0010111
+`define J           7'b1101111
+
+// Instruction fields
+`define OPCODE(x)   x[6:0]
+`define RD(x)       x[11:7]
+`define FUNCT3(x)   x[14:12]
+`define RS1(x)      x[19:15]
+`define RS2(x)      x[24:20]
+`define FUNCT7(x)   x[31:25]
 
 // Integer ALU Types (encoded from funct3)
-`define ADD 3'b000 // funct7[6] == 0
-`define SUB 3'b000 // funct7[6] == 1
-`define SLL 3'b001
-`define XOR 3'b100
-`define SRL 3'b101 // funct7[6] == 0
-`define SRA 3'b101 // funct7[6] == 1
-`define OR  3'b110
-`define AND 3'b111
+`define ADD         3'b000 // funct7[6] == 0
+`define SUB         3'b000 // funct7[6] == 1
+`define SLL         3'b001
+`define XOR         3'b100
+`define SRL         3'b101 // funct7[6] == 0
+`define SRA         3'b101 // funct7[6] == 1
+`define OR          3'b110
+`define AND         3'b111

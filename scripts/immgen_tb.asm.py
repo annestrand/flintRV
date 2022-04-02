@@ -44,17 +44,19 @@ if __name__ == "__main__":
     outfileGold = f"{basenameNoExt('build', __file__)}.gold.mem"
     test_gold   = asmStr2AsmList(test_assembly)
     with open(outfileGold, 'w') as fp:
+        lineCount = 0
         for gold in test_gold:
             if len(gold) == 4:
-                imm = gold[3] if 'b' not in gold[0] else int(gold[3][1:])*4
+                imm = gold[3] if 'b' not in gold[0] else (int(gold[3][1:]) - lineCount)*4
                 print(f"{int(imm) & 0xffffffff:032b}", file=fp)
             else:
                 if '(' in gold[2]:
                     imm = gold[2].split('(')[0]
                     print(f"{int(imm) & 0xffffffff:032b}", file=fp)
                 else:
-                    imm = gold[2] if 'j' not in gold[0] else int(gold[2][1:])*4
-                    if 'lui' in gold:
+                    imm = gold[2] if 'j' not in gold[0] else (int(gold[2][1:]) - lineCount)*4
+                    if 'lui' == gold[0] or 'auipc' == gold[0]:
                         print(f"{((int(imm) & 0xffffffff) << 12):032b}", file=fp)
                     else:
                         print(f"{int(imm) & 0xffffffff:032b}", file=fp)
+            lineCount += 1
