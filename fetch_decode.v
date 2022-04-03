@@ -33,7 +33,9 @@ module Controller // WIP
 
     // Controller encoder and uCode ROM
     wire    [UCODE_ADDR_WIDTH-1:0] uCodeAddr;
-    reg     [13:0] uCtrlCode [0:INSTR_COUNT-1];
+    reg     [13:0] uCtrlCode [0:UCODE_COUNT-1];
     // Output signals
-    assign ctrlSignals = uCtrlCode[uCodeAddr];
+    always @* begin
+        ctrlSignals = uCtrlCode[uCodeAddr];
+    end
 endmodule

@@ -21,7 +21,7 @@ module CLA_tb;
     reg [31:0]  test_gold_vector    [0:31];
     initial begin
         $readmemb("build/adder.mem", test_vector);
-        $readmemb("build/adder.gold.mem", test_gold_vector);
+        $readmemb("build/adder_gold.mem", test_gold_vector);
     end
 
     // Test loop

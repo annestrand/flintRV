@@ -41,7 +41,7 @@ if __name__ == "__main__":
         print(test_assembly, file=fp)
 
     # Output/gold test vector
-    outfileGold = f"{basenameNoExt('build', __file__)}.gold.mem"
+    outfileGold = f"{basenameNoExt('build', __file__)}_gold.mem"
     test_gold   = asmStr2AsmList(test_assembly)
     with open(outfileGold, 'w') as fp:
         lineCount = 0

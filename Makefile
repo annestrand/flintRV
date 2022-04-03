@@ -24,12 +24,19 @@ vpath %.py         scripts
 TB_SOURCES         := $(shell find tests -type f -name "*.v" -exec basename {} \;)
 TB_OUTPUTS         := $(TB_SOURCES:%.v=$(OUTPUT)/%)
 
+GEN_PY             := $(shell find scripts -type f -name "*.gen.py" -exec basename {} \;)
+GEN_V              := $(GEN_PY:%.gen.py=%.v)
 TEST_PY            := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
 TEST_MEMH          := $(TEST_PY:%.mem.py=$(OUTPUT)/%.mem)
 TEST_PY_ASM        := $(shell find scripts -type f -name "*.asm.py" -exec basename {} \;)
 TEST_ASM           := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
 TEST_ASM_ELF       := $(TEST_ASM:%.s=%.elf)
 TEST_ASM_MEMH      := $(TEST_ASM_ELF:%.elf=%.mem)
+
+# Generated code
+.SECONDARY:
+%.v: %.gen.py
+	$(PYTHON) $<
 
 # Testbench mem
 .SECONDARY:
@@ -64,7 +71,7 @@ $(OUTPUT)/%: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
-all:
+all: $(GEN_V)
 	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: build-dir

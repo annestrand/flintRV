@@ -21,7 +21,7 @@ if __name__ == "__main__":
             test_vector += f"{test_vector_subEn[i]   & 0x1:01b}"
             print(test_vector, file=fp)
 
-    outfileGold = f"{basenameNoExt('build', __file__)}.gold.mem"
+    outfileGold = f"{basenameNoExt('build', __file__)}_gold.mem"
     with open(outfileGold, 'w') as fp:
         for i in range(n_vectors):
             if test_vector_subEn[i] == 0:
