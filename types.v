@@ -28,3 +28,13 @@
 `define SRA         3'b101 // funct7[6] == 1
 `define OR          3'b110
 `define AND         3'b111
+
+// Forward select
+`define NO_FWD      2'b00
+`define FWD_MEM     2'b01
+`define FWD_WB      2'b10
+
+// ALU operand select
+`define FROM_REG    1'b0
+`define FROM_PC     1'b1 // ~~~ Operand A ~~~
+`define FROM_IMM    1'b1 // ~~~ Operand B ~~~

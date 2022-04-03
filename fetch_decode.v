@@ -21,3 +21,19 @@ module ImmGen
     end
 
 endmodule
+
+// ====================================================================================================================
+module Controller // WIP
+(
+    input       [31:0] instr,
+    output  reg [13:0] ctrlSignals
+);
+    parameter   UCODE_COUNT         = 37;
+    localparam  UCODE_ADDR_WIDTH    = $clog2(UCODE_COUNT);
+
+    // Controller encoder and uCode ROM
+    wire    [UCODE_ADDR_WIDTH-1:0] uCodeAddr;
+    reg     [13:0] uCtrlCode [0:INSTR_COUNT-1];
+    // Output signals
+    assign ctrlSignals = uCtrlCode[uCodeAddr];
+endmodule
