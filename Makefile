@@ -71,7 +71,7 @@ $(OUTPUT)/%: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
-all: $(GEN_V)
+all:
 	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: build-dir
