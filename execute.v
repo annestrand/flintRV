@@ -74,18 +74,19 @@ endmodule
 // ====================================================================================================================
 module IntegerAlu // IALU
 (
-  input         [WIDTH-1:0] a, b,   // input operands
-  input         [2:0]       op,     // ALU operation
-  input                     opAlt,  // ALU alternate operation modifier bit: ( funct7[6] )
-  output reg    [WIDTH-1:0] result, // ALU output
-  output                    zflag   // Zero-flag
+  input         [WIDTH-1:0]         a, b,   // input operands
+  input         [IALU_OP_WIDTH-1:0] op,     // ALU operation
+  output reg    [WIDTH-1:0]         result  // ALU output
 );
-    parameter WIDTH = 32;
+    parameter   WIDTH           = 32;
+    parameter   IALU_OP_COUNT   = 8;
+    localparam  IALU_OP_WIDTH   = $clog2(IALU_OP_COUNT);
+    localparam  CLA_ALT         = 0;
 
     // Lets use fast adder (CLA) for IALU
     wire [WIDTH-1:0]    IALU_ADDER_result;
     wire                IALU_ADDER_cout;    // Don't currently use this "cout" value (maybe later..?)
-    CLA                 IALU_ADDER(a, b, opAlt, IALU_ADDER_result, IALU_ADDER_cout);
+    CLA                 IALU_ADDER(a, b, op[CLA_ALT], IALU_ADDER_result, IALU_ADDER_cout);
 
     always @(*) begin
         case (op)
@@ -97,9 +98,8 @@ module IntegerAlu // IALU
             `OR     : result = a | b;
             `XOR    : result = a ^ b;
             `SLL    : result = a << b;
-            `SRL    : result = a >> b;          // TODO: Replace with dedicated right shifter
-            `SRA    : result = a >>> b;         // TODO: Replace with dedicated right shifter
+            `SRL    : result = a >> b;
+            `SRA    : result = a >>> b;
         endcase
     end
-    assign zflag = (result == 'd0) ? 1 : 0;
 endmodule
