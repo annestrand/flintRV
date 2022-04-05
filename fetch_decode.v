@@ -19,11 +19,15 @@ module ImmGen
             `J               :   imm = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:25], instr[24:21], 1'd0};
         endcase
     end
-
 endmodule
 
 // ====================================================================================================================
-module Controller // WIP - Macro handling define/undef still wonky here... need to fix
+// uCode defines
+`define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
+    `define NAME ISA_ENC
+`include "ucode.v"
+`undef INSTR
+module Controller
 (
     input       [31:0] instr,
     output  reg [15:0] ctrlSignals
@@ -31,30 +35,26 @@ module Controller // WIP - Macro handling define/undef still wonky here... need 
     parameter   UCODE_COUNT         = 40; // Default RV32I count
     localparam  UCODE_ADDR_WIDTH    = $clog2(UCODE_COUNT);
 
-    // Controller encoder and uCode ROM
-    reg     [UCODE_ADDR_WIDTH-1:0] uCodeAddr;
-    reg     [15:0] uCtrlCode [0:UCODE_COUNT-1];
-
     // uCode encoder
-    `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-        `NAME : uCodeAddr = ENC;
+    reg     [UCODE_ADDR_WIDTH-1:0] uCodeAddr;
     always @* begin
         case ({`FUNCT7(instr), `FUNCT3(instr), `OPCODE(instr)})
-        `INSTRUCTIONS
+        `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
+            `NAME : uCodeAddr = ENC;
+        `include "ucode.v"
+        `undef INSTR
         default : uCodeAddr = 'd0;
         endcase
     end
-    `undef INSTR
 
-    // uCode ROM contents
-    `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-        ENC : ctrlSignals = {EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP};
+    // uCode contents
     always @* begin
         case (uCodeAddr)
-        `INSTRUCTIONS
+        `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
+            ENC : ctrlSignals = {EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP};
+        `include "ucode.v"
+        `undef INSTR
         default : ctrlSignals = 'd0;
         endcase
     end
-    `undef INSTR
-
 endmodule
