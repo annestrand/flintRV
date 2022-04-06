@@ -9,7 +9,7 @@ module ImmGen
     wire isShiftImm     = ~funct3[1] && funct3[0];
     always @* begin
         case (`OPCODE(instr))
-            default          :   imm = 32'd5;
+            default          :   imm = 32'd0;
         // Immediate cases
             `I_JUMP, `I_LOAD :   imm = {{22{instr[31]}}, instr[30:20]};
             `I_ARITH         :   imm = isShiftImm ? {{27{instr[31]}}, instr[24:20]} : {{22{instr[31]}}, instr[30:20]};
@@ -22,7 +22,6 @@ module ImmGen
 endmodule
 
 // ====================================================================================================================
-// uCode defines
 `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
     `define NAME ISA_ENC
 `include "ucode.vh"
