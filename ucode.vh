@@ -2,13 +2,13 @@
 // [ Usage ]:
 //
 //      `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-//          <... define expr ...>
+//          < define_expr >
 //      `include ucode.vh
 //      `undef INSTR
 
 // ====================================================================================================================
 // Instruction list:
-// INSTR(NAME, ISA_ENC, ENC,    EX_OP,  EXEA, EXEB, LDEXT,  MEMR,MEMW,REGW,M2R,BRA,JMP)
+// INSTR(NAME, ISA_ENC,   ENC,  EX_OP,  EXEA, EXEB, LDEXT,  MEMR,MEMW,REGW,M2R,BRA,JMP)
 //                              [5]     [1]   [1]   [3]     [1] [1] [1] [1] [1] [1]
 `INSTR(LB,     17'd3,     'd0,  `ADD,   `REG, `IMM, `EXTB,  `Y, `N, `Y, `Y, `N, `N)
 `INSTR(FENCE,  17'd15,    'd1,  `ADD,   `REG, `REG, `NOEXT, `N, `N, `N, `N, `N, `N)

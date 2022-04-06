@@ -75,7 +75,6 @@ build-dir:
 tests: build-dir $(TB_OUTPUTS)
 	@printf "\nAll done building tests.\n"
 
-# Maybe I should maybe just use/try VUnit at this point 😅
 .PHONY: runtests
 runtests: tests
 	@printf "Running tests...\n"

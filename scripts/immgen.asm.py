@@ -25,7 +25,7 @@ L16:    sh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
 L17:    sw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
 L18:    lui     x{randReg(x0=False)},  {randImmU()}
 L19:    auipc   x{randReg(x0=False)},  {randImmU()}
-L20:    jal     x{randReg(x0=False)},  L{random.randint(0,20)}
+L20:    jal     x{randReg(x0=False)}, L{random.randint(0,20)}
         beq     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
         bne     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
         blt     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
