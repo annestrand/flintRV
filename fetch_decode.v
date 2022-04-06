@@ -1,4 +1,4 @@
-`include "types.v"
+`include "types.vh"
 
 module ImmGen
 (
@@ -25,7 +25,7 @@ endmodule
 // uCode defines
 `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
     `define NAME ISA_ENC
-`include "ucode.v"
+`include "ucode.vh"
 `undef INSTR
 module Controller
 (
@@ -41,7 +41,7 @@ module Controller
         case ({`FUNCT7(instr), `FUNCT3(instr), `OPCODE(instr)})
         `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
             `NAME : uCodeAddr = ENC;
-        `include "ucode.v"
+        `include "ucode.vh"
         `undef INSTR
         default : uCodeAddr = 'd0;
         endcase
@@ -52,7 +52,7 @@ module Controller
         case (uCodeAddr)
         `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
             ENC : ctrlSignals = {EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP};
-        `include "ucode.v"
+        `include "ucode.vh"
         `undef INSTR
         default : ctrlSignals = 'd0;
         endcase

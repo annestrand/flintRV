@@ -1,4 +1,4 @@
-`include "types.v"
+`include "types.vh"
 
 module FullAdder
 (
