@@ -59,7 +59,7 @@ module CLA  // Carry Lookahead Adder (fast but more resource expensive)
 
     generate
         for (i = 0; i < WIDTH; i = i + 1) begin
-            FullAdder FA(a[i], finalB[i], c[i], result[i] /* No Cout */);
+            FullAdder FA(.a(a[i]), .b(finalB[i]), .cin(c[i]), .sum(result[i]), .cout(/* No Cout */));
         end
     endgenerate
     generate
@@ -92,14 +92,14 @@ module IntegerAlu // IALU
         case (op)
             default : result = IALU_ADDER_result;
             // Operations
-            `ADD    : result = IALU_ADDER_result;
-            `SUB    : result = IALU_ADDER_result;
-            `AND    : result = a & b;
-            `OR     : result = a | b;
-            `XOR    : result = a ^ b;
-            `SLL    : result = a << b;
-            `SRL    : result = a >> b;
-            `SRA    : result = a >>> b;
+            `OP_ADD    : result = IALU_ADDER_result;
+            `OP_SUB    : result = IALU_ADDER_result;
+            `OP_AND    : result = a & b;
+            `OP_OR     : result = a | b;
+            `OP_XOR    : result = a ^ b;
+            `OP_SLL    : result = a << b;
+            `OP_SRL    : result = a >> b;
+            `OP_SRA    : result = a >>> b;
         endcase
     end
 endmodule

@@ -25,23 +25,23 @@
 `define ENDIAN_SWP_32(x) {x[7:0],x[15:8],x[23:16],x[31:24]}
 
 // IALU Types
-`define ADD         5'd0
-`define SUB         5'd1
-`define SLL         5'd2
-`define XOR         5'd3
-`define SRL         5'd4
-`define SRA         5'd5
-`define OR          5'd6
-`define AND         5'd7
+`define OP_ADD    5'd0
+`define OP_SUB    5'd1
+`define OP_SLL    5'd2
+`define OP_XOR    5'd3
+`define OP_SRL    5'd4
+`define OP_SRA    5'd5
+`define OP_OR     5'd6
+`define OP_AND    5'd7
 // Other execute types
-`define PASSB       5'd8
-`define ADD4A       5'd9
-`define EQ          5'd10
-`define NEQ         5'd11
-`define SLT         5'd12
-`define SLTU        5'd13
-`define SGTE        5'd14
-`define SGTEU       5'd15
+`define OP_PASSB  5'd8
+`define OP_ADD4A  5'd9
+`define OP_EQ     5'd10
+`define OP_NEQ    5'd11
+`define OP_SLT    5'd12
+`define OP_SLTU   5'd13
+`define OP_SGTE   5'd14
+`define OP_SGTEU  5'd15
 
 // Forward select
 `define NO_FWD      2'b00
