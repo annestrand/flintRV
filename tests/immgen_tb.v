@@ -1,3 +1,4 @@
+`include "types.vh"
 `include "fetch_decode.v"
 
 module ImmGen_tb;
@@ -29,12 +30,8 @@ module ImmGen_tb;
         instr   = 'd0;
         #20;
         for (i=0; i<27; i=i+1) begin
-            instr = { // RISC-V Verilog Objcopy seems to output big-endian for some reason, swap to little here
-                test_vector[i][7:0],
-                test_vector[i][15:8],
-                test_vector[i][23:16],
-                test_vector[i][31:24]
-            };
+            // Note: RISC-V Verilog Objcopy seems to output big-endian for some reason, swap to little here
+            instr = `ENDIAN_SWP_32(test_vector[i]);
             #20;
             if ($signed(imm) != $signed(test_gold_vector[i]))   resultStr = "ERROR";
             else                                                resultStr = "PASS ";

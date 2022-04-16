@@ -1,3 +1,6 @@
+`ifndef TYPES_VH
+`define TYPES_VH
+
 // RV32I Opcode types
 `define R           7'b0110011
 `define I_JUMP      7'b1100111
@@ -18,6 +21,8 @@
 `define RS1(x)      x[19:15]
 `define RS2(x)      x[24:20]
 `define FUNCT7(x)   x[31:25]
+
+`define ENDIAN_SWP_32(x) {x[7:0],x[15:8],x[23:16],x[31:24]}
 
 // IALU Types
 `define ADD         5'd0
@@ -58,3 +63,5 @@
 // Yes/No bit macros
 `define Y           1'b0
 `define N           1'b1
+
+`endif // TYPES_VH

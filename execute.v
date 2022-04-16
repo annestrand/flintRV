@@ -59,7 +59,7 @@ module CLA  // Carry Lookahead Adder (fast but more resource expensive)
 
     generate
         for (i = 0; i < WIDTH; i = i + 1) begin
-            FullAdder FA(a[i], finalB[i], c[i], result[i], c[i+1]);
+            FullAdder FA(a[i], finalB[i], c[i], result[i] /* No Cout */);
         end
     endgenerate
     generate
