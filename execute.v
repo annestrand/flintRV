@@ -112,8 +112,8 @@ module Alu
             `OP_SRA     : result = a >>> b;
             `OP_PASSB   : result = b;
             `OP_ADD4A   : result = ALU_ADDER_result;
-            `OP_EQ      : result = ALU_XOR_result
-            `OP_NEQ     : result = ALU_XOR_result
+            `OP_EQ      : result = ALU_XOR_result;
+            `OP_NEQ     : result = ALU_XOR_result;
             `OP_SLT     : result = {31'd0,  ALU_SLT};
             `OP_SGTE    : result = {31'd0, ~ALU_SLT};
             `OP_SLTU    : result = {31'd0, ~cflag};
