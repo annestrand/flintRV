@@ -92,7 +92,7 @@ module Alu
     CLA                             ALU_ADDER(a, b, op[CLA_ALT], ALU_ADDER_result, cflag);
 
     always @(*) begin
-        // SLT/SLTU setup
+        // SLT setup
         case ({a[WIDTH-1], b[WIDTH-1]})
             2'b00       : ALU_SLT = ALU_ADDER_result[31];
             2'b01       : ALU_SLT = 1'b0; // a > b since a is pos.
