@@ -28,32 +28,57 @@ endmodule
 `undef INSTR
 module Controller
 (
-    input       [31:0] instr,
-    output  reg [15:0] ctrlSignals
+    input       [31:0]  instr,
+    output  reg [15:0]  ctrlSignals
 );
-    parameter   UCODE_COUNT         = 40; // Default RV32I count
-    localparam  UCODE_ADDR_WIDTH    = $clog2(UCODE_COUNT);
+    parameter           UCODE_COUNT         = 40; // Default RV32I count
+    localparam          UCODE_ADDR_WIDTH    = $clog2(UCODE_COUNT);
+    localparam  [1:0]   OP                  = 2'd0,
+                        F3_OP               = 2'd1,
+                        F7_F3_OP            = 2'd2;
 
     // uCode encoder
-    reg     [UCODE_ADDR_WIDTH-1:0] uCodeAddr;
+    reg     [1:0]                   uCodeOpEnc;
+    reg     [16:0]                  uCodeOpEncAddr;
+    reg     [UCODE_ADDR_WIDTH-1:0]  uCodeAddr;
+    wire    [16:0]                  F7_F3_OP_wire   = {`FUNCT7(instr), `FUNCT3(instr), `OPCODE(instr)};
+    wire    [16:0]                  F3_OP_wire      = {{7{1'b0}}     , `FUNCT3(instr), `OPCODE(instr)};
+    wire    [16:0]                  OP_wire         = {{7{1'b0}}     , {3{1'b0}}     , `OPCODE(instr)};
+    wire    [2:0]                   funct3          = `FUNCT3(instr);
+    wire                            isShiftImm      = ~funct3[1] && funct3[0];
     always @* begin
-        case ({`FUNCT7(instr), `FUNCT3(instr), `OPCODE(instr)})
-        `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-            `NAME : uCodeAddr = ENC;
-        `include "ucode.vh"
-        `undef INSTR
-        default : uCodeAddr = 'd0;
+        case (`OPCODE(instr))   // 1. Get instruction type
+            default                                      : uCodeOpEnc = F7_F3_OP;
+            `R                                           : uCodeOpEnc = F7_F3_OP;
+            `I_JUMP, `I_LOAD, `I_FENCE, `I_SYS           : uCodeOpEnc = F3_OP;
+            `I_ARITH                                     : uCodeOpEnc = isShiftImm ? F7_F3_OP : F3_OP;
+            `S                                           : uCodeOpEnc = F3_OP;
+            `B                                           : uCodeOpEnc = F3_OP;
+            `U_LUI, `U_AUIPC                             : uCodeOpEnc = OP;
+            `J                                           : uCodeOpEnc = OP;
+        endcase
+        case (uCodeOpEnc)       // 2. Select uCode addr. line by instruction type
+            default     : uCodeOpEncAddr = F7_F3_OP_wire;
+            F7_F3_OP    : uCodeOpEncAddr = F7_F3_OP_wire;
+            F3_OP       : uCodeOpEncAddr = F3_OP_wire;
+            OP          : uCodeOpEncAddr = OP_wire;
+        endcase
+        case (uCodeOpEncAddr)   // 3. Create uCode encoder
+            default : uCodeAddr = 'd0;
+            `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
+                `NAME : uCodeAddr = ENC;
+            `include "ucode.vh"
+            `undef INSTR
         endcase
     end
-
-    // uCode contents
+    // uCode output assignment
     always @* begin
         case (uCodeAddr)
-        `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-            ENC : ctrlSignals = {EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP};
-        `include "ucode.vh"
-        `undef INSTR
-        default : ctrlSignals = 'd0;
+            default : ctrlSignals = 'd0;
+            `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
+                ENC : ctrlSignals = {EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP};
+            `include "ucode.vh"
+            `undef INSTR
         endcase
     end
 endmodule

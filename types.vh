@@ -61,7 +61,7 @@
 `define EXTUH       3'd4   // No-sign extend (half)
 
 // Yes/No bit macros
-`define Y           1'b0
-`define N           1'b1
+`define Y           1'b1
+`define N           1'b0
 
 `endif // TYPES_VH

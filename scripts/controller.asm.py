@@ -4,47 +4,48 @@ from common import *
 
 # Try each immediate-based RV32I instruction with random operands as the test vector
 test_assembly = f'''
-# Need to use (L#) for jump labels here to later get imm. value from for gold vector
-L0:     jalr    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+# Note: Instruction order also has to be same as "ucode.vh" file
+
 L1:     lb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L2:     lh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L3:     lw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L4:     lbu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L5:     lhu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L6:     addi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-L7:     slti    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-L8:     sltiu   x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-L9:     xori    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-L10:    ori     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-L11:    andi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
-L12:    slli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
-L13:    srli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
-L14:    srai    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
-L15:    sb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L16:    sh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L17:    sw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
-L18:    lui     x{randReg(x0=False)},  {randImmU()}
-L19:    auipc   x{randReg(x0=False)},  {randImmU()}
-L20:    jal     x{randReg(x0=False)}, L{random.randint(0,20)}
-        add     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        sub     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        sll     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        slt     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        sltu    x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        xor     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        srl     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        sra     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        or      x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
-        and     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
         fence
-        ecall
-        ebreak
+L6:     addi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L19:    auipc   x{randReg(x0=False)},  {randImmU()}
+L15:    sb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+        add     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
+L18:    lui     x{randReg(x0=False)},  {randImmU()}
         beq     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+L0:     jalr    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L20:    jal     x{randReg(x0=False)}, L{random.randint(0,20)}
+        ecall
+L2:     lh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L12:    slli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
+L16:    sh      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+        sll     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
         bne     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+L3:     lw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L7:     slti    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+L17:    sw      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+        slt     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
+L8:     sltiu   x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+        sltu    x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
+L4:     lbu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L9:     xori    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+        xor     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
         blt     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+L5:     lhu     x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
+L13:    srli    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
+        srl     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
         bge     x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+L10:    ori     x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+        or      x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
         bltu    x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+L11:    andi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}
+        and     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
         bgeu    x{randReg(x0=False)}, x{randReg(x0=False)}, L{random.randint(0,20)}
+        ebreak
+        sub     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
+L14:    srai    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
+        sra     x{randReg(x0=False)}, x{randReg(x0=True)} , x{randReg(x0=True)}
 '''
 
 if __name__ == "__main__":
