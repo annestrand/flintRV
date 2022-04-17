@@ -42,8 +42,8 @@ module Controller
     reg     [16:0]                  uCodeOpEncAddr;
     reg     [UCODE_ADDR_WIDTH-1:0]  uCodeAddr;
     wire    [16:0]                  F7_F3_OP_wire   = {`FUNCT7(instr), `FUNCT3(instr), `OPCODE(instr)};
-    wire    [16:0]                  F3_OP_wire      = {{7{1'b0}}     , `FUNCT3(instr), `OPCODE(instr)};
-    wire    [16:0]                  OP_wire         = {{7{1'b0}}     , {3{1'b0}}     , `OPCODE(instr)};
+    wire    [16:0]                  F3_OP_wire      = {7'd0          , `FUNCT3(instr), `OPCODE(instr)};
+    wire    [16:0]                  OP_wire         = {7'd0          , 3'd0          , `OPCODE(instr)};
     wire    [2:0]                   funct3          = `FUNCT3(instr);
     wire                            isShiftImm      = ~funct3[1] && funct3[0];
     always @* begin
