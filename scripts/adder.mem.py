@@ -3,14 +3,9 @@
 from common import *
 
 n_vectors           = 32
-test_vector_a       = []
-test_vector_b       = []
-test_vector_subEn   = []
-
-for i in range(n_vectors):
-    test_vector_a.append(random.randint(Int16Range.MIN16.value, Int16Range.MAX16.value))
-    test_vector_b.append(random.randint(Int16Range.MIN16.value, Int16Range.MAX16.value))
-    test_vector_subEn.append(random.randint(0,1))
+test_vector_a       = [randImmI() for x in range(n_vectors)]
+test_vector_b       = [randImmI() for x in range(n_vectors)]
+test_vector_subEn   = [random.randint(0,1) for x in range(n_vectors)]
 
 if __name__ == "__main__":
     outfile = f"{basenameNoExt('build', __file__)}.mem"

@@ -16,9 +16,23 @@ class Imm32Ranges(Enum):
     # Unsigned max
     UJ_MAX_U = 2**20
 
-class Int16Range(Enum):
-    MIN16 = -((2**16))
-    MAX16 = ((2**16))-1
+class AluTypes(Enum):
+    ADD     = 0
+    PASSB   = 1
+    ADD4A   = 2
+    XOR     = 3
+    SRL     = 4
+    SRA     = 5
+    OR      = 6
+    AND     = 7
+    SUB     = 8
+    SLL     = 9
+    EQ      = 10
+    NEQ     = 11
+    SLT     = 12
+    SLTU    = 13
+    SGTE    = 14
+    SGTEU   = 15
 
 def basenameNoExt(outputBaseDir, file):
     '''My testgen scripts use double extensions for naming - helper function for just getting name with no extension'''
@@ -42,9 +56,7 @@ def asmStr2AsmList(asmStr:str):
 
 def getOperandVals(asmList:List[List[str]]):
     '''Takes "asmList" from asmStr2AsmList() and returns only operand values from asmList'''
-    operandList = [x[1:] for x in asmList]
-    return operandList
-
+    return [x[1:] for x in asmList]
 def randImmI():
     return random.randint(Imm32Ranges.I_MIN.value//2, Imm32Ranges.I_MAX.value//2)
 def randShamt():

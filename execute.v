@@ -81,7 +81,7 @@ module Alu
 );
     parameter                       WIDTH               = 32;
     parameter                       ALU_OP_COUNT        = 16;
-    localparam                      CLA_ALT             = 0;
+    localparam                      ADDER_ALT           = 3; // Bit 3 encodes SUB function in Adder
     localparam                      ALU_OP_WIDTH        = $clog2(ALU_OP_COUNT);
 
     wire                            cflag; // Catch unsigned overflow for SLTU/SGTEU cases
@@ -89,7 +89,7 @@ module Alu
     wire        [WIDTH-1:0]         ALU_XOR_result      = a ^ b;
     reg                             ALU_SLT;
     // Using fast adder (CLA) for ALU
-    CLA                             ALU_ADDER(a, b, op[CLA_ALT], ALU_ADDER_result, cflag);
+    CLA                             ALU_ADDER(a, b, op[ADDER_ALT], ALU_ADDER_result, cflag);
 
     always @(*) begin
         // SLT setup
@@ -109,17 +109,17 @@ module Alu
             `OP_XOR     : result = ALU_XOR_result;
             `OP_SLL     : result = a << b;
             `OP_SRL     : result = a >> b;
-            `OP_SRA     : result = a >>> b;
+            `OP_SRA     : result = $signed(a) >>> b;
             `OP_PASSB   : result = b;
             `OP_ADD4A   : result = ALU_ADDER_result;
-            `OP_EQ      : result = ALU_XOR_result;
-            `OP_NEQ     : result = ALU_XOR_result;
+            `OP_EQ      : result = {31'd0, ~|ALU_XOR_result};
+            `OP_NEQ     : result = {31'd0, ~(~|ALU_XOR_result)};
             `OP_SLT     : result = {31'd0,  ALU_SLT};
             `OP_SGTE    : result = {31'd0, ~ALU_SLT};
             `OP_SLTU    : result = {31'd0, ~cflag};
             `OP_SGTEU   : result = {31'd0,  cflag};
         endcase
     end
-    // Zero-flag out (mainly used for EQ and NEQ cases)
+    // Zero-flag out
     assign zflag = ~|result;
 endmodule
