@@ -45,6 +45,7 @@ defparam Alu_dut.ALU_OP_COUNT = 16;
             {a,b,op} = test_vector[i];
             #20;
             if ($signed(result) != $signed(test_gold_vector[i][32:1]))  resultStr = "ERROR";
+            else if (zflag != test_gold_vector[i][0])                   resultStr = "ERROR";
             else                                                        resultStr = "PASS ";
             $display("Test[ %2d ]: a = %10d | b = %10d | op = %2d || result = %10d ... %s",
                 i, $signed(a), $signed(b), op, $signed(result), resultStr
