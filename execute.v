@@ -81,7 +81,7 @@ module Alu
 );
     parameter                       WIDTH               = 32;
     parameter                       ALU_OP_COUNT        = 16;
-    localparam                      ADDER_ALT           = 3; // Bit 3 encodes SUB function in Adder
+    localparam                      ADDER_ALT           = 3; // op[3] encodes SUB function in Adder
     localparam                      ALU_OP_WIDTH        = $clog2(ALU_OP_COUNT);
 
     wire                            cflag; // Catch unsigned overflow for SLTU/SGTEU cases
