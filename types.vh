@@ -48,17 +48,21 @@
 `define FWD_MEM             2'b01
 `define FWD_WB              2'b10
 
+// Control bubble
+`define NO_CTRL_BUBBLE      1'b0
+`define CTRL_BUBBLE         1'b1
+
 // EXEC operand select
 `define REG                 1'b0
-`define PC                  1'b1 // Operand A
-`define IMM                 1'b1 // Operand B
+`define PC                  1'b1    // Operand A
+`define IMM                 1'b1    // Operand B
 
 // Load/store sign-extend select
-`define NOEXT               3'd0   // No sign extension (word)
-`define EXTB                3'd1   // Sign extend (byte)
-`define EXTH                3'd2   // Sign extend (half)
-`define EXTUB               3'd3   // No-sign extend (byte)
-`define EXTUH               3'd4   // No-sign extend (half)
+`define NOEXT               3'd0    // No sign extension (word)
+`define EXTB                3'd1    // Sign extend (byte)
+`define EXTH                3'd2    // Sign extend (half)
+`define EXTUB               3'd3    // No-sign extend (byte)
+`define EXTUH               3'd4    // No-sign extend (half)
 
 // Yes/No bit macros
 `define Y                   1'b1
