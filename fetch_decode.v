@@ -82,3 +82,17 @@ module Controller
         endcase
     end
 endmodule
+
+// ====================================================================================================================
+// Main fetch-decode stage wrapper module
+module FetchDecode
+(
+    input   [31:0] instr,
+    output  [31:0] imm,
+    output  [15:0] ctrlSignals
+);
+
+ImmGen      IMMGEN_unit(.instr(instr), .imm(imm));
+Controller  CTRL_unit(.instr(instr), .ctrlSignals(ctrlSignals));
+
+endmodule
