@@ -92,7 +92,7 @@ module FetchDecode
     output  [15:0] ctrlSignals
 );
 
-ImmGen      IMMGEN_unit(.instr(instr), .imm(imm));
-Controller  CTRL_unit(.instr(instr), .ctrlSignals(ctrlSignals));
+    ImmGen      IMMGEN_unit(.instr(instr), .imm(imm));
+    Controller  CTRL_unit(.instr(instr), .ctrlSignals(ctrlSignals));
 
 endmodule
