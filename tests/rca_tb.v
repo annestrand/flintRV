@@ -6,7 +6,7 @@ module RCA_tb;
     wire    [31:0]  result;
     wire            cout;
 
-    RCA RCA_dut(a, b, subEn, result, cout);
+    RCA RCA_dut(.*);
     defparam RCA_dut.WIDTH = 32;
 
 `ifdef DUMP_VCD

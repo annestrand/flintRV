@@ -5,7 +5,7 @@ module ImmGen_tb;
     reg     [31:0]  instr;
     wire    [31:0]  imm;
 
-    ImmGen ImmGen_dut(instr, imm);
+    ImmGen ImmGen_dut(.*);
 
 `ifdef DUMP_VCD
     initial begin

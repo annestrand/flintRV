@@ -5,7 +5,7 @@ module Controller_tb;
     reg     [31:0] instr;
     wire    [15:0] ctrlSignals;
 
-    Controller Controller_dut(instr, ctrlSignals);
+    Controller Controller_dut(.*);
 
 `ifdef DUMP_VCD
     initial begin

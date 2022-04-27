@@ -7,14 +7,9 @@ module Alu_tb;
     wire    [31:0]  result;
     wire            zflag;
 
-Alu Alu_dut(
-    a, b,   // input operands
-    op,     // ALU operation
-    result, // ALU output
-    zflag   // Zero-flag
-);
-defparam Alu_dut.WIDTH = 32;
-defparam Alu_dut.ALU_OP_COUNT = 16;
+    Alu Alu_dut(.*);
+    defparam Alu_dut.WIDTH = 32;
+    defparam Alu_dut.ALU_OP_COUNT = 16;
 
 `ifdef DUMP_VCD
     initial begin

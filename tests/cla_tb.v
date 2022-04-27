@@ -6,7 +6,7 @@ module CLA_tb;
     wire    [31:0]  result;
     wire            cout;
 
-    CLA CLA_dut(a, b, subEn, result, cout);
+    CLA CLA_dut(.*);
     defparam CLA_dut.WIDTH = 32;
 
 `ifdef DUMP_VCD
