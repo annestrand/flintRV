@@ -4,7 +4,7 @@ Another RISCV core.
 ⚠ [Work In Progress]: Repo still subject to many changes ⚠
 
 ## Design 🗺
-- 4-stage in-order pipelined processor
+- 5-stage in-order pipelined processor
 - Harvard architecture
 - Configurable RISC-V extensions (RV32I)
     - (TODO): Extensions later?
