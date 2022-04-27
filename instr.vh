@@ -1,9 +1,9 @@
-// uCode instruction list
+// Instructions list
 // [ Usage ]:
 //
 //      `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
 //          < define_expr >
-//      `include ucode.vh
+//      `include instr.vh
 //      `undef INSTR
 //
 // ====================================================================================================================

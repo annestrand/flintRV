@@ -23,7 +23,7 @@ module Controller_tb;
         `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
             test_gold_vector[x] = {EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP}; \
             x = x + 1;
-        `include "ucode.vh"
+        `include "instr.vh"
         `undef INSTR
     end
 
