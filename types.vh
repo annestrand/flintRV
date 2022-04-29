@@ -25,7 +25,38 @@
 // Utility macros
 `define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
 
-// ALU Types
+// Forward select
+`define NO_FWD              2'b00
+`define FWD_MEM             2'b01
+`define FWD_WB              2'b10
+
+// Control bubble
+`define NO_CTRL_BUBBLE      1'b0
+`define CTRL_BUBBLE         1'b1
+
+// EXEC operand select
+`define REG                 1'b0
+`define PC                  1'b1    // Operand A
+`define IMM                 1'b1    // Operand B
+
+// Yes/No bit macros
+`define Y                   1'b1
+`define N                   1'b0
+
+// ALU OP
+`define ALU_OP_R            4'b0000
+`define ALU_OP_I_JUMP       4'b0001
+`define ALU_OP_I_LOAD       4'b0010
+`define ALU_OP_I_ARITH      4'b0011
+`define ALU_OP_I_SYS        4'b0100
+`define ALU_OP_I_FENCE      4'b0101
+`define ALU_OP_S            4'b0110
+`define ALU_OP_B            4'b0111
+`define ALU_OP_U_LUI        4'b1000
+`define ALU_OP_U_AUIPC      4'b1001
+`define ALU_OP_J            4'b1010
+
+// ALU EXEC Types
 `define OP_ADD              5'b0_0000
 `define OP_PASSB            5'b0_0001
 `define OP_ADD4A            5'b0_0010
@@ -43,29 +74,18 @@
 `define OP_SGTE             5'b0_1110
 `define OP_SGTEU            5'b0_1111
 
-// Forward select
-`define NO_FWD              2'b00
-`define FWD_MEM             2'b01
-`define FWD_WB              2'b10
-
-// Control bubble
-`define NO_CTRL_BUBBLE      1'b0
-`define CTRL_BUBBLE         1'b1
-
-// EXEC operand select
-`define REG                 1'b0
-`define PC                  1'b1    // Operand A
-`define IMM                 1'b1    // Operand B
-
-// Load/store sign-extend select
-`define NOEXT               3'd0    // No sign extension (word)
-`define EXTB                3'd1    // Sign extend (byte)
-`define EXTH                3'd2    // Sign extend (half)
-`define EXTUB               3'd3    // No-sign extend (byte)
-`define EXTUH               3'd4    // No-sign extend (half)
-
-// Yes/No bit macros
-`define Y                   1'b1
-`define N                   1'b0
+// Opcode-type controls
+//                          | EXEC_A | EXEC_B | LD/SD | MEM_R | MEM_W | REG_W | MEM2REG | BRA | JMP |
+`define R_CTRL              { `REG,    `REG,    `N,     `N,     `N,     `Y,     `N,       `N,   `N  }
+`define I_JUMP_CTRL         { `PC,     `REG,    `N,     `N,     `N,     `Y,     `N,       `N,   `Y  }
+`define I_LOAD_CTRL         { `REG,    `IMM,    `Y,     `Y,     `N,     `Y,     `Y,       `N,   `N  }
+`define I_ARITH_CTRL        { `REG,    `IMM,    `N,     `N,     `N,     `Y,     `N,       `N,   `N  }
+`define I_SYS_CTRL          { `REG,    `IMM,    `N,     `N,     `N,     `N,     `N,       `N,   `N  }
+`define I_FENCE_CTRL        { `REG,    `IMM,    `N,     `N,     `N,     `N,     `N,       `N,   `N  }
+`define S_CTRL              { `REG,    `IMM,    `Y,     `N,     `Y,     `N,     `N,       `N,   `N  }
+`define B_CTRL              { `REG,    `REG,    `N,     `N,     `N,     `N,     `N,       `Y,   `N  }
+`define U_LUI_CTRL          { `REG,    `IMM,    `N,     `N,     `N,     `Y,     `N,       `N,   `N  }
+`define U_AUIPC_CTRL        { `PC,     `IMM,    `N,     `N,     `N,     `Y,     `N,       `N,   `N  }
+`define J_CTRL              { `PC,     `REG,    `N,     `N,     `N,     `Y,     `N,       `N,   `Y  }
 
 `endif // TYPES_VH

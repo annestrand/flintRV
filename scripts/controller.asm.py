@@ -4,8 +4,6 @@ from common import *
 
 # Try each immediate-based RV32I instruction with random operands as the test vector
 test_assembly = f'''
-# Note: Instruction order also has to be same as "instr.vh" file
-
 L1:     lb      x{randReg(x0=False)},  {randImmI()}(x{randReg(x0=False)})
         fence
 L6:     addi    x{randReg(x0=False)}, x{randReg(x0=False)}, {randImmI()}

@@ -22,63 +22,46 @@ module ImmGen
 endmodule
 
 // ====================================================================================================================
-`define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-    `define NAME ISA_ENC
-`include "instr.vh"
-`undef INSTR
 module Controller
 (
-    input       [31:0]  instr,
-    output  reg [15:0]  ctrlSignals
+    input       [6:0]   opcode,
+    output  reg [3:0]   aluOp,
+    output  reg         exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp
 );
-    parameter           INSTR_COUNT         = 40; // Default RV32I count
-    localparam          INSTR_ADDR_WIDTH    = $clog2(INSTR_COUNT);
-    localparam  [1:0]   OP                  = 2'd0,
-                        F3_OP               = 2'd1,
-                        F7_F3_OP            = 2'd2;
-
-    // instr encoder
-    reg     [1:0]                   instrOpEnc;
-    reg     [16:0]                  instrOpEncAddr;
-    reg     [INSTR_ADDR_WIDTH-1:0]  instrAddr;
-    wire    [16:0]                  F7_F3_OP_wire   = {`FUNCT7(instr), `FUNCT3(instr), `OPCODE(instr)};
-    wire    [16:0]                  F3_OP_wire      = {7'd0          , `FUNCT3(instr), `OPCODE(instr)};
-    wire    [16:0]                  OP_wire         = {7'd0          , 3'd0          , `OPCODE(instr)};
-    wire    [2:0]                   funct3          = `FUNCT3(instr);
-    wire                            isShiftImm      = ~funct3[1] && funct3[0];
+    // Main ctrl. signals
     always @* begin
-        case (`OPCODE(instr))   // 1. Get instruction type
-            default                                      : instrOpEnc = F7_F3_OP;
-            `R                                           : instrOpEnc = F7_F3_OP;
-            `I_JUMP, `I_LOAD, `I_FENCE, `I_SYS           : instrOpEnc = F3_OP;
-            `I_ARITH                                     : instrOpEnc = isShiftImm ? F7_F3_OP : F3_OP;
-            `S                                           : instrOpEnc = F3_OP;
-            `B                                           : instrOpEnc = F3_OP;
-            `U_LUI, `U_AUIPC                             : instrOpEnc = OP;
-            `J                                           : instrOpEnc = OP;
-        endcase
-        case (instrOpEnc)       // 2. Select instr addr. line by instruction type
-            default     : instrOpEncAddr = F7_F3_OP_wire;
-            F7_F3_OP    : instrOpEncAddr = F7_F3_OP_wire;
-            F3_OP       : instrOpEncAddr = F3_OP_wire;
-            OP          : instrOpEncAddr = OP_wire;
-        endcase
-        case (instrOpEncAddr)   // 3. Create instr encoder
-            default : instrAddr = 'd0;
-            `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-                `NAME : instrAddr = ENC;
-            `include "instr.vh"
-            `undef INSTR
+        case (opcode)
+            default     : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = 13'd0; // Invalid opcode
+        // Instruction formats
+            `R          : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `R_CTRL;
+            `I_JUMP     : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `I_JUMP_CTRL;
+            `I_LOAD     : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `I_LOAD_CTRL;
+            `I_ARITH    : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `I_ARITH_CTRL;
+            `I_SYS      : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `I_SYS_CTRL;
+            `I_FENCE    : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `I_FENCE_CTRL;
+            `S          : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `S_CTRL;
+            `B          : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `B_CTRL;
+            `U_LUI      : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `U_LUI_CTRL;
+            `U_AUIPC    : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `U_AUIPC_CTRL;
+            `J          : {exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp} = `J_CTRL;
         endcase
     end
-    // instr output assignment
+    // ALU Op signal
     always @* begin
-        case (instrAddr)
-            default : ctrlSignals = 'd0;
-            `define INSTR(NAME, ISA_ENC, ENC, EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP) \
-                ENC : ctrlSignals = {EX_OP, EXEA, EXEB, LDEXT, MEMR, MEMW, REGW, M2R, BRA, JMP};
-            `include "instr.vh"
-            `undef INSTR
+        case (opcode)
+            default     : aluOp = 4'd0; // Invalid opcode
+        // Instruction formats
+            `R          : aluOp = `ALU_OP_R;
+            `I_JUMP     : aluOp = `ALU_OP_I_JUMP;
+            `I_LOAD     : aluOp = `ALU_OP_I_LOAD;
+            `I_ARITH    : aluOp = `ALU_OP_I_ARITH;
+            `I_SYS      : aluOp = `ALU_OP_I_SYS;
+            `I_FENCE    : aluOp = `ALU_OP_I_FENCE;
+            `S          : aluOp = `ALU_OP_S;
+            `B          : aluOp = `ALU_OP_B;
+            `U_LUI      : aluOp = `ALU_OP_U_LUI;
+            `U_AUIPC    : aluOp = `ALU_OP_U_AUIPC;
+            `J          : aluOp = `ALU_OP_J;
         endcase
     end
 endmodule
@@ -87,12 +70,24 @@ endmodule
 // Main fetch-decode stage wrapper module
 module FetchDecode
 (
-    input   [31:0] instr,
-    output  [31:0] imm,
-    output  [15:0] ctrlSignals
+    input   [31:0]  instr,
+    output  [31:0]  imm,
+    output  [3:0]   aluOp,
+    output          exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp
 );
-
     ImmGen      IMMGEN_unit(.instr(instr), .imm(imm));
-    Controller  CTRL_unit(.instr(instr), .ctrlSignals(ctrlSignals));
+    Controller  CTRL_unit(
+        .opcode(`OPCODE(instr)),
+        .exec_a(exec_a),
+        .exec_b(exec_b),
+        .ld_sd(ld_sd),
+        .mem_r(mem_r),
+        .mem_w(mem_w),
+        .reg_w(reg_w),
+        .mem2reg(mem2reg),
+        .bra(bra),
+        .jmp(jmp),
+        .aluOp(aluOp)
+    );
 
 endmodule
