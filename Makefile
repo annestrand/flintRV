@@ -21,6 +21,7 @@ LINE                := =========================================================
 vpath %.v          tests
 vpath %.py         scripts
 
+SOURCES            := $(shell find . -type f -name "*.v" -exec basename {} \;)
 TB_SOURCES         := $(shell find tests -type f -name "*.v" -exec basename {} \;)
 TB_OUTPUTS         := $(TB_SOURCES:%.v=$(OUTPUT)/%)
 
@@ -60,7 +61,7 @@ else
 endif
 
 # Testbench iverilog
-$(OUTPUT)/%: %.v $(TEST_MEMH) $(TEST_ASM_MEMH)
+$(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH) $(SOURCES)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
