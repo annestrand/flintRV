@@ -57,6 +57,18 @@ def asmStr2AsmList(asmStr:str):
 def getOperandVals(asmList:List[List[str]]):
     '''Takes "asmList" from asmStr2AsmList() and returns only operand values from asmList'''
     return [x[1:] for x in asmList]
+def getInstrName(asmList:List[List[str]]):
+    '''Takes "asmList" from asmStr2AsmList() and returns instrNameList from asmList'''
+    return [x[0] for x in asmList]
+def getComments(asmStr:str):
+    '''Converts multi-line assembly string to a list of comments'''
+    retList = []
+    tmpStr  = asmStr.split('\n')
+    for line in tmpStr:
+        index = line.rfind('#')
+        if (0 <= index) and index < len(line):
+            retList.append(line[line.rfind('#'):])
+    return retList
 def randImmI():
     return random.randint(Imm32Ranges.I_MIN.value//2, Imm32Ranges.I_MAX.value//2)
 def randShamt():

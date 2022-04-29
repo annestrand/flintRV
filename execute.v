@@ -90,7 +90,7 @@ module AluControl
             `ALU_OP_S           : aluControl = `OP_ADD;
             `ALU_OP_I_SYS       : aluControl = `OP_ADD;
             `ALU_OP_I_LOAD      : aluControl = `OP_ADD;
-            `ALU_OP_I_JUMP      : aluControl = `OP_ADD;
+            `ALU_OP_I_JUMP      : aluControl = `OP_ADD4A;
             `ALU_OP_I_FENCE     : aluControl = `OP_ADD;
             `ALU_OP_B           : case (funct3)
                 3'b000          : aluControl = `OP_EQ;
