@@ -51,8 +51,8 @@ module AluControl_tb;
             #20;
             if (aluControl != test_gold_vector[i]) resultStr = "ERROR";
             else                                   resultStr = "PASS ";
-            $display("Test[ %2d ]: aluOp = %b | funct3 = %b | funct7 = %b || aluControl = %b | gold = %b ... %s",
-                i, aluOp, funct3, funct7, aluControl, test_gold_vector[i], resultStr
+            $display("Test[ %2d ]: aluOp = %b | funct3 = %b | funct7 = %b || aluControl = %b ... %s",
+                i, aluOp, funct3, funct7, aluControl, resultStr
             );
             if (resultStr == "ERROR") errs = errs + 1;
         end
