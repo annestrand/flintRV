@@ -25,17 +25,17 @@ module Controller_tb;
     initial begin
         for (i=0; i<40; i=i+1) begin
             instr = `ENDIAN_SWP_32(test_vector[i]);
-            if      (`OPCODE(instr) == `R      ) test_gold_vector[i] = {`ALU_OP_R, `R_CTRL};
-            else if (`OPCODE(instr) == `I_JUMP ) test_gold_vector[i] = {`ALU_OP_I_JUMP, `I_JUMP_CTRL};
-            else if (`OPCODE(instr) == `I_LOAD ) test_gold_vector[i] = {`ALU_OP_I_LOAD, `I_LOAD_CTRL};
-            else if (`OPCODE(instr) == `I_ARITH) test_gold_vector[i] = {`ALU_OP_I_ARITH, `I_ARITH_CTRL};
-            else if (`OPCODE(instr) == `I_SYS  ) test_gold_vector[i] = {`ALU_OP_I_SYS, `I_SYS_CTRL};
-            else if (`OPCODE(instr) == `I_FENCE) test_gold_vector[i] = {`ALU_OP_I_FENCE, `I_FENCE_CTRL};
-            else if (`OPCODE(instr) == `S      ) test_gold_vector[i] = {`ALU_OP_S, `S_CTRL};
-            else if (`OPCODE(instr) == `B      ) test_gold_vector[i] = {`ALU_OP_B, `B_CTRL};
-            else if (`OPCODE(instr) == `U_LUI  ) test_gold_vector[i] = {`ALU_OP_U_LUI, `U_LUI_CTRL};
-            else if (`OPCODE(instr) == `U_AUIPC) test_gold_vector[i] = {`ALU_OP_U_AUIPC, `U_AUIPC_CTRL};
-            else if (`OPCODE(instr) == `J      ) test_gold_vector[i] = {`ALU_OP_J, `J_CTRL};
+            if      (`OPCODE(instr) == `R      ) test_gold_vector[i] = {`R_CTRL         };
+            else if (`OPCODE(instr) == `I_JUMP ) test_gold_vector[i] = {`I_JUMP_CTRL    };
+            else if (`OPCODE(instr) == `I_LOAD ) test_gold_vector[i] = {`I_LOAD_CTRL    };
+            else if (`OPCODE(instr) == `I_ARITH) test_gold_vector[i] = {`I_ARITH_CTRL   };
+            else if (`OPCODE(instr) == `I_SYS  ) test_gold_vector[i] = {`I_SYS_CTRL     };
+            else if (`OPCODE(instr) == `I_FENCE) test_gold_vector[i] = {`I_FENCE_CTRL   };
+            else if (`OPCODE(instr) == `S      ) test_gold_vector[i] = {`S_CTRL         };
+            else if (`OPCODE(instr) == `B      ) test_gold_vector[i] = {`B_CTRL         };
+            else if (`OPCODE(instr) == `U_LUI  ) test_gold_vector[i] = {`U_LUI_CTRL     };
+            else if (`OPCODE(instr) == `U_AUIPC) test_gold_vector[i] = {`U_AUIPC_CTRL   };
+            else if (`OPCODE(instr) == `J      ) test_gold_vector[i] = {`J_CTRL         };
         end
     end
 
