@@ -74,18 +74,25 @@
 `define OP_SGTE             5'b0_1110
 `define OP_SGTEU            5'b0_1111
 
+// Load/Store op type
+`define LS_B_OP             3'b000
+`define LS_H_OP             3'b001
+`define LS_W_OP             3'b010
+`define LS_BU_OP            3'b100
+`define LS_HU_OP            3'b101
+
 // Opcode-type controls
-//                          | EXEC_A | EXEC_B | LD/SD | MEM_W | REG_W | MEM2REG | BRA | JMP |
-`define R_CTRL              { `REG,    `REG,    `N,     `N,     `Y,     `N,       `N,   `N  }
-`define I_JUMP_CTRL         { `PC,     `REG,    `N,     `N,     `Y,     `N,       `N,   `Y  }
-`define I_LOAD_CTRL         { `REG,    `IMM,    `Y,     `N,     `Y,     `Y,       `N,   `N  }
-`define I_ARITH_CTRL        { `REG,    `IMM,    `N,     `N,     `Y,     `N,       `N,   `N  }
-`define I_SYS_CTRL          { `REG,    `IMM,    `N,     `N,     `N,     `N,       `N,   `N  }
-`define I_FENCE_CTRL        { `REG,    `IMM,    `N,     `N,     `N,     `N,       `N,   `N  }
-`define S_CTRL              { `REG,    `IMM,    `Y,     `Y,     `N,     `N,       `N,   `N  }
-`define B_CTRL              { `REG,    `REG,    `N,     `N,     `N,     `N,       `Y,   `N  }
-`define U_LUI_CTRL          { `REG,    `IMM,    `N,     `N,     `Y,     `N,       `N,   `N  }
-`define U_AUIPC_CTRL        { `PC,     `IMM,    `N,     `N,     `Y,     `N,       `N,   `N  }
-`define J_CTRL              { `PC,     `REG,    `N,     `N,     `Y,     `N,       `N,   `Y  }
+//                          | EXEC_A | EXEC_B | MEM_W | REG_W | MEM2REG | BRA | JMP |
+`define R_CTRL              { `REG,    `REG,    `N,     `Y,     `N,       `N,   `N  }
+`define I_JUMP_CTRL         { `PC,     `REG,    `N,     `Y,     `N,       `N,   `Y  }
+`define I_LOAD_CTRL         { `REG,    `IMM,    `N,     `Y,     `Y,       `N,   `N  }
+`define I_ARITH_CTRL        { `REG,    `IMM,    `N,     `Y,     `N,       `N,   `N  }
+`define I_SYS_CTRL          { `REG,    `IMM,    `N,     `N,     `N,       `N,   `N  }
+`define I_FENCE_CTRL        { `REG,    `IMM,    `N,     `N,     `N,       `N,   `N  }
+`define S_CTRL              { `REG,    `IMM,    `Y,     `N,     `N,       `N,   `N  }
+`define B_CTRL              { `REG,    `REG,    `N,     `N,     `N,       `Y,   `N  }
+`define U_LUI_CTRL          { `REG,    `IMM,    `N,     `Y,     `N,       `N,   `N  }
+`define U_AUIPC_CTRL        { `PC,     `IMM,    `N,     `Y,     `N,       `N,   `N  }
+`define J_CTRL              { `PC,     `REG,    `N,     `Y,     `N,       `N,   `Y  }
 
 `endif // TYPES_VH

@@ -26,24 +26,24 @@ module Controller
 (
     input       [6:0]   opcode,
     output  reg [3:0]   aluOp,
-    output  reg         exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp
+    output  reg         exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp
 );
     // Main ctrl. signals
     always @* begin
         case (opcode)
-            default     : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = 13'd0; // Invalid opcode
+            default     : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = 13'd0; // Invalid opcode
         // Instruction formats
-            `R          : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `R_CTRL;
-            `I_JUMP     : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `I_JUMP_CTRL;
-            `I_LOAD     : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `I_LOAD_CTRL;
-            `I_ARITH    : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `I_ARITH_CTRL;
-            `I_SYS      : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `I_SYS_CTRL;
-            `I_FENCE    : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `I_FENCE_CTRL;
-            `S          : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `S_CTRL;
-            `B          : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `B_CTRL;
-            `U_LUI      : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `U_LUI_CTRL;
-            `U_AUIPC    : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `U_AUIPC_CTRL;
-            `J          : {exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp} = `J_CTRL;
+            `R          : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `R_CTRL;
+            `I_JUMP     : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_JUMP_CTRL;
+            `I_LOAD     : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_LOAD_CTRL;
+            `I_ARITH    : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_ARITH_CTRL;
+            `I_SYS      : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_SYS_CTRL;
+            `I_FENCE    : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_FENCE_CTRL;
+            `S          : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `S_CTRL;
+            `B          : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `B_CTRL;
+            `U_LUI      : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `U_LUI_CTRL;
+            `U_AUIPC    : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `U_AUIPC_CTRL;
+            `J          : {exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `J_CTRL;
         endcase
     end
     // ALU Op signal
@@ -73,14 +73,13 @@ module FetchDecode
     input   [31:0]  instr,
     output  [31:0]  imm,
     output  [3:0]   aluOp,
-    output          exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp
+    output          exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp
 );
     ImmGen      IMMGEN_unit(.instr(instr), .imm(imm));
     Controller  CTRL_unit(
         .opcode(`OPCODE(instr)),
         .exec_a(exec_a),
         .exec_b(exec_b),
-        .ld_sd(ld_sd),
         .mem_w(mem_w),
         .reg_w(reg_w),
         .mem2reg(mem2reg),
