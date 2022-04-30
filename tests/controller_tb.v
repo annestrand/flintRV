@@ -4,7 +4,7 @@
 module Controller_tb;
     reg     [6:0]   opcode;
     wire    [3:0]   aluOp;
-    wire            exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp;
+    wire            exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp;
 
     Controller Controller_dut(.*);
 
@@ -52,7 +52,7 @@ module Controller_tb;
             instr  = `ENDIAN_SWP_32(test_vector[i]);
             opcode = `OPCODE(instr);
             #20;
-            ctrlSignals = {aluOp, exec_a, exec_b, ld_sd, mem_r, mem_w, reg_w, mem2reg, bra, jmp};
+            ctrlSignals = {aluOp, exec_a, exec_b, ld_sd, mem_w, reg_w, mem2reg, bra, jmp};
             if (ctrlSignals != test_gold_vector[i]) resultStr = "ERROR";
             else                                    resultStr = "PASS ";
             $display("Test[ %2d ]: instr = 0x%8h || ctrlSigs = %b ... %s",
