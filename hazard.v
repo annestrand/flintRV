@@ -21,12 +21,13 @@ module Hazard
 
     // Stall and flush logic
     wire   load_stall   = EXEC_mem_read && ((FETCH_rs1 == EXEC_rd) || (FETCH_rs2 == EXEC_rd))
-    assign FETCH_stall  = ~FETCH_valid;     // Invalid I-Fetch
     assign EXEC_stall   = ~MEM_valid;       // Invalid D-Fetch
-    assign EXEC_flush   = load_stall    ||  // Bubble
-                          BRA           ||  // Mispredicted branch
-                          FETCH_stall   ||
-                          JMP;
+    assign FETCH_stall  = ~FETCH_valid  ||  // Invalid I-Fetch
+                          EXEC_stall    ||
+                          load_stall;
     assign MEM_flush    = EXEC_stall;       // Bubble
+    assign EXEC_flush   = BRA           ||  // Mispredicted branch
+                          JMP           ||
+                          FETCH_stall;      // Bubble
 
 endmodule
