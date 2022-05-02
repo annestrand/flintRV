@@ -6,10 +6,10 @@ module Hazard
     input   [4:0]   EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd,
     output  [1:0]   FWD_rs1, FWD_rs2,
     // Stall and Flush
-    input           BRA, JMP, FETCH_valid, MEM_valid, EXEC_mem_read,
+    input           BRA, JMP, FETCH_valid, MEM_valid, EXEC_mem2reg,
     input   [4:0]   FETCH_rs1, FETCH_rs2, EXEC_rd,
     output          FETCH_stall, EXEC_stall,
-                    EXEC_flush, MEM_flush
+                    EXEC_flush,  MEM_flush
 );
     // Forwarding logic
     wire RS1_fwd_mem    = MEM_rd_reg_write && (EXEC_rs1 == MEM_rd);
@@ -20,7 +20,7 @@ module Hazard
     assign FWD_rs2      = {RS2_fwd_wb, RS2_fwd_mem};
 
     // Stall and flush logic
-    wire   load_stall   = EXEC_mem_read && ((FETCH_rs1 == EXEC_rd) || (FETCH_rs2 == EXEC_rd))
+    wire   load_stall   = EXEC_mem2reg  && ((FETCH_rs1 == EXEC_rd) || (FETCH_rs2 == EXEC_rd));
     assign EXEC_stall   = ~MEM_valid;       // Invalid D-Fetch
     assign FETCH_stall  = ~FETCH_valid  ||  // Invalid I-Fetch
                           EXEC_stall    ||

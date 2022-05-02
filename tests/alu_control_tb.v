@@ -10,8 +10,8 @@ module AluControl_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("build/cla_tb.vcd");
-        $dumpvars(0, CLA_tb);
+        $dumpfile("build/alu_control_tb.vcd");
+        $dumpvars(0, AluControl_tb);
     end
 `endif // DUMP_VCD
 

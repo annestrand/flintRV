@@ -77,3 +77,5 @@ def randImmU():
     return random.randint(0, Imm32Ranges.UJ_MAX_U.value//2)
 def randReg(x0=False):
     return random.randint(0,31) if x0 else random.randint(1,31)
+def randBit():
+    return random.randint(0,1)
