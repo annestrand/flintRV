@@ -196,7 +196,6 @@ module Alu
 endmodule
 
 // ====================================================================================================================
-// Main execute stage wrapper module
 module Execute
 (
     input   [6:0]   funct7,
