@@ -7,6 +7,8 @@ module pineapplecore
     output  reg [31:0]  pcOut, dataAddr, dataOut,
     output  reg         dataWe
 );
+    localparam  [4:0] REG0 = 5'b00000; // Register x0
+
     // Pipeline regs (p_*)
     localparam  EXEC = 0;
     localparam  MEM  = 1;
@@ -53,7 +55,8 @@ module pineapplecore
                     EXEC_stall,
                     EXEC_flush,
                     MEM_flush;
-    wire            braMispredict = p_bra[EXEC] && aluOut[0]; // Assume branch not-taken
+    wire            braMispredict = p_bra[EXEC] && aluOut[0];   // Assume branch not-taken
+    wire            writeRd = reg_w != REG0;                    // Skip regfile write for x0
 
     // Core modules
     FetchDecode FETCH_DECODE_unit(
@@ -120,12 +123,6 @@ module pineapplecore
         .MEM_flush          (MEM_flush                  )
     );
 
-    // Program counter logic
-    always @(posedge clk) begin
-        PC <= FETCH_stall ? PC : (braMispredict || p_jmp[EXEC]) ? p_IMM[EXEC] + p_PC[EXEC] : PC + 32'd4;
-    end
-    assign pcOut = PC;
-
     // Pipeline logic
     always @(posedge clk) begin
         if (p_reg_w[WB]) begin
@@ -141,7 +138,7 @@ module pineapplecore
         p_funct3    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_funct3    [EXEC] : `FUNCT3(instr);
         p_funct7    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_funct7    [EXEC] : `FUNCT7(instr);
         p_mem_w     [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_mem_w     [EXEC] : mem_w;
-        p_reg_w     [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_reg_w     [EXEC] : reg_w;
+        p_reg_w     [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_reg_w     [EXEC] : writeRd;
         p_mem2reg   [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_mem2reg   [EXEC] : mem2reg;
         p_rs1Addr   [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rs1Addr   [EXEC] : `RS1(instr);
         p_rs2Addr   [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rs2Addr   [EXEC] : `RS2(instr);
@@ -165,5 +162,16 @@ module pineapplecore
         p_funct3    [WB]    <= p_funct3      [MEM];
         p_aluOut    [WB]    <= p_aluOut      [MEM];
         p_rdAddr    [WB]    <= p_rdAddr      [MEM];
+        p_readData  [WB]    <= dataIn;
     end
+
+    // Program counter logic
+    always @(posedge clk) begin
+        PC <= FETCH_stall ? PC : (braMispredict || p_jmp[EXEC]) ? p_IMM[EXEC] + p_PC[EXEC] : PC + 32'd4;
+    end
+
+    // Other output assignments
+    assign pcOut    = PC;
+    assign dataAddr = p_aluOut[MEM];
+    assign dataWe   = p_mem_w[MEM];
 endmodule
