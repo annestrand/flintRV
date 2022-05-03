@@ -133,37 +133,37 @@ module pineapplecore
             regfile[p_rdAddr[WB]] <= WB_result;
         end
         // Execute
-        p_rs1       [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_rs1       [EXEC] : regfile[`RS1(instr)];
-        p_rs2       [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_rs2       [EXEC] : regfile[`RS2(instr)];
-        p_rdAddr    [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_rdAddr    [EXEC] : `RD(instr);
-        p_IMM       [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_IMM       [EXEC] : IMM;
-        p_PC        [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_PC        [EXEC] : PC;
-        p_funct3    [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_funct3    [EXEC] : `FUNCT3(instr);
-        p_funct7    [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_funct7    [EXEC] : `FUNCT7(instr);
-        p_mem_w     [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_mem_w     [EXEC] : mem_w;
-        p_reg_w     [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_reg_w     [EXEC] : reg_w;
-        p_mem2reg   [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_mem2reg   [EXEC] : mem2reg;
-        p_rs1Addr   [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_rs1Addr   [EXEC] : `RS1(instr);
-        p_rs2Addr   [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_rs2Addr   [EXEC] : `RS2(instr);
-        p_rdAddr    [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_rdAddr    [EXEC] : `RD(instr);
-        p_aluOp     [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_aluOp     [EXEC] : aluOp;
-        p_exec_a    [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_exec_a    [EXEC] : exec_a;
-        p_exec_b    [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_exec_b    [EXEC] : exec_b;
-        p_bra       [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_bra       [EXEC] : bra;
-        p_jmp       [EXEC]  <= (EXEC_flush) ? 'd0 : (EXEC_stall) ? p_jmp       [EXEC] : jmp;
+        p_rs1       [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rs1       [EXEC] : regfile[`RS1(instr)];
+        p_rs2       [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rs2       [EXEC] : regfile[`RS2(instr)];
+        p_rdAddr    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rdAddr    [EXEC] : `RD(instr);
+        p_IMM       [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_IMM       [EXEC] : IMM;
+        p_PC        [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_PC        [EXEC] : PC;
+        p_funct3    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_funct3    [EXEC] : `FUNCT3(instr);
+        p_funct7    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_funct7    [EXEC] : `FUNCT7(instr);
+        p_mem_w     [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_mem_w     [EXEC] : mem_w;
+        p_reg_w     [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_reg_w     [EXEC] : reg_w;
+        p_mem2reg   [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_mem2reg   [EXEC] : mem2reg;
+        p_rs1Addr   [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rs1Addr   [EXEC] : `RS1(instr);
+        p_rs2Addr   [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rs2Addr   [EXEC] : `RS2(instr);
+        p_rdAddr    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_rdAddr    [EXEC] : `RD(instr);
+        p_aluOp     [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
+        p_exec_a    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_exec_a    [EXEC] : exec_a;
+        p_exec_b    [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_exec_b    [EXEC] : exec_b;
+        p_bra       [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_bra       [EXEC] : bra;
+        p_jmp       [EXEC]  <= EXEC_flush ? 'd0 : EXEC_stall ? p_jmp       [EXEC] : jmp;
         // Memory
-        p_mem_w     [MEM]   <= (MEM_flush) ? 'd0 : p_mem_w      [EXEC];
-        p_reg_w     [MEM]   <= (MEM_flush) ? 'd0 : p_reg_w      [EXEC];
-        p_mem2reg   [MEM]   <= (MEM_flush) ? 'd0 : p_mem2reg    [EXEC];
-        p_funct3    [MEM]   <= (MEM_flush) ? 'd0 : p_funct3     [EXEC];
-        p_rs2       [MEM]   <= (MEM_flush) ? 'd0 : p_rs2        [EXEC];
-        p_aluOut    [MEM]   <= (MEM_flush) ? 'd0 : aluOut;
-        p_rdAddr    [MEM]   <= (MEM_flush) ? 'd0 : p_rdAddr     [EXEC];
+        p_mem_w     [MEM]   <= MEM_flush ? 'd0 : p_mem_w      [EXEC];
+        p_reg_w     [MEM]   <= MEM_flush ? 'd0 : p_reg_w      [EXEC];
+        p_mem2reg   [MEM]   <= MEM_flush ? 'd0 : p_mem2reg    [EXEC];
+        p_funct3    [MEM]   <= MEM_flush ? 'd0 : p_funct3     [EXEC];
+        p_rs2       [MEM]   <= MEM_flush ? 'd0 : p_rs2        [EXEC];
+        p_aluOut    [MEM]   <= MEM_flush ? 'd0 : aluOut;
+        p_rdAddr    [MEM]   <= MEM_flush ? 'd0 : p_rdAddr     [EXEC];
         // Writeback
-        p_reg_w     [WB]   <= p_reg_w       [MEM];
-        p_mem2reg   [WB]   <= p_mem2reg     [MEM];
-        p_funct3    [WB]   <= p_funct3      [MEM];
-        p_aluOut    [WB]   <= p_aluOut      [MEM];
-        p_rdAddr    [WB]   <= p_rdAddr      [MEM];
+        p_reg_w     [WB]    <= p_reg_w       [MEM];
+        p_mem2reg   [WB]    <= p_mem2reg     [MEM];
+        p_funct3    [WB]    <= p_funct3      [MEM];
+        p_aluOut    [WB]    <= p_aluOut      [MEM];
+        p_rdAddr    [WB]    <= p_rdAddr      [MEM];
     end
 endmodule
