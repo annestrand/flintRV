@@ -56,7 +56,7 @@ module pineapplecore
                     EXEC_flush,
                     MEM_flush;
     wire            braMispredict = p_bra[EXEC] && aluOut[0];   // Assume branch not-taken
-    wire            writeRd = reg_w != REG0;                    // Skip regfile write for x0
+    wire            writeRd = (`RD(instr) != REG0) ? reg_w : 0; // Skip regfile write for x0
 
     // Core modules
     FetchDecode FETCH_DECODE_unit(
