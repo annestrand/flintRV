@@ -203,7 +203,7 @@ module Execute
     input   [3:0]   aluOp,
     input   [1:0]   fwdRs1, fwdRs2,
     input           aluSrcA, aluSrcB,
-    input   [31:0]  EXEC_rs1, MEM_rs1, WB_rs1, EXEC_rs2, MEM_rs2, WB_rs2,
+    input   [31:0]  EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd,
     input   [31:0]  PC, IMM,
     output  [31:0]  aluOut, addrGenOut
 );
@@ -213,14 +213,14 @@ module Execute
     always@(*) begin
         case (fwdRs1)
             `NO_FWD     : rs1Out = EXEC_rs1;
-            `FWD_MEM    : rs1Out = MEM_rs1;
-            `FWD_WB     : rs1Out = WB_rs1;
+            `FWD_MEM    : rs1Out = MEM_rd
+            `FWD_WB     : rs1Out = WB_rd;
             default     : rs1Out = EXEC_rs1;
         endcase
         case (fwdRs2)
             `NO_FWD     : rs2Out = EXEC_rs2;
-            `FWD_MEM    : rs2Out = MEM_rs2;
-            `FWD_WB     : rs2Out = WB_rs2;
+            `FWD_MEM    : rs2Out = MEM_rd;
+            `FWD_WB     : rs2Out = WB_rd;
             default     : rs2Out = EXEC_rs2;
         endcase
     end
