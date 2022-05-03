@@ -30,7 +30,7 @@ module RCA // Ripple-Carry Adder (slow but more resource efficient)
     assign  cout = c[WIDTH];
 
     generate
-        for (i = 0; i < WIDTH; i = i + 1) begin
+        for (i = 0; i < WIDTH; i = i + 1) begin : GEN_FA
             FullAdder FA(a[i], finalB[i], c[i], result[i], c[i+1]);
         end
     endgenerate
@@ -58,12 +58,12 @@ module CLA  // Carry Lookahead Adder (fast but more resource expensive)
     assign  cout = c[WIDTH];
 
     generate
-        for (i = 0; i < WIDTH; i = i + 1) begin
+        for (i = 0; i < WIDTH; i = i + 1) begin : GEN_FA
             FullAdder FA(.a(a[i]), .b(finalB[i]), .cin(c[i]), .sum(result[i]), .cout(/* No Cout */));
         end
     endgenerate
     generate
-        for (i = 0; i < WIDTH; i = i + 1) begin
+        for (i = 0; i < WIDTH; i = i + 1) begin : GEN_PG
             assign p[i]   = a[i] || finalB[i];
             assign g[i]   = a[i] && finalB[i];
             assign c[i+1] = g[i] || (p[i] && c[i]);
@@ -203,7 +203,7 @@ module Execute
     input   [2:0]   funct3,
     input   [3:0]   aluOp,
     input   [1:0]   fwdRs1, fwdRs2,
-    input           aluSrcA, aluSrcB
+    input           aluSrcA, aluSrcB,
     input   [31:0]  EXEC_rs1, MEM_rs1, WB_rs1, EXEC_rs2, MEM_rs2, WB_rs2,
     input   [31:0]  PC, IMM,
     output  [31:0]  aluOut, addrGenOut
@@ -228,7 +228,7 @@ module Execute
 
     // Datapath for ALU srcs
     wire [31:0] aluSrcAin = (aluSrcA == `PC ) ? PC  : rs1Out;
-    wire [31:0] aluSrcBin = (aluSrcA == `IMM) ? IMM : rs2Out;
+    wire [31:0] aluSrcBin = (aluSrcB == `IMM) ? IMM : rs2Out;
 
     // ALU/ALU_Control
     wire [4:0]  aluControl;
@@ -245,8 +245,8 @@ module Execute
         .result (aluOut),
         .zflag  (/* No use for now... */)
     );
-    defparam Alu_dut.WIDTH = 32;
-    defparam Alu_dut.ALU_OP_COUNT = 16;
+    defparam ALU_unit.WIDTH = 32;
+    defparam ALU_unit.ALU_OP_COUNT = 16;
 
     // Address generator
     CLA ADDR_GEN_unit(
