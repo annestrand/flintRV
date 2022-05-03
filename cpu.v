@@ -2,6 +2,7 @@
 // ====================================================================================================================
 module pineapplecore
 (
+    input               clk,
     input       [31:0]  instr, dataIn,
     input               ifValid, memValid,
     output  reg [31:0]  pcOut, dataAddr, dataOut,
