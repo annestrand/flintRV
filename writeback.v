@@ -14,5 +14,6 @@ module Writeback
             `LS_BU_OP   : dataOut = {24'd0, dataIn[7:0]};
             `LS_HU_OP   : dataOut = {16'd0, dataIn[15:0]};
             default     : dataOut = dataIn;
+        endcase
     end
 endmodule

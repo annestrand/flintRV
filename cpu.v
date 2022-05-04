@@ -5,8 +5,8 @@ module pineapplecore
     input               clk,
     input       [31:0]  instr, dataIn,
     input               ifValid, memValid,
-    output  reg [31:0]  pcOut, dataAddr, dataOut,
-    output  reg         dataWe
+    output      [31:0]  pcOut, dataAddr, dataOut,
+    output              dataWe
 );
     localparam  [4:0] REG0 = 5'b00000; // Register x0
 

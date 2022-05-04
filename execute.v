@@ -213,7 +213,7 @@ module Execute
     always@(*) begin
         case (fwdRs1)
             `NO_FWD     : rs1Out = EXEC_rs1;
-            `FWD_MEM    : rs1Out = MEM_rd
+            `FWD_MEM    : rs1Out = MEM_rd;
             `FWD_WB     : rs1Out = WB_rd;
             default     : rs1Out = EXEC_rs1;
         endcase
