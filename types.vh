@@ -22,7 +22,7 @@
 `define RS2(x)              x[24:20]
 `define FUNCT7(x)           x[31:25]
 
-// Utility macros
+// Utility macro(s)
 `define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
 
 // Forward select

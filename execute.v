@@ -139,8 +139,7 @@ module Alu
   output                            zflag   // Zero-flag
 );
     parameter                       WIDTH               = 32;
-    parameter                       ALU_OP_COUNT        = 16;
-    localparam                      ALU_OP_WIDTH        = $clog2(ALU_OP_COUNT);
+    localparam                      ALU_OP_WIDTH        = 5;
 
     wire                            cflag; // Catch unsigned overflow for SLTU/SGTEU cases
     wire        [WIDTH-1:0]         ALU_ADDER_result;
@@ -245,13 +244,12 @@ module Execute
         .zflag  (/* No use for now... */)
     );
     defparam ALU_unit.WIDTH = 32;
-    defparam ALU_unit.ALU_OP_COUNT = 16;
 
     // Address generator
     CLA ADDR_GEN_unit(
         .a      (PC),
         .b      (IMM),
-        .subEn  (0),
+        .subEn  (1'b0),
         .result (addrGenOut),
         .cout   (/* No use for now... */)
     );

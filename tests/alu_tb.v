@@ -9,7 +9,6 @@ module Alu_tb;
 
     Alu Alu_dut(.*);
     defparam Alu_dut.WIDTH = 32;
-    defparam Alu_dut.ALU_OP_COUNT = 16;
 
 `ifdef DUMP_VCD
     initial begin

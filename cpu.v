@@ -41,7 +41,6 @@ module pineapplecore
                     aluOut,
                     addrGenOut,
                     loadData;
-    wire    [31:0]  WB_result = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire    [1:0]   fwdRs1,
                     fwdRs2;
     wire    [3:0]   aluOp;
@@ -56,72 +55,73 @@ module pineapplecore
                     EXEC_stall,
                     EXEC_flush,
                     MEM_flush;
-    wire            braMispredict = p_bra[EXEC] && aluOut[0];       // Assume branch not-taken
-    wire            writeRd = (`RD(instr) != REG0) ? reg_w : 1'b0;  // Skip regfile write for x0
+    wire    [31:0]  WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
+    wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
+    wire            writeRd         = (`RD(instr) != REG0) ? reg_w : 1'b0;      // Skip regfile write for x0
 
     // Core modules
     FetchDecode FETCH_DECODE_unit(
-        .instr              (instr                      ),
-        .imm                (IMM                        ),
-        .aluOp              (aluOp                      ),
-        .exec_a             (exec_a                     ),
-        .exec_b             (exec_b                     ),
-        .mem_w              (mem_w                      ),
-        .reg_w              (reg_w                      ),
-        .mem2reg            (mem2reg                    ),
-        .bra                (bra                        ),
-        .jmp                (jmp                        )
+        .instr              (instr              ),
+        .imm                (IMM                ),
+        .aluOp              (aluOp              ),
+        .exec_a             (exec_a             ),
+        .exec_b             (exec_b             ),
+        .mem_w              (mem_w              ),
+        .reg_w              (reg_w              ),
+        .mem2reg            (mem2reg            ),
+        .bra                (bra                ),
+        .jmp                (jmp                )
     );
     Execute EXECUTE_unit(
-        .funct7             (p_funct7[EXEC]             ),
-        .funct3             (p_funct3[EXEC]             ),
-        .aluOp              (p_aluOp[EXEC]              ),
-        .fwdRs1             (fwdRs1                     ),
-        .fwdRs2             (fwdRs2                     ),
-        .aluSrcA            (p_exec_a[EXEC]             ),
-        .aluSrcB            (p_exec_b[EXEC]             ),
-        .EXEC_rs1           (p_rs1[EXEC]                ),
-        .EXEC_rs2           (p_rs2[EXEC]                ),
-        .MEM_rd             (p_aluOut[MEM]              ),
-        .WB_rd              (WB_result                  ),
-        .PC                 (p_PC[EXEC]                 ),
-        .IMM                (p_IMM[EXEC]                ),
-        .aluOut             (aluOut                     ),
-        .addrGenOut         (addrGenOut                 )
+        .funct7             (p_funct7[EXEC]     ),
+        .funct3             (p_funct3[EXEC]     ),
+        .aluOp              (p_aluOp[EXEC]      ),
+        .fwdRs1             (fwdRs1             ),
+        .fwdRs2             (fwdRs2             ),
+        .aluSrcA            (p_exec_a[EXEC]     ),
+        .aluSrcB            (p_exec_b[EXEC]     ),
+        .EXEC_rs1           (p_rs1[EXEC]        ),
+        .EXEC_rs2           (p_rs2[EXEC]        ),
+        .MEM_rd             (p_aluOut[MEM]      ),
+        .WB_rd              (WB_result          ),
+        .PC                 (p_PC[EXEC]         ),
+        .IMM                (p_IMM[EXEC]        ),
+        .aluOut             (aluOut             ),
+        .addrGenOut         (addrGenOut         )
     );
     Memory MEMORY_unit(
-        .funct3             (p_funct3[MEM]              ),
-        .dataIn             (p_rs2[MEM]                 ),
-        .dataOut            (dataOut                    )
+        .funct3             (p_funct3[MEM]      ),
+        .dataIn             (p_rs2[MEM]         ),
+        .dataOut            (dataOut            )
     );
     Writeback WRITEBACK_unit(
-        .funct3             (p_funct3[WB]               ),
-        .dataIn             (p_readData[WB]             ),
-        .dataOut            (loadData                   )
+        .funct3             (p_funct3[WB]       ),
+        .dataIn             (p_readData[WB]     ),
+        .dataOut            (loadData           )
     );
     Hazard HZD_FWD_unit(
         // Forwarding
-        .MEM_rd_reg_write   (p_reg_w[MEM]               ),
-        .WB_rd_reg_write    (p_reg_w[WB]                ),
-        .EXEC_rs1           (p_rs1Addr[EXEC]            ),
-        .EXEC_rs2           (p_rs2Addr[EXEC]            ),
-        .MEM_rd             (p_rdAddr[MEM]              ),
-        .WB_rd              (p_rdAddr[WB]               ),
-        .FWD_rs1            (fwdRs1                     ),
-        .FWD_rs2            (fwdRs2                     ),
+        .MEM_rd_reg_write   (p_reg_w[MEM]       ),
+        .WB_rd_reg_write    (p_reg_w[WB]        ),
+        .EXEC_rs1           (p_rs1Addr[EXEC]    ),
+        .EXEC_rs2           (p_rs2Addr[EXEC]    ),
+        .MEM_rd             (p_rdAddr[MEM]      ),
+        .WB_rd              (p_rdAddr[WB]       ),
+        .FWD_rs1            (fwdRs1             ),
+        .FWD_rs2            (fwdRs2             ),
         // Stall and Flush
-        .BRA                (braMispredict              ),
-        .JMP                (p_jmp[EXEC]                ),
-        .FETCH_valid        (ifValid                    ),
-        .MEM_valid          (memValid                   ),
-        .EXEC_mem2reg       (p_mem2reg[EXEC]            ),
-        .FETCH_rs1          (`RS1(instr)                ),
-        .FETCH_rs2          (`RS2(instr)                ),
-        .EXEC_rd            (p_rdAddr[EXEC]             ),
-        .FETCH_stall        (FETCH_stall                ),
-        .EXEC_stall         (EXEC_stall                 ),
-        .EXEC_flush         (EXEC_flush                 ),
-        .MEM_flush          (MEM_flush                  )
+        .BRA                (braMispredict      ),
+        .JMP                (p_jmp[EXEC]        ),
+        .FETCH_valid        (ifValid            ),
+        .MEM_valid          (memValid           ),
+        .EXEC_mem2reg       (p_mem2reg[EXEC]    ),
+        .FETCH_rs1          (`RS1(instr)        ),
+        .FETCH_rs2          (`RS2(instr)        ),
+        .EXEC_rd            (p_rdAddr[EXEC]     ),
+        .FETCH_stall        (FETCH_stall        ),
+        .EXEC_stall         (EXEC_stall         ),
+        .EXEC_flush         (EXEC_flush         ),
+        .MEM_flush          (MEM_flush          )
     );
 
     // Pipeline logic
@@ -168,11 +168,12 @@ module pineapplecore
 
     // Program counter logic
     always @(posedge clk) begin
-        PC <= FETCH_stall ? PC : (braMispredict || p_jmp[EXEC]) ? p_IMM[EXEC] + p_PC[EXEC] : PC + 32'd4;
+        PC <= FETCH_stall ? PC : (braMispredict || p_jmp[EXEC]) ? addrGenOut : PC + 32'd4;
     end
 
     // Other output assignments
     assign pcOut    = PC;
     assign dataAddr = p_aluOut[MEM];
     assign dataWe   = p_mem_w[MEM];
+
 endmodule
