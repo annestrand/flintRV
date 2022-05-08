@@ -250,7 +250,7 @@ module pineapplecore
     always @(posedge clk) begin
         $display("\n[pinapplecore - TRACE]:");
         $display("             PC: 0x%08h", PC);
-        $display("          INSTR: 0x%08h", instrReg);
+        $display("    INSTRUCTION: 0x%08h", instrReg);
         `DBG_INSTR_TRACE_PRINT(instrReg, IMM)
     end
 `endif // SIM
