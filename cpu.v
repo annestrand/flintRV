@@ -8,7 +8,7 @@ module pineapplecore
     output      [31:0]  pcOut, dataAddr, dataOut,
     output              dataWe
 );
-    localparam  [4:0] REG0 = 5'b00000; // Register x0
+    localparam  [4:0] REG_0 = 5'b00000; // Register x0
 
     // Pipeline regs (p_*)
     localparam  EXEC = 0;
@@ -56,7 +56,7 @@ module pineapplecore
                     MEM_flush;
     wire    [31:0]  WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
-    wire            writeRd         = (`RD(instrReg) != REG0) ? reg_w : 1'b0;   // Skip regfile write for x0
+    wire            writeRd         = (`RD(instrReg) != REG_0) ? reg_w : 1'b0;  // Skip regfile write for x0
     wire            pcJump          = braMispredict || p_jmp[EXEC];
 
     // Core modules
@@ -126,11 +126,11 @@ module pineapplecore
 
     // Regfile assignments
     /*
-        NOTE:   IIRC this setup will infer 2 copied/synced 32x32 (2048 KBits) BRAMs
-                (i.e. one BRAM per read-port) rather than just 1 32x32 (1024 KBits) BRAM (YMMV per synth tool).
-                This is somewhat wasteful but is simpler and should have less Tpcq at the output.
-                Alternate approach is to have 2 "banks" (i.e. 2 32x16 BRAMs) w/ additional banking logic
-                for wr_en and output forwarding.
+        NOTE:   Infer 2 copied/synced 32x32 (2048 KBits) BRAMs (i.e. one BRAM per read-port)
+                rather than just 1 32x32 (1024 KBits) BRAM. This is somewhat wasteful but is
+                simpler and should have less Tpcq at the output. Alternate approach is to have
+                the 2 "banks" configured as 2 32x16 BRAMs w/ additional banking logic for
+                wr_en and output forwarding.
     */
     wire [31:0] rs1Out, rs2Out;
     DualPortRam RS1_PORT (
@@ -150,8 +150,8 @@ module pineapplecore
         .q                  (rs2Out             )
     );
     defparam RS1_PORT.DATA_WIDTH = 32;
-    defparam RS1_PORT.ADDR_WIDTH = 5;
     defparam RS2_PORT.DATA_WIDTH = 32;
+    defparam RS1_PORT.ADDR_WIDTH = 5;
     defparam RS2_PORT.ADDR_WIDTH = 5;
 
     // Pipeline assignments
