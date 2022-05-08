@@ -12,6 +12,7 @@ OBJDUMP             := $(TOOLCHAIN_PREFIX)-objdump
 OUTPUT 	            := build
 FLAGS               := -Wall
 FLAGS               += -I..
+FLAGS	            += -DSIM
 ifdef VCD
 FLAGS	            += -DDUMP_VCD
 endif

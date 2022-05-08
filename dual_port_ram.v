@@ -8,21 +8,22 @@ module DualPortRam
 );
     parameter DATA_WIDTH = 32;
     parameter ADDR_WIDTH = 5;
+    reg [DATA_WIDTH-1:0] ram [2**ADDR_WIDTH-1:0];
 
-    reg [DATA_WIDTH-1:0] bram [2**ADDR_WIDTH-1:0];
-
+`ifdef SIM
     integer i;
     initial begin
-        for (i=0; i<32; i=i+1) begin
-            bram[i] = 32'd0;
+        for (i=0; i<(2**ADDR_WIDTH-1); i=i+1) begin
+            ram[i] = {DATA_WIDTH{1'b0}};
         end
-        q = 32'd0;
+        q = {DATA_WIDTH{1'b0}};
     end
+`endif // SIM
 
     always @ (posedge clk) begin
         if (we) begin
-            bram[wAddr] <= dataIn;
+            ram[wAddr] <= dataIn;
         end
-        q <= bram[rAddr];
+        q <= ram[rAddr];
     end
 endmodule
