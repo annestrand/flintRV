@@ -248,7 +248,7 @@ module pineapplecore
         p_readData  [WB]    = 'd0;
     end
     always @(posedge clk) begin
-        $display("\n[pinapplecore - TRACE]:");
+        $display("\n[pineapplecore - TRACE]:");
         $display("             PC: 0x%08h", PC);
         $display("    INSTRUCTION: 0x%08h", instrReg);
         `DBG_INSTR_TRACE_PRINT(instrReg, IMM)
