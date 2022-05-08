@@ -3,7 +3,7 @@
 
 module Alu_tb;
     reg     [31:0]  a, b;
-    reg     [3:0]   op;
+    reg     [4:0]   op;
     wire    [31:0]  result;
     wire            zflag;
 
@@ -18,7 +18,7 @@ module Alu_tb;
 `endif // DUMP_VCD
 
     // Test vectors
-    reg [67:0]  test_vector         [0:15];
+    reg [68:0]  test_vector         [0:15];
     reg [32:0]  test_gold_vector    [0:15];
     initial begin
         $readmemb("build/alu.mem", test_vector);

@@ -35,8 +35,7 @@ module pineapplecore
     reg         p_jmp       [EXEC:WB];
 
     // Internal wires/regs
-    reg     [31:0]  PC;
-    reg     [31:0]  regfile [0:31];
+    reg     [31:0]  PC, instrReg;
     wire    [31:0]  IMM,
                     aluOut,
                     jumpAddr,
@@ -57,12 +56,12 @@ module pineapplecore
                     MEM_flush;
     wire    [31:0]  WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
-    wire            writeRd         = (`RD(instr) != REG0) ? reg_w : 1'b0;      // Skip regfile write for x0
+    wire            writeRd         = (`RD(instrReg) != REG0) ? reg_w : 1'b0;   // Skip regfile write for x0
     wire            pcJump          = braMispredict || p_jmp[EXEC];
 
     // Core modules
     FetchDecode FETCH_DECODE_unit(
-        .instr              (instr              ),
+        .instr              (instrReg           ),
         .imm                (IMM                ),
         .aluOp              (aluOp              ),
         .exec_a             (exec_a             ),
@@ -116,8 +115,8 @@ module pineapplecore
         .FETCH_valid        (ifValid            ),
         .MEM_valid          (memValid           ),
         .EXEC_mem2reg       (p_mem2reg[EXEC]    ),
-        .FETCH_rs1          (`RS1(instr)        ),
-        .FETCH_rs2          (`RS2(instr)        ),
+        .FETCH_rs1          (`RS1(instrReg)     ),
+        .FETCH_rs2          (`RS2(instrReg)     ),
         .EXEC_rd            (p_rdAddr[EXEC]     ),
         .FETCH_stall        (FETCH_stall        ),
         .EXEC_stall         (EXEC_stall         ),
@@ -125,26 +124,52 @@ module pineapplecore
         .MEM_flush          (MEM_flush          )
     );
 
-    // Pipeline logic
+    // Regfile assignments
+    /*
+        NOTE:   IIRC this setup will infer 2 copied/synced 32x32 (2048 KBits) BRAMs
+                (i.e. one BRAM per read-port) rather than just 1 32x32 (1024 KBits) BRAM (YMMV per synth tool).
+                This is somewhat wasteful but is simpler and should have less Tpcq at the output.
+                Alternate approach is to have 2 "banks" (i.e. 2 32x16 BRAMs) w/ additional banking logic
+                for wr_en and output forwarding.
+    */
+    wire [31:0] rs1Out, rs2Out;
+    DualPortRam RS1_PORT (
+        .clk                (clk                ),
+        .we                 (p_reg_w[WB]        ),
+        .dataIn             (WB_result          ),
+        .rAddr              (`RS1(instr)        ),
+        .wAddr              (p_rdAddr[WB]       ),
+        .q                  (rs1Out             )
+    );
+    DualPortRam RS2_PORT (
+        .clk                (clk                ),
+        .we                 (p_reg_w[WB]        ),
+        .dataIn             (WB_result          ),
+        .rAddr              (`RS2(instr)        ),
+        .wAddr              (p_rdAddr[WB]       ),
+        .q                  (rs2Out             )
+    );
+    defparam RS1_PORT.DATA_WIDTH = 32;
+    defparam RS1_PORT.ADDR_WIDTH = 5;
+    defparam RS2_PORT.DATA_WIDTH = 32;
+    defparam RS2_PORT.ADDR_WIDTH = 5;
+
+    // Pipeline assignments
     always @(posedge clk) begin
-        if (p_reg_w[WB]) begin
-            // Update regfile
-            regfile[p_rdAddr[WB]] <= WB_result;
-        end
         // Execute
-        p_rs1       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_rs1        [EXEC] : regfile[`RS1(instr)];
-        p_rs2       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_rs2        [EXEC] : regfile[`RS2(instr)];
-        p_rdAddr    [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr     [EXEC] : `RD(instr);
+        p_rs1       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_rs1        [EXEC] : rs1Out;
+        p_rs2       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_rs2        [EXEC] : rs2Out;
+        p_rdAddr    [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr     [EXEC] : `RD(instrReg);
         p_IMM       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_IMM        [EXEC] : IMM;
         p_PC        [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_PC         [EXEC] : PC;
-        p_funct3    [EXEC]  <= EXEC_flush ?  3'd0 : EXEC_stall ? p_funct3     [EXEC] : `FUNCT3(instr);
-        p_funct7    [EXEC]  <= EXEC_flush ?  7'd0 : EXEC_stall ? p_funct7     [EXEC] : `FUNCT7(instr);
+        p_funct3    [EXEC]  <= EXEC_flush ?  3'd0 : EXEC_stall ? p_funct3     [EXEC] : `FUNCT3(instrReg);
+        p_funct7    [EXEC]  <= EXEC_flush ?  7'd0 : EXEC_stall ? p_funct7     [EXEC] : `FUNCT7(instrReg);
         p_mem_w     [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_mem_w      [EXEC] : mem_w;
         p_reg_w     [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_reg_w      [EXEC] : writeRd;
         p_mem2reg   [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_mem2reg    [EXEC] : mem2reg;
-        p_rs1Addr   [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rs1Addr    [EXEC] : `RS1(instr);
-        p_rs2Addr   [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rs2Addr    [EXEC] : `RS2(instr);
-        p_rdAddr    [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr     [EXEC] : `RD(instr);
+        p_rs1Addr   [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rs1Addr    [EXEC] : `RS1(instrReg);
+        p_rs2Addr   [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rs2Addr    [EXEC] : `RS2(instrReg);
+        p_rdAddr    [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr     [EXEC] : `RD(instrReg);
         p_aluOp     [EXEC]  <= EXEC_flush ?  4'd0 : EXEC_stall ? p_aluOp      [EXEC] : aluOp;
         p_exec_a    [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_a     [EXEC] : exec_a;
         p_exec_b    [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_b     [EXEC] : exec_b;
@@ -172,6 +197,10 @@ module pineapplecore
         PC          <=  FETCH_stall ?   PC          :
                         pcJump      ?   jumpAddr    :
                                         PC + 32'd4;
+        // Buffer instruction fetch to balance the BRAM-based regfile read
+        instrReg    <=  FETCH_stall ?   instrReg    :
+                        EXEC_flush  ?   32'd0       :
+                                        instr;
     end
 
     // Other output assignments

@@ -16,7 +16,7 @@ if __name__ == "__main__":
         for i in range(2**4):
             test_vector  = f"{test_vector_a[i]  & 0xffffffff:032b}"
             test_vector += f"{test_vector_b[i]  & 0xffffffff:032b}"
-            test_vector += f"{test_vector_op[i] & 0xf:04b}"
+            test_vector += f"{test_vector_op[i] & 0xf:05b}"
             print(test_vector, file=fp)
 
     outfileGold = f"{basenameNoExt('build', __file__)}_gold.mem"
