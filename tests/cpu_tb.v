@@ -38,7 +38,7 @@ module cpu_tb;
         dataIn      = 32'hcafebabe;
         #20;
         $display("=== Run CPU =========================================");
-        for (i=0; i<40; i=i+1) begin
+        for (i=0; i<10; i=i+1) begin
             instr = `ENDIAN_SWP_32(test_vector[i]);
             // Toggle clk
             #20; clk = ~clk; #20; clk = ~clk;
