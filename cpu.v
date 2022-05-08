@@ -39,7 +39,7 @@ module pineapplecore
     reg     [31:0]  regfile [0:31];
     wire    [31:0]  IMM,
                     aluOut,
-                    addrGenOut,
+                    jumpAddr,
                     loadData;
     wire    [1:0]   fwdRs1,
                     fwdRs2;
@@ -58,6 +58,7 @@ module pineapplecore
     wire    [31:0]  WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
     wire            writeRd         = (`RD(instr) != REG0) ? reg_w : 1'b0;      // Skip regfile write for x0
+    wire            pcJump          = braMispredict || p_jmp[EXEC];
 
     // Core modules
     FetchDecode FETCH_DECODE_unit(
@@ -87,7 +88,7 @@ module pineapplecore
         .PC                 (p_PC[EXEC]         ),
         .IMM                (p_IMM[EXEC]        ),
         .aluOut             (aluOut             ),
-        .addrGenOut         (addrGenOut         )
+        .addrGenOut         (jumpAddr           )
     );
     Memory MEMORY_unit(
         .funct3             (p_funct3[MEM]      ),
@@ -166,9 +167,11 @@ module pineapplecore
         p_readData  [WB]    <= dataIn;
     end
 
-    // Program counter logic
+    // Program counter and instruction reg assignments
     always @(posedge clk) begin
-        PC <= FETCH_stall ? PC : (braMispredict || p_jmp[EXEC]) ? addrGenOut : PC + 32'd4;
+        PC          <=  FETCH_stall ?   PC          :
+                        pcJump      ?   jumpAddr    :
+                                        PC + 32'd4;
     end
 
     // Other output assignments
