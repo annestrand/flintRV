@@ -128,9 +128,9 @@ module pineapplecore
     /*
         NOTE:   Infer 2 copied/synced 32x32 (2048 KBits) BRAMs (i.e. one BRAM per read-port)
                 rather than just 1 32x32 (1024 KBits) BRAM. This is somewhat wasteful but is
-                simpler and should have less Tpcq at the output. Alternate approach is to have
-                the 2 "banks" configured as 2 32x16 BRAMs w/ additional banking logic for
-                wr_en and output forwarding.
+                simpler. Alternate approach is to have the 2 "banks" configured as 2 32x16
+                BRAMs w/ additional banking logic for wr_en and output forwarding
+                (no duplication with this approach but adds some more Tpcq at the output).
     */
     wire [31:0] rs1Out, rs2Out;
     DualPortRam RS1_PORT (
@@ -207,5 +207,52 @@ module pineapplecore
     assign pcOut    = PC;
     assign dataAddr = p_aluOut[MEM];
     assign dataWe   = p_mem_w[MEM];
+
+// ====================================================================================================================
+// === CPU-state dumping for simulation ===============================================================================
+// ====================================================================================================================
+`ifdef SIM
+    initial begin
+        PC                  = 'd0;
+        instrReg            = 'd0;
+        p_rs1       [EXEC]  = 'd0;
+        p_rs2       [EXEC]  = 'd0;
+        p_rdAddr    [EXEC]  = 'd0;
+        p_IMM       [EXEC]  = 'd0;
+        p_PC        [EXEC]  = 'd0;
+        p_funct3    [EXEC]  = 'd0;
+        p_funct7    [EXEC]  = 'd0;
+        p_mem_w     [EXEC]  = 'd0;
+        p_reg_w     [EXEC]  = 'd0;
+        p_mem2reg   [EXEC]  = 'd0;
+        p_rs1Addr   [EXEC]  = 'd0;
+        p_rs2Addr   [EXEC]  = 'd0;
+        p_rdAddr    [EXEC]  = 'd0;
+        p_aluOp     [EXEC]  = 'd0;
+        p_exec_a    [EXEC]  = 'd0;
+        p_exec_b    [EXEC]  = 'd0;
+        p_bra       [EXEC]  = 'd0;
+        p_jmp       [EXEC]  = 'd0;
+        p_mem_w     [MEM]   = 'd0;
+        p_reg_w     [MEM]   = 'd0;
+        p_mem2reg   [MEM]   = 'd0;
+        p_funct3    [MEM]   = 'd0;
+        p_rs2       [MEM]   = 'd0;
+        p_aluOut    [MEM]   = 'd0;
+        p_rdAddr    [MEM]   = 'd0;
+        p_reg_w     [WB]    = 'd0;
+        p_mem2reg   [WB]    = 'd0;
+        p_funct3    [WB]    = 'd0;
+        p_aluOut    [WB]    = 'd0;
+        p_rdAddr    [WB]    = 'd0;
+        p_readData  [WB]    = 'd0;
+    end
+    always @(posedge clk) begin
+        $display("\n[pinapplecore - TRACE]:");
+        $display("             PC: 0x%08h", PC);
+        $display("          INSTR: 0x%08h", instrReg);
+        `DBG_INSTR_TRACE_PRINT(instrReg, IMM)
+    end
+`endif // SIM
 
 endmodule

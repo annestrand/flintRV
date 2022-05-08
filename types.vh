@@ -22,9 +22,6 @@
 `define RS2(x)              x[24:20]
 `define FUNCT7(x)           x[31:25]
 
-// Utility macro(s)
-`define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
-
 // Forward select
 `define NO_FWD              2'b00
 `define FWD_MEM             2'b01
@@ -94,5 +91,83 @@
 `define U_LUI_CTRL          { `ALU_OP_U_LUI,    `REG,    `IMM,    `N,     `Y,     `N,       `N,   `N  }
 `define U_AUIPC_CTRL        { `ALU_OP_U_AUIPC,  `PC,     `IMM,    `N,     `Y,     `N,       `N,   `N  }
 `define J_CTRL              { `ALU_OP_J,        `PC,     `REG,    `N,     `Y,     `N,       `N,   `Y  }
+
+// Utility and Debug macro(s)
+`define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
+`define DBG_INSTR_TRACES                                        \
+    `DBG_INSTR_TRACE("ADD",    7'h00,      3'h0,       7'h33   )\ // --- R-Type ---
+    `DBG_INSTR_TRACE("SUB",    7'h20,      3'h0,       7'h33   )\
+    `DBG_INSTR_TRACE("SLL",    7'h00,      3'h1,       7'h33   )\
+    `DBG_INSTR_TRACE("SLT",    7'h00,      3'h2,       7'h33   )\
+    `DBG_INSTR_TRACE("SLTU",   7'h00,      3'h3,       7'h33   )\
+    `DBG_INSTR_TRACE("XOR",    7'h00,      3'h4,       7'h33   )\
+    `DBG_INSTR_TRACE("SRL",    7'h00,      3'h5,       7'h33   )\
+    `DBG_INSTR_TRACE("SRA",    7'h20,      3'h5,       7'h33   )\
+    `DBG_INSTR_TRACE("OR",     7'h00,      3'h6,       7'h33   )\
+    `DBG_INSTR_TRACE("AND",    7'h00,      3'h7,       7'h33   )\
+    `DBG_INSTR_TRACE("JALR",   7'h00,      3'h0,       7'h67   )\ // --- I-Type ---
+    `DBG_INSTR_TRACE("LB",     7'h00,      3'h0,       7'h03   )\
+    `DBG_INSTR_TRACE("LH",     7'h00,      3'h1,       7'h03   )\
+    `DBG_INSTR_TRACE("LW",     7'h00,      3'h2,       7'h03   )\
+    `DBG_INSTR_TRACE("LBU",    7'h00,      3'h4,       7'h03   )\
+    `DBG_INSTR_TRACE("LHU",    7'h00,      3'h5,       7'h03   )\
+    `DBG_INSTR_TRACE("ADDI",   7'h00,      3'h0,       7'h13   )\
+    `DBG_INSTR_TRACE("SLTI",   7'h00,      3'h2,       7'h13   )\
+    `DBG_INSTR_TRACE("SLTIU",  7'h00,      3'h3,       7'h13   )\
+    `DBG_INSTR_TRACE("XORI",   7'h00,      3'h4,       7'h13   )\
+    `DBG_INSTR_TRACE("ORI",    7'h00,      3'h6,       7'h13   )\
+    `DBG_INSTR_TRACE("ANDI",   7'h00,      3'h7,       7'h13   )\
+    `DBG_INSTR_TRACE("FENCE",  7'h00,      3'h0,       7'h0f   )\
+    `DBG_INSTR_TRACE("ECALL",  7'h00,      3'h0,       7'h73   )\
+    `DBG_INSTR_TRACE("SLLI",   7'h00,      3'h1,       7'h13   )\
+    `DBG_INSTR_TRACE("SRLI",   7'h00,      3'h5,       7'h13   )\
+    `DBG_INSTR_TRACE("SRAI",   7'h20,      3'h5,       7'h13   )\
+    `DBG_INSTR_TRACE("EBREAK", 7'h01,      3'h0,       7'h73   )\
+    `DBG_INSTR_TRACE("SB",     7'h00,      3'h0,       7'h23   )\ // --- S-Type ---
+    `DBG_INSTR_TRACE("SH",     7'h00,      3'h1,       7'h23   )\
+    `DBG_INSTR_TRACE("SW",     7'h00,      3'h2,       7'h23   )\
+    `DBG_INSTR_TRACE("BEQ",    7'h00,      3'h0,       7'h63   )\ // --- B-Type ---
+    `DBG_INSTR_TRACE("BNE",    7'h00,      3'h1,       7'h63   )\
+    `DBG_INSTR_TRACE("BLT",    7'h00,      3'h4,       7'h63   )\
+    `DBG_INSTR_TRACE("BGE",    7'h00,      3'h5,       7'h63   )\
+    `DBG_INSTR_TRACE("BLTU",   7'h00,      3'h6,       7'h63   )\
+    `DBG_INSTR_TRACE("BGEU",   7'h00,      3'h7,       7'h63   )\
+    `DBG_INSTR_TRACE("LUI",    7'h00,      3'h0,       7'h37   )\ // --- U-Type ---
+    `DBG_INSTR_TRACE("AUIPC",  7'h00,      3'h0,       7'h17   )\
+    `DBG_INSTR_TRACE("JAL",    7'h00,      3'h0,       7'h6f   )  // --- J-Type ---
+`define DBG_INSTR_TRACE_OP_FMT(name, opcode, rs1, rs2, rd, imm)                                                 \
+         if (opcode == `R)       $display("    INSTRUCTION: %s x%0d, x%0d, x%0d", name, rd, rs1, rs2);          \
+    else if (opcode == `I_JUMP)  $display("    INSTRUCTION: %s x%0d, %0d", name, rd, imm);                      \
+    else if (opcode == `I_LOAD)  $display("    INSTRUCTION: %s x%0d, %0d(x%0d)", name, rd, imm, rs1);           \
+    else if (opcode == `I_ARITH) $display("    INSTRUCTION: %s x%0d, x%0d, %0d", name, rd, rs1, imm);           \
+    else if (opcode == `I_SYS)   $display("    INSTRUCTION: %s", name);                                         \
+    else if (opcode == `I_FENCE) $display("    INSTRUCTION: %s", name);                                         \
+    else if (opcode == `S)       $display("    INSTRUCTION: %s x%0d, %0d(x%0d)", name, rs2, imm, rs1);          \
+    else if (opcode == `B)       $display("    INSTRUCTION: %s x%0d, x%0d, %0d", name, rs1, rs2, imm);          \
+    else if (opcode == `U_LUI)   $display("    INSTRUCTION: %s x%0d, %0d", name, rd, imm);                      \
+    else if (opcode == `U_AUIPC) $display("    INSTRUCTION: %s x%0d, %0d", name, rd, imm);                      \
+    else if (opcode == `J)       $display("    INSTRUCTION: %s x%0d, %0d", name, rd, imm);
+`define DBG_INSTR_TRACE_PRINT(instrReg, IMM)                                                                     \
+    case ({`FUNCT7(instrReg), `FUNCT3(instrReg), `OPCODE(instrReg)})                                             \
+    `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct7, funct3, opcode} : begin                     \\
+        `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)              \\
+        end                                                                                                      \
+    `DBG_INSTR_TRACES                                                                                            \
+    `undef DBG_INSTR_TRACE                                                                                       \
+    default : case ({`FUNCT3(instrReg), `OPCODE(instrReg)})                                                      \
+        `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct3, opcode} : begin                         \\
+            `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)          \\
+            end                                                                                                  \
+        `DBG_INSTR_TRACES                                                                                        \
+        `undef DBG_INSTR_TRACE                                                                                   \
+        default: case (`OPCODE(instrReg))                                                                        \
+            `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) opcode : begin                               \\
+                `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)      \\
+                end                                                                                              \
+            `DBG_INSTR_TRACES                                                                                    \
+            default : $display("    INSTRUCTION: Invalid instruction! ( 0x%08h )", instrReg);                    \
+            endcase                                                                                              \
+        endcase                                                                                                  \
+    endcase                                                                                                      \
 
 `endif // TYPES_VH
