@@ -50,7 +50,7 @@ module Hazard_tb;
         FETCH_rs1           = 'd0;
         FETCH_rs2           = 'd0;
         EXEC_rd             = 'd0;
-        $display("Running random Hazard (FWD) tests...\n");
+        $display("\n=== Running random Hazard (FWD) tests... =========================================");
         #20;
         $display("INPUTS : MEM_rd_reg_write, WB_rd_reg_write, EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd");
         $display("OUTPUTS: FWD_rs1, FWD_rs2");
@@ -93,7 +93,7 @@ module Hazard_tb;
         if (errs > 0)   $display("\nFAILED: %0d", errs);
         else            $display("\nPASSED");
         // TODO: Use VPI to have $myReturn(...) return the "errs" value?
-        $display("Running random Hazard (HZD) tests...\n");
+        $display("\n=== Running random Hazard (HZD) tests... =========================================");
         $display("INPUTS : BRA, JMP, FETCH_valid, MEM_valid, EXEC_mem2reg, FETCH_rs1, FETCH_rs2, EXEC_rd");
         $display("OUTPUTS: FETCH_stall, EXEC_stall, EXEC_flush, MEM_flush");
         $display("");

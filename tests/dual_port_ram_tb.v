@@ -44,23 +44,23 @@ module DualPortRam_tb;
         rAddr   = 'd0;
         wAddr   = 'd0;
         #20;
-        $display("=== Writing data =========================================");
+        $display("\n=== Writing data =========================================");
         for (i=0; i<10; i=i+1) begin // Write
             #20; clk = ~clk;
             wAddr  = i[4:0];
             dataIn = testData[i];
             #20; clk = ~clk;
-            $display("[ %2d ]: wAddr = %b | dataIn = 0x%08h", i, wAddr, dataIn);
+            $display("Test[ %2d ]: wAddr = %b || dataIn = 0x%08h", i, wAddr, dataIn);
         end
         we      = 0;
-        $display("=== Reading data =========================================");
+        $display("\n=== Reading data =========================================");
         for (i=0; i<10; i=i+1) begin // Read
             #20; clk = ~clk;
             rAddr = i[4:0];
             #20; clk = ~clk;
             if (q != testData[i]) resultStr = "ERROR";
             else                  resultStr = "PASS ";
-            $display("[ %2d ]: rAddr = %b | q      = 0x%08h ... %s", i, rAddr, q, resultStr);
+            $display("Test[ %2d ]: rAddr = %b || q      = 0x%08h ... %s", i, rAddr, q, resultStr);
             if (resultStr == "ERROR") errs = errs + 1;
         end
         if (errs > 0)   $display("\nFAILED: %0d", errs);
