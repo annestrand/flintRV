@@ -2,7 +2,7 @@
 // ====================================================================================================================
 module pineapplecore
 (
-    input               clk,
+    input               clk, rst,
     input       [31:0]  instr, dataIn,
     input               ifValid, memValid,
     output      [31:0]  pcOut, dataAddr, dataOut,
@@ -157,50 +157,51 @@ module pineapplecore
     // Pipeline assignments
     always @(posedge clk) begin
         // Execute
-        p_rs1       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_rs1        [EXEC] : rs1Out;
-        p_rs2       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_rs2        [EXEC] : rs2Out;
-        p_rdAddr    [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr     [EXEC] : `RD(instrReg);
-        p_IMM       [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_IMM        [EXEC] : IMM;
-        p_PC        [EXEC]  <= EXEC_flush ? 32'd0 : EXEC_stall ? p_PC         [EXEC] : PC;
-        p_funct3    [EXEC]  <= EXEC_flush ?  3'd0 : EXEC_stall ? p_funct3     [EXEC] : `FUNCT3(instrReg);
-        p_funct7    [EXEC]  <= EXEC_flush ?  7'd0 : EXEC_stall ? p_funct7     [EXEC] : `FUNCT7(instrReg);
-        p_mem_w     [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_mem_w      [EXEC] : mem_w;
-        p_reg_w     [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_reg_w      [EXEC] : writeRd;
-        p_mem2reg   [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_mem2reg    [EXEC] : mem2reg;
-        p_rs1Addr   [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rs1Addr    [EXEC] : `RS1(instrReg);
-        p_rs2Addr   [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rs2Addr    [EXEC] : `RS2(instrReg);
-        p_rdAddr    [EXEC]  <= EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr     [EXEC] : `RD(instrReg);
-        p_aluOp     [EXEC]  <= EXEC_flush ?  4'd0 : EXEC_stall ? p_aluOp      [EXEC] : aluOp;
-        p_exec_a    [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_a     [EXEC] : exec_a;
-        p_exec_b    [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_b     [EXEC] : exec_b;
-        p_bra       [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_bra        [EXEC] : bra;
-        p_jmp       [EXEC]  <= EXEC_flush ?  1'd0 : EXEC_stall ? p_jmp        [EXEC] : jmp;
+        p_rs1       [EXEC]  <= rst || EXEC_flush ? 32'd0 : EXEC_stall ? p_rs1       [EXEC] : rs1Out;
+        p_rs2       [EXEC]  <= rst || EXEC_flush ? 32'd0 : EXEC_stall ? p_rs2       [EXEC] : rs2Out;
+        p_rdAddr    [EXEC]  <= rst || EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr    [EXEC] : `RD(instrReg);
+        p_IMM       [EXEC]  <= rst || EXEC_flush ? 32'd0 : EXEC_stall ? p_IMM       [EXEC] : IMM;
+        p_PC        [EXEC]  <= rst || EXEC_flush ? 32'd0 : EXEC_stall ? p_PC        [EXEC] : PC;
+        p_funct3    [EXEC]  <= rst || EXEC_flush ?  3'd0 : EXEC_stall ? p_funct3    [EXEC] : `FUNCT3(instrReg);
+        p_funct7    [EXEC]  <= rst || EXEC_flush ?  7'd0 : EXEC_stall ? p_funct7    [EXEC] : `FUNCT7(instrReg);
+        p_mem_w     [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_mem_w     [EXEC] : mem_w;
+        p_reg_w     [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_reg_w     [EXEC] : writeRd;
+        p_mem2reg   [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_mem2reg   [EXEC] : mem2reg;
+        p_rs1Addr   [EXEC]  <= rst || EXEC_flush ?  5'd0 : EXEC_stall ? p_rs1Addr   [EXEC] : `RS1(instrReg);
+        p_rs2Addr   [EXEC]  <= rst || EXEC_flush ?  5'd0 : EXEC_stall ? p_rs2Addr   [EXEC] : `RS2(instrReg);
+        p_rdAddr    [EXEC]  <= rst || EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr    [EXEC] : `RD(instrReg);
+        p_aluOp     [EXEC]  <= rst || EXEC_flush ?  4'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
+        p_exec_a    [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_a    [EXEC] : exec_a;
+        p_exec_b    [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_b    [EXEC] : exec_b;
+        p_bra       [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_bra       [EXEC] : bra;
+        p_jmp       [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_jmp       [EXEC] : jmp;
         // Memory
-        p_mem_w     [MEM]   <= MEM_flush ?  1'd0 : p_mem_w      [EXEC];
-        p_reg_w     [MEM]   <= MEM_flush ?  1'd0 : p_reg_w      [EXEC];
-        p_mem2reg   [MEM]   <= MEM_flush ?  1'd0 : p_mem2reg    [EXEC];
-        p_funct3    [MEM]   <= MEM_flush ?  3'd0 : p_funct3     [EXEC];
-        p_rs2       [MEM]   <= MEM_flush ? 32'd0 : p_rs2        [EXEC];
-        p_aluOut    [MEM]   <= MEM_flush ? 32'd0 : aluOut;
-        p_rdAddr    [MEM]   <= MEM_flush ?  5'd0 : p_rdAddr     [EXEC];
+        p_mem_w     [MEM]   <= rst || MEM_flush ?  1'd0 : p_mem_w      [EXEC];
+        p_reg_w     [MEM]   <= rst || MEM_flush ?  1'd0 : p_reg_w      [EXEC];
+        p_mem2reg   [MEM]   <= rst || MEM_flush ?  1'd0 : p_mem2reg    [EXEC];
+        p_funct3    [MEM]   <= rst || MEM_flush ?  3'd0 : p_funct3     [EXEC];
+        p_rs2       [MEM]   <= rst || MEM_flush ? 32'd0 : p_rs2        [EXEC];
+        p_aluOut    [MEM]   <= rst || MEM_flush ? 32'd0 : aluOut;
+        p_rdAddr    [MEM]   <= rst || MEM_flush ?  5'd0 : p_rdAddr     [EXEC];
         // Writeback
-        p_reg_w     [WB]    <= p_reg_w       [MEM];
-        p_mem2reg   [WB]    <= p_mem2reg     [MEM];
-        p_funct3    [WB]    <= p_funct3      [MEM];
-        p_aluOut    [WB]    <= p_aluOut      [MEM];
-        p_rdAddr    [WB]    <= p_rdAddr      [MEM];
-        p_readData  [WB]    <= dataIn;
+        p_reg_w     [WB]    <= rst ? 32'd0  : p_reg_w       [MEM];
+        p_mem2reg   [WB]    <= rst ? 1'd0   : p_mem2reg     [MEM];
+        p_funct3    [WB]    <= rst ? 3'd0   : p_funct3      [MEM];
+        p_aluOut    [WB]    <= rst ? 32'd0  : p_aluOut      [MEM];
+        p_rdAddr    [WB]    <= rst ? 5'd0   : p_rdAddr      [MEM];
+        p_readData  [WB]    <= rst ? 32'd0  : dataIn;
     end
 
     // Program counter and instruction reg assignments
     always @(posedge clk) begin
-        PC          <=  FETCH_stall ?   PC          :
+        PC          <=  rst         ?   32'd0       :
+                        FETCH_stall ?   PC          :
                         pcJump      ?   jumpAddr    :
                                         PC + 32'd4;
         // Buffer instruction fetch to balance the BRAM-based regfile read
-        instrReg    <=  FETCH_stall ?   instrReg    :
-                        EXEC_flush  ?   32'd0       :
-                                        instr;
+        instrReg    <=  FETCH_stall         ?   instrReg :
+                        rst || EXEC_flush   ?   32'd0    :
+                                                instr;
     end
 
     // Other output assignments
@@ -212,45 +213,12 @@ module pineapplecore
 // === CPU-state dumping for simulation ===============================================================================
 // ====================================================================================================================
 `ifdef SIM
-    initial begin
-        PC                  = 'd0;
-        instrReg            = 'd0;
-        p_rs1       [EXEC]  = 'd0;
-        p_rs2       [EXEC]  = 'd0;
-        p_rdAddr    [EXEC]  = 'd0;
-        p_IMM       [EXEC]  = 'd0;
-        p_PC        [EXEC]  = 'd0;
-        p_funct3    [EXEC]  = 'd0;
-        p_funct7    [EXEC]  = 'd0;
-        p_mem_w     [EXEC]  = 'd0;
-        p_reg_w     [EXEC]  = 'd0;
-        p_mem2reg   [EXEC]  = 'd0;
-        p_rs1Addr   [EXEC]  = 'd0;
-        p_rs2Addr   [EXEC]  = 'd0;
-        p_rdAddr    [EXEC]  = 'd0;
-        p_aluOp     [EXEC]  = 'd0;
-        p_exec_a    [EXEC]  = 'd0;
-        p_exec_b    [EXEC]  = 'd0;
-        p_bra       [EXEC]  = 'd0;
-        p_jmp       [EXEC]  = 'd0;
-        p_mem_w     [MEM]   = 'd0;
-        p_reg_w     [MEM]   = 'd0;
-        p_mem2reg   [MEM]   = 'd0;
-        p_funct3    [MEM]   = 'd0;
-        p_rs2       [MEM]   = 'd0;
-        p_aluOut    [MEM]   = 'd0;
-        p_rdAddr    [MEM]   = 'd0;
-        p_reg_w     [WB]    = 'd0;
-        p_mem2reg   [WB]    = 'd0;
-        p_funct3    [WB]    = 'd0;
-        p_aluOut    [WB]    = 'd0;
-        p_rdAddr    [WB]    = 'd0;
-        p_readData  [WB]    = 'd0;
-    end
     always @(posedge clk) begin
+        // TODO: Dump other items?
         $display("\n[pineapplecore - TRACE]:");
         $display("             PC: 0x%08h", PC);
         $display("    INSTRUCTION: 0x%08h", instrReg);
+        // Dump disassembled instruction
         `DBG_INSTR_TRACE_PRINT(instrReg, IMM)
     end
 `endif // SIM
