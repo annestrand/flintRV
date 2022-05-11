@@ -4,7 +4,7 @@ from common import *
 
 # Nonsensical test program for now
 test_assembly = f'''
-        addi x6, x7, 5
+        addi x6, x0, 5
         xori x8, x6, 15
         add  x4, x0, x0
         add  x5, x0, x0

@@ -199,7 +199,7 @@ module pineapplecore
                         pcJump      ?   jumpAddr    :
                                         PC + 32'd4;
         // Buffer instruction fetch to balance the BRAM-based regfile read
-        instrReg    <=  rst || EXEC_stall   ?   32'd0    :
+        instrReg    <=  rst || EXEC_flush   ?   32'd0    :
                         FETCH_stall         ?   instrReg :
                                                 instr;
     end
@@ -215,9 +215,10 @@ module pineapplecore
 `ifdef SIM
     always @(posedge clk) begin
         // TODO: Dump other items?
-        $display("[pineapplecore - TRACE]:");
-        $display("             PC: 0x%08h", PC);
-        $display("    INSTRUCTION: 0x%08h", instrReg);
+        $display("[pineapplecore - FETCH_DECODE TRACE]:");
+        $display("-------------------------------------");
+        $display("    PCout       : 0x%08h", PC);
+        $display("    INSTRUCTION : 0x%08h", instrReg);
         // Dump disassembled instruction
         `DBG_INSTR_TRACE_PRINT(instrReg, IMM)
         $display("%s", `PRINT_LINE);

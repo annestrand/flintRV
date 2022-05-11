@@ -19,7 +19,7 @@ module cpu_tb;
 `ifdef DUMP_VCD
     initial begin
         $dumpfile("build/cpu_tb.vcd");
-        $dumpvars;
+        $dumpvars(0, pineapplecore_dut);
     end
 `endif // DUMP_VCD
 
@@ -29,19 +29,26 @@ module cpu_tb;
     end
 
     // Test loop
+    reg [31:0] pcReg;
     reg [39:0] resultStr;
     integer i = 0, errs = 0, subfail = 0;
     initial begin
+        $display("%s", `PRINT_LINE);
+        // Reset CPU
         clk         = 0;
         rst         = 1;
         ifValid     = 1;
         memValid    = 1;
         dataIn      = 32'hcafebabe;
         instr       = 32'd0;
-        $display("=== Run CPU =========================================");
-        for (i=0; i<10; i=i+1) begin
-            rst = (i == 0) ? 1 : 0;
-            instr = `ENDIAN_SWP_32(test_vector[i]);
+        // Toggle clk and clear reset line
+        #20; clk = ~clk; #20; clk = ~clk;
+        rst = 0;
+        // Run though instructions
+        for (i=0; i<20; i=i+1) begin
+            pcReg = pcOut[31:2];
+            instr = `ENDIAN_SWP_32(test_vector[pcReg]);
+            if (instr === 32'dx) instr = 32'd0;
             // Toggle clk
             #20; clk = ~clk; #20; clk = ~clk;
         end

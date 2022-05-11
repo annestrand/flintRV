@@ -88,7 +88,7 @@
 `define U_AUIPC_CTRL        { `ALU_OP_U_AUIPC,  `PC,     `IMM,    `N,     `Y,     `N,       `N,   `N  }
 `define J_CTRL              { `ALU_OP_J,        `PC,     `REG,    `N,     `Y,     `N,       `N,   `Y  }
 
-// Utility and Debug macro(s)
+// Utility, Debug, and Simulation related macro(s)
 `define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
 `define DBG_INSTR_TRACES                                        \
     `DBG_INSTR_TRACE("ADD",    7'h00,      3'h0,       7'h33   )\ // --- R-Type ---
@@ -132,39 +132,41 @@
     `DBG_INSTR_TRACE("AUIPC",  7'h00,      3'h0,       7'h17   )\
     `DBG_INSTR_TRACE("JAL",    7'h00,      3'h0,       7'h6f   )  // --- J-Type ---
 `define PRINT_LINE "================================================================================================"
-`define DBG_INSTR_TRACE_OP_FMT(name, opcode, rs1, rs2, rd, imm)                                                 \
-         if (opcode == `R)       $display("            ASM: %s x%0d, x%0d, x%0d", name, rd, rs1, rs2);          \
-    else if (opcode == `I_JUMP)  $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));             \
-    else if (opcode == `I_LOAD)  $display("            ASM: %s x%0d, %0d(x%0d)", name, rd, $signed(imm), rs1);  \
-    else if (opcode == `I_ARITH) $display("            ASM: %s x%0d, x%0d, %0d", name, rd, rs1, $signed(imm));  \
-    else if (opcode == `I_SYS)   $display("            ASM: %s", name);                                         \
-    else if (opcode == `I_FENCE) $display("            ASM: %s", name);                                         \
-    else if (opcode == `S)       $display("            ASM: %s x%0d, %0d(x%0d)", name, rs2, $signed(imm), rs1); \
-    else if (opcode == `B)       $display("            ASM: %s x%0d, x%0d, %0d", name, rs1, rs2, $signed(imm)); \
-    else if (opcode == `U_LUI)   $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));             \
-    else if (opcode == `U_AUIPC) $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));             \
-    else if (opcode == `J)       $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));
-`define DBG_INSTR_TRACE_PRINT(instrReg, IMM)                                                                 \
-    case ({`FUNCT7(instrReg), `FUNCT3(instrReg), `OPCODE(instrReg)})                                         \
-    `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct7, funct3, opcode} : begin                 \\
-        `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)          \\
-        end                                                                                                  \
-    `DBG_INSTR_TRACES                                                                                        \
-    `undef DBG_INSTR_TRACE                                                                                   \
-    default : case ({`FUNCT3(instrReg), `OPCODE(instrReg)})                                                  \
-        `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct3, opcode} : begin                     \\
-            `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)      \\
-            end                                                                                              \
-        `DBG_INSTR_TRACES                                                                                    \
-        `undef DBG_INSTR_TRACE                                                                               \
-        default: case (`OPCODE(instrReg))                                                                    \
-            `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) opcode : begin                           \\
-                `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)  \\
-                end                                                                                          \
-            `DBG_INSTR_TRACES                                                                                \
-            default : $display("            ASM: Invalid instruction! ( 0x%08h )", instrReg);                \
-            endcase                                                                                          \
-        endcase                                                                                              \
-    endcase                                                                                                  \
+`define DBG_INSTR_TRACE_OP_FMT(name, opcode, rs1, rs2, rd, imm)                                                   \
+         if (opcode == `R)       $display("    ASM         : %s x%0d, x%0d, x%0d", name, rd, rs1, rs2);           \
+    else if (opcode == `I_JUMP)  $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));              \
+    else if (opcode == `I_LOAD)  $display("    ASM         : %s x%0d, %0d(x%0d)", name, rd, $signed(imm), rs1);   \
+    else if (opcode == `I_ARITH) $display("    ASM         : %s x%0d, x%0d, %0d", name, rd, rs1, $signed(imm));   \
+    else if (opcode == `I_SYS)   $display("    ASM         : %s", name);                                          \
+    else if (opcode == `I_FENCE) $display("    ASM         : %s", name);                                          \
+    else if (opcode == `S)       $display("    ASM         : %s x%0d, %0d(x%0d)", name, rs2, $signed(imm), rs1);  \
+    else if (opcode == `B)       $display("    ASM         : %s x%0d, x%0d, %0d", name, rs1, rs2, $signed(imm));  \
+    else if (opcode == `U_LUI)   $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));              \
+    else if (opcode == `U_AUIPC) $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));              \
+    else if (opcode == `J)       $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));
+`define DBG_INSTR_TRACE_PRINT(instrReg, IMM)                                                                    \
+    case ({`FUNCT7(instrReg), `FUNCT3(instrReg), `OPCODE(instrReg)})                                            \
+    `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct7, funct3, opcode} : begin                    \\
+        `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)             \\
+        end                                                                                                     \
+    `DBG_INSTR_TRACES                                                                                           \
+    `undef DBG_INSTR_TRACE                                                                                      \
+    default : case ({`FUNCT3(instrReg), `OPCODE(instrReg)})                                                     \
+        `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct3, opcode} : begin                        \\
+            `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)         \\
+            end                                                                                                 \
+        `DBG_INSTR_TRACES                                                                                       \
+        `undef DBG_INSTR_TRACE                                                                                  \
+        default: case (`OPCODE(instrReg))                                                                       \
+            `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) opcode : begin                              \\
+                `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)     \\
+                end                                                                                             \
+            `DBG_INSTR_TRACES                                                                                   \
+            default : begin                                                                                     \
+                $display("    ASM         : Undefined instruction ( 0x%08h )", instrReg);                       \
+            end                                                                                                 \
+            endcase                                                                                             \
+        endcase                                                                                                 \
+    endcase                                                                                                     \
 
 `endif // TYPES_VH
