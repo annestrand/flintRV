@@ -27,10 +27,6 @@
 `define FWD_MEM             2'b01
 `define FWD_WB              2'b10
 
-// Control bubble
-`define NO_CTRL_BUBBLE      1'b0
-`define CTRL_BUBBLE         1'b1
-
 // EXEC operand select
 `define REG                 1'b0
 `define PC                  1'b1    // Operand A
@@ -135,18 +131,19 @@
     `DBG_INSTR_TRACE("LUI",    7'h00,      3'h0,       7'h37   )\ // --- U-Type ---
     `DBG_INSTR_TRACE("AUIPC",  7'h00,      3'h0,       7'h17   )\
     `DBG_INSTR_TRACE("JAL",    7'h00,      3'h0,       7'h6f   )  // --- J-Type ---
-`define DBG_INSTR_TRACE_OP_FMT(name, opcode, rs1, rs2, rd, imm)                                         \
-         if (opcode == `R)       $display("            ASM: %s x%0d, x%0d, x%0d", name, rd, rs1, rs2);  \
-    else if (opcode == `I_JUMP)  $display("            ASM: %s x%0d, %0d", name, rd, imm);              \
-    else if (opcode == `I_LOAD)  $display("            ASM: %s x%0d, %0d(x%0d)", name, rd, imm, rs1);   \
-    else if (opcode == `I_ARITH) $display("            ASM: %s x%0d, x%0d, %0d", name, rd, rs1, imm);   \
-    else if (opcode == `I_SYS)   $display("            ASM: %s", name);                                 \
-    else if (opcode == `I_FENCE) $display("            ASM: %s", name);                                 \
-    else if (opcode == `S)       $display("            ASM: %s x%0d, %0d(x%0d)", name, rs2, imm, rs1);  \
-    else if (opcode == `B)       $display("            ASM: %s x%0d, x%0d, %0d", name, rs1, rs2, imm);  \
-    else if (opcode == `U_LUI)   $display("            ASM: %s x%0d, %0d", name, rd, imm);              \
-    else if (opcode == `U_AUIPC) $display("            ASM: %s x%0d, %0d", name, rd, imm);              \
-    else if (opcode == `J)       $display("            ASM: %s x%0d, %0d", name, rd, imm);
+`define PRINT_LINE "================================================================================================"
+`define DBG_INSTR_TRACE_OP_FMT(name, opcode, rs1, rs2, rd, imm)                                                 \
+         if (opcode == `R)       $display("            ASM: %s x%0d, x%0d, x%0d", name, rd, rs1, rs2);          \
+    else if (opcode == `I_JUMP)  $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));             \
+    else if (opcode == `I_LOAD)  $display("            ASM: %s x%0d, %0d(x%0d)", name, rd, $signed(imm), rs1);  \
+    else if (opcode == `I_ARITH) $display("            ASM: %s x%0d, x%0d, %0d", name, rd, rs1, $signed(imm));  \
+    else if (opcode == `I_SYS)   $display("            ASM: %s", name);                                         \
+    else if (opcode == `I_FENCE) $display("            ASM: %s", name);                                         \
+    else if (opcode == `S)       $display("            ASM: %s x%0d, %0d(x%0d)", name, rs2, $signed(imm), rs1); \
+    else if (opcode == `B)       $display("            ASM: %s x%0d, x%0d, %0d", name, rs1, rs2, $signed(imm)); \
+    else if (opcode == `U_LUI)   $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));             \
+    else if (opcode == `U_AUIPC) $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));             \
+    else if (opcode == `J)       $display("            ASM: %s x%0d, %0d", name, rd, $signed(imm));
 `define DBG_INSTR_TRACE_PRINT(instrReg, IMM)                                                                 \
     case ({`FUNCT7(instrReg), `FUNCT3(instrReg), `OPCODE(instrReg)})                                         \
     `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct7, funct3, opcode} : begin                 \\

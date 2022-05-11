@@ -44,7 +44,7 @@ module Controller
             `U_AUIPC    : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `U_AUIPC_CTRL;
             `J          : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `J_CTRL;
             // Invalid opcode
-            default     : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = 11'bxxxxxxxxxxx;
+            default     : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = 11'd0;
         endcase
     end
 endmodule

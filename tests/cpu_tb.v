@@ -8,7 +8,7 @@
 `include "dual_port_ram.v"
 
 module cpu_tb;
-    reg               clk;
+    reg               clk, rst;
     reg       [31:0]  instr, dataIn;
     reg               ifValid, memValid;
     wire      [31:0]  pcOut, dataAddr, dataOut;
@@ -33,12 +33,14 @@ module cpu_tb;
     integer i = 0, errs = 0, subfail = 0;
     initial begin
         clk         = 0;
+        rst         = 1;
         ifValid     = 1;
         memValid    = 1;
         dataIn      = 32'hcafebabe;
-        #20;
+        instr       = 32'd0;
         $display("=== Run CPU =========================================");
         for (i=0; i<10; i=i+1) begin
+            rst = (i == 0) ? 1 : 0;
             instr = `ENDIAN_SWP_32(test_vector[i]);
             // Toggle clk
             #20; clk = ~clk; #20; clk = ~clk;

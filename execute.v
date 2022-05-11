@@ -99,7 +99,7 @@ module AluControl
                 3'b101          : aluControl = `OP_SGTE;
                 3'b110          : aluControl = `OP_SLTU;
                 3'b111          : aluControl = `OP_SGTEU;
-                default         : aluControl = 5'bxxxxx;
+                default         : aluControl = 5'b00000;
             endcase
             `ALU_OP_I_ARITH     : case (funct3)
                 3'b000          : aluControl = `OP_ADD;
@@ -110,7 +110,7 @@ module AluControl
                 3'b111          : aluControl = `OP_AND;
                 3'b001          : aluControl = `OP_SLL;
                 3'b101          : aluControl =  funct7[SRAI] ? `OP_SRA : `OP_SRL;
-                default         : aluControl = 5'bxxxxx;
+                default         : aluControl = 5'b00000;
             endcase
             // ~~~ R-Type format ~~~
             default             : case ({funct7, funct3})
@@ -124,7 +124,7 @@ module AluControl
                 10'b0100000_101 : aluControl = `OP_SRA;
                 10'b0000000_110 : aluControl = `OP_OR;
                 10'b0000000_111 : aluControl = `OP_AND;
-                default         : aluControl = 5'bxxxxx;
+                default         : aluControl = 5'b00000;
             endcase
         endcase
     end
