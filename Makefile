@@ -73,9 +73,9 @@ all:
 build-dir:
 	@mkdir -p $(OUTPUT)
 
-.PHONY: tests
-tests: build-dir $(TB_OUTPUTS)
-	@printf "\nAll done building tests.\n"
+.PHONY: units
+units: build-dir $(TB_OUTPUTS)
+	@printf "\nAll done building unit-tests.\n"
 
 .PHONY: runtests
 runtests: tests

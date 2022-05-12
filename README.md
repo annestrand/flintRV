@@ -1,19 +1,20 @@
 # pineapplecore 🍍
-Another RISCV core.
 
-⚠ [Work In Progress]: Repo still subject to many changes ⚠
+Another RISC-V core (⚠ Currently still in development ⚠)
 
 ## Design 🗺
 - 4-stage in-order pipelined processor
-- Harvard architecture
-- Configurable RISC-V extensions (RV32I)
-    - (TODO): Extensions later?
+- Harvard architecture (separate data and instruction memory)
+- Aimed to be implemented as a soft-cpu for use in FPGAs
 
 ## Dependencies ✅
 - GNU Make
-- GCC RISC-V compiler/cross-compiler toolcahin  (optional - for testing)
-- Icarus Verilog                                (optional - for testing)
-- Python >= 3.6                                 (optional - for testing)
+- GCC RISC-V compiler/cross-compiler toolcahin
+- Icarus Verilog
+- SymbiYosys
+    - Yosys
+    - z3
+- Python >= 3.6
 
 ## Make configs ⚙
 Below are a table of Make config variables:
