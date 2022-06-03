@@ -9,29 +9,28 @@ CC                  := $(TOOLCHAIN_PREFIX)-gcc
 AS                  := $(TOOLCHAIN_PREFIX)-as
 OBJCOPY             := $(TOOLCHAIN_PREFIX)-objcopy
 OBJDUMP             := $(TOOLCHAIN_PREFIX)-objdump
-OUTPUT 	            := build
+OUTPUT              := build
 FLAGS               := -Wall
 FLAGS               += -I..
-FLAGS	            += -DSIM
+FLAGS               += -DSIM
 ifdef VCD
-FLAGS	            += -DDUMP_VCD
-endif
+FLAGS               += -DDUMP_VCD
+endif # VCD
 DOCKER_CMD          := docker exec -w /src pineapplecore-toolchain
 LINE                := ================================================================================================
 
-vpath %.v          tests
-vpath %.py         scripts
+vpath %.v           tests
+vpath %.py          scripts
 
-SOURCES            := $(shell find . -type f -name "*.v" -exec basename {} \;)
-TB_SOURCES         := $(shell find tests -type f -name "*.v" -exec basename {} \;)
-TB_OUTPUTS         := $(TB_SOURCES:%.v=$(OUTPUT)/%)
-
-TEST_PY            := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
-TEST_MEMH          := $(TEST_PY:%.mem.py=$(OUTPUT)/%.mem)
-TEST_PY_ASM        := $(shell find scripts -type f -name "*.asm.py" -exec basename {} \;)
-TEST_ASM           := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
-TEST_ASM_ELF       := $(TEST_ASM:%.s=%.elf)
-TEST_ASM_MEMH      := $(TEST_ASM_ELF:%.elf=%.mem)
+CPU_SOURCES         := $(shell find . -maxdepth 1 -type f -name "*.v" -exec basename {} \;)
+TB_SOURCES          := $(shell find tests -type f -name "*.v" -exec basename {} \;)
+TB_OUTPUTS          := $(TB_SOURCES:%.v=$(OUTPUT)/%)
+TEST_PY             := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
+TEST_MEMH           := $(TEST_PY:%.mem.py=$(OUTPUT)/%.mem)
+TEST_PY_ASM         := $(shell find scripts -type f -name "*.asm.py" -exec basename {} \;)
+TEST_ASM            := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
+TEST_ASM_ELF        := $(TEST_ASM:%.s=%.elf)
+TEST_ASM_MEMH       := $(TEST_ASM_ELF:%.elf=%.mem)
 
 # Testbench mem
 .SECONDARY:
@@ -62,7 +61,7 @@ else
 endif
 
 # Testbench iverilog
-$(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH) $(SOURCES)
+$(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH) $(CPU_SOURCES)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
@@ -73,8 +72,8 @@ all:
 build-dir:
 	@mkdir -p $(OUTPUT)
 
-.PHONY: units
-units: build-dir $(TB_OUTPUTS)
+.PHONY: unit
+unit: build-dir $(TB_OUTPUTS)
 	@printf "\nAll done building unit-tests.\n"
 
 .PHONY: runtests
@@ -89,3 +88,7 @@ runtests: tests
 .PHONY: clean
 clean:
 	rm -rf $(OUTPUT) 2> /dev/null || true
+
+.PHONY: pinacolada-unit
+pinacolada-unit:
+	$(MAKE) unit -C ./pinacolada
