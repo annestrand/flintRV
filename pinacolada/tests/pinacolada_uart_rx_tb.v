@@ -7,7 +7,7 @@ module uart_reciever_tb;
     wire [7:0] rx_byte;
 
     uart_reciever uart_reciever_dut(.*);
-    localparam F_CLK                    = 100_000_000;
+    localparam F_CLK                    = 10_000_000;
     localparam BAUDRATE                 = 9600;
     localparam SAMPLE_PERIOD            = F_CLK / (16 * BAUDRATE) + 1;
     defparam uart_reciever_dut.F_CLK    = F_CLK;
@@ -58,6 +58,8 @@ module uart_reciever_tb;
                 end
                 if (rx_done && started) begin
                     rx = 1;
+                    // We are done - exit loop
+                    i = BAUDRATE;
                 end
                 clk = ~clk; #20; clk = ~clk; #20;
             end

@@ -9,8 +9,8 @@ module uart_reciever (
     output        rx_done,
     output  [7:0] rx_byte
 );
-    parameter   F_CLK               = 1_000_000;                // Clk frequency
-    parameter   BAUDRATE            = 9600;                     // symbols/sec
+    parameter   F_CLK               = 1_000_000;                // Default Clk frequency
+    parameter   BAUDRATE            = 9600;                     // Default symbols/sec
     localparam  SAMPLE_PERIOD       = F_CLK / (16 * BAUDRATE);  // 16x sample-rate
     localparam  HALF_SAMPLE_PERIOD  = SAMPLE_PERIOD / 2;
     localparam  [1:0]
@@ -104,8 +104,8 @@ module uart_transmitter (
     output        tx,
     output        tx_done
 );
-    parameter   F_CLK           = 1_000_000;                // Clk frequency
-    parameter   BAUDRATE        = 9600;                     // symbols/sec
+    parameter   F_CLK           = 1_000_000;                // Default Clk frequency
+    parameter   BAUDRATE        = 9600;                     // Default symbols/sec
     localparam  SAMPLE_PERIOD   = F_CLK / BAUDRATE;
     localparam  [1:0]
         IDLE  = 2'b00,
