@@ -9,11 +9,11 @@ module uart_reciever (
     output        rx_done,
     output  [7:0] rx_byte
 );
-    parameter   F_CLK           = 1_000_000;                // Clk frequency
-    parameter   BAUDRATE        = 9600;                     // symbols/sec
-    localparam  BAUD_TICK       = F_CLK / BAUDRATE;         // Ticks per uart bit
-    localparam  HALF_BAUD_TICK  = BAUD_TICK / 2;            // 1/2 Ticks per uart bit
-    localparam  [1:0]                                       // Reciever states
+    parameter   F_CLK               = 1_000_000;                // Clk frequency
+    parameter   BAUDRATE            = 9600;                     // symbols/sec
+    localparam  SAMPLE_PERIOD       = F_CLK / (16 * BAUDRATE);  // 16x sample-rate
+    localparam  HALF_SAMPLE_PERIOD  = SAMPLE_PERIOD / 2;
+    localparam  [1:0]
         IDLE  = 2'b00,
         START = 2'b01,
         DATA  = 2'b10,
@@ -33,8 +33,8 @@ module uart_reciever (
         rx_done_buffer  = 1'b1;
         rx_byte_counter = 4'd0;
         $display("--- UART config: ---");
-        $display("    F_CLK( %0d )\n    BAUDRATE( %0d )\n    BAUD_TICK( %0d )\n    HALF_BAUD_TICK( %0d )\n",
-            F_CLK, BAUDRATE, BAUD_TICK, HALF_BAUD_TICK
+        $display("    F_CLK( %0d )\n    BAUDRATE( %0d )\n    SAMPLE_PERIOD( %0d )\n    HALF_SAMPLE_PERIOD( %0d )\n",
+            F_CLK, BAUDRATE, SAMPLE_PERIOD, HALF_SAMPLE_PERIOD
         );
     end
 `endif // SIM
@@ -56,7 +56,7 @@ module uart_reciever (
             end
         end
         START: begin // -----------------------------------------------------------------------------------------------
-            if (sample_counter == HALF_BAUD_TICK) begin
+            if (sample_counter == HALF_SAMPLE_PERIOD) begin
                 if (!rx) begin // Check if start-bit is still valid
                     state           <= DATA;
                     sample_counter  <= 32'd0;
@@ -68,7 +68,7 @@ module uart_reciever (
             end
         end
         DATA: begin // ------------------------------------------------------------------------------------------------
-            if (sample_counter == BAUD_TICK) begin
+            if (sample_counter == SAMPLE_PERIOD) begin
                 if (rx_byte_counter == 8) begin
                     state           <= STOP;
                     rx_byte_counter <= 4'd0;
@@ -83,7 +83,7 @@ module uart_reciever (
             end
         end
         STOP: begin // ------------------------------------------------------------------------------------------------
-            if (sample_counter == BAUD_TICK) begin
+            if (sample_counter == SAMPLE_PERIOD) begin
                 state           <= IDLE;
                 sample_counter  <= 32'd0;
                 rx_byte_counter <= 4'd0;
@@ -106,8 +106,8 @@ module uart_transmitter (
 );
     parameter   F_CLK           = 1_000_000;                // Clk frequency
     parameter   BAUDRATE        = 9600;                     // symbols/sec
-    localparam  BAUD_TICK       = F_CLK / BAUDRATE;         // Ticks per uart bit
-    localparam  [1:0]                                       // Reciever states
+    localparam  SAMPLE_PERIOD   = F_CLK / BAUDRATE;
+    localparam  [1:0]
         IDLE  = 2'b00,
         START = 2'b01,
         DATA  = 2'b10,
@@ -151,7 +151,7 @@ module uart_transmitter (
             tx_reg          <= 1'b1;
         end
         START: begin // -----------------------------------------------------------------------------------------------
-            if (sample_counter == BAUD_TICK) begin
+            if (sample_counter == SAMPLE_PERIOD) begin
                 state           <= DATA;
                 sample_counter  <= 32'd0;
                 tx_reg          <= tx_byte_buffer[0];
@@ -160,7 +160,7 @@ module uart_transmitter (
             end
         end
         DATA: begin // ------------------------------------------------------------------------------------------------
-            if (sample_counter == BAUD_TICK) begin
+            if (sample_counter == SAMPLE_PERIOD) begin
                 if (tx_byte_counter == 7) begin
                     state           <= STOP;
                     tx_reg          <= 1'b1;
@@ -175,7 +175,7 @@ module uart_transmitter (
             end
         end
         STOP: begin // ------------------------------------------------------------------------------------------------
-            if (sample_counter == BAUD_TICK) begin
+            if (sample_counter == SAMPLE_PERIOD) begin
                 state           <= IDLE;
                 sample_counter  <= 32'd0;
                 tx_done_buffer  <= 1'b1;

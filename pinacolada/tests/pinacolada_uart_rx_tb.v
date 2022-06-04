@@ -7,9 +7,9 @@ module uart_reciever_tb;
     wire [7:0] rx_byte;
 
     uart_reciever uart_reciever_dut(.*);
-    localparam F_CLK                    = 1_000_000;
+    localparam F_CLK                    = 100_000_000;
     localparam BAUDRATE                 = 9600;
-    localparam BAUD_TICK                = (F_CLK / BAUDRATE) + 1;
+    localparam SAMPLE_PERIOD            = F_CLK / (16 * BAUDRATE) + 1;
     defparam uart_reciever_dut.F_CLK    = F_CLK;
     defparam uart_reciever_dut.BAUDRATE = BAUDRATE;
 
@@ -45,7 +45,7 @@ module uart_reciever_tb;
                 end else begin
                     counter = 0;
                 end
-                if (counter > 0 && counter == BAUD_TICK) begin
+                if (counter > 0 && counter == SAMPLE_PERIOD) begin
                     counter = 0;
                     byte_counter = byte_counter + 1;
                     rx = ascii_char[0];
