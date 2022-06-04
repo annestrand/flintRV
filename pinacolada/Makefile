@@ -14,7 +14,6 @@ SOURCES := $(shell find $(TEST_BASE) -maxdepth 1 -type f -name "*.v" -exec basen
 OUTPUTS := $(SOURCES:%.v=$(OUT_DIR)/%.out)
 
 $(OUT_DIR)/%.out: %.v
-	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -o $@ $^
 
 .PHONY: all
@@ -23,7 +22,6 @@ all:
 
 .PHONY: unit
 unit: set-up $(OUTPUTS)
-	@$(foreach out, $(OUTPUTS), $(out);)
 
 .PHONY: set-up
 set-up:

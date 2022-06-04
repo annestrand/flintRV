@@ -21,7 +21,7 @@ module uart_reciever (
 
     reg         rx_done_buffer;   // Define "done" flag for a sucessful byte reception
     reg [1:0]   state;            // State machine reg
-    reg [2:0]   rx_byte_counter;  // Count number of recieved bits and stop at 1 byte (i.e. 8)
+    reg [3:0]   rx_byte_counter;  // Count number of recieved bits and stop at 1 byte (i.e. 8)
     reg [7:0]   rx_byte_buffer;   // Reg that holds the recieved uart byte
     reg [31:0]  sample_counter;   // Counter used to sample in the middle of a uart bit
 
@@ -31,7 +31,11 @@ module uart_reciever (
         rx_byte_buffer  = 8'd0;
         sample_counter  = 32'd0;
         rx_done_buffer  = 1'b1;
-        rx_byte_counter = 3'd0;
+        rx_byte_counter = 4'd0;
+        $display("--- UART config: ---");
+        $display("    F_CLK( %0d )\n    BAUDRATE( %0d )\n    BAUD_TICK( %0d )\n    HALF_BAUD_TICK( %0d )\n",
+            F_CLK, BAUDRATE, BAUD_TICK, HALF_BAUD_TICK
+        );
     end
 `endif // SIM
 
@@ -43,21 +47,20 @@ module uart_reciever (
         case (state)
         IDLE: begin // ------------------------------------------------------------------------------------------------
             if (!rx) begin
-                state <= START;
+                state           <= START;
+                rx_done_buffer  <= 1'b0;
+            end else begin
+                sample_counter  <= 32'd0;
+                rx_byte_counter <= 3'd0;
+                rx_done_buffer  <= 1'b1;
             end
-            sample_counter  <= 32'd0;
-            rx_byte_buffer  <= 32'd0;
-            rx_byte_counter <= 3'd0;
-            rx_done_buffer  <= 1'b1;
         end
         START: begin // -----------------------------------------------------------------------------------------------
             if (sample_counter == HALF_BAUD_TICK) begin
-                if (!rx) begin
+                if (!rx) begin // Check if start-bit is still valid
                     state           <= DATA;
-                    rx_done_buffer  <= 1'b0;
                     sample_counter  <= 32'd0;
-                end
-                else begin
+                end else begin
                     state           <= IDLE;
                 end
             end else begin
@@ -66,24 +69,25 @@ module uart_reciever (
         end
         DATA: begin // ------------------------------------------------------------------------------------------------
             if (sample_counter == BAUD_TICK) begin
-                if (rx_byte_counter == 7) begin
+                if (rx_byte_counter == 8) begin
                     state           <= STOP;
-                    rx_byte_counter <= 3'd0;
+                    rx_byte_counter <= 4'd0;
+                    sample_counter  <= 32'd0;
+                end else begin
+                    rx_byte_buffer  <= {rx, rx_byte_buffer[7:1]}; // Right-shift rx into buffer
+                    rx_byte_counter <= rx_byte_counter + 1;
+                    sample_counter  <= 32'd0;
                 end
-                rx_byte_buffer  <= {rx, rx_byte_buffer[7:1]}; // Right-shift rx into buffer
-                rx_byte_counter <= rx_byte_counter + 1;
-                sample_counter  <= 32'd0;
             end else begin
                 sample_counter  <= sample_counter + 1;
             end
         end
         STOP: begin // ------------------------------------------------------------------------------------------------
             if (sample_counter == BAUD_TICK) begin
-                if (rx) begin
-                    rx_done_buffer <= 1'b1;
-                end
-                sample_counter  <= 32'd0;
                 state           <= IDLE;
+                sample_counter  <= 32'd0;
+                rx_byte_counter <= 4'd0;
+                rx_done_buffer  <= 1'b1;
             end else begin
                 sample_counter  <= sample_counter + 1;
             end
