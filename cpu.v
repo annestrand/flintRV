@@ -1,7 +1,6 @@
 `include "types.vh"
 // ====================================================================================================================
-module pineapplecore
-(
+module pineapplecore (
     input               clk, rst,
     input       [31:0]  instr, dataIn,
     input               ifValid, memValid,

@@ -1,7 +1,6 @@
 `include "types.vh"
 // ====================================================================================================================
-module ImmGen
-(
+module ImmGen (
     input       [31:0]  instr,
     output reg  [31:0]  imm
 );
@@ -22,8 +21,7 @@ module ImmGen
 endmodule
 
 // ====================================================================================================================
-module Controller
-(
+module Controller (
     input       [6:0]   opcode,
     output  reg [3:0]   aluOp,
     output  reg         exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp
@@ -50,8 +48,7 @@ module Controller
 endmodule
 
 // ====================================================================================================================
-module FetchDecode
-(
+module FetchDecode (
     input   [31:0]  instr,
     output  [31:0]  imm,
     output  [3:0]   aluOp,

@@ -1,7 +1,6 @@
 `include "types.vh"
 
-module FullAdder
-(
+module FullAdder (
     input   a, b, cin,
     output  sum, cout
 );
@@ -10,8 +9,7 @@ module FullAdder
 endmodule
 
 // ====================================================================================================================
-module RCA // Ripple-Carry Adder (slow but more resource efficient)
-(
+module RCA ( // Ripple-Carry Adder (slow but more resource efficient)
     input   [WIDTH-1:0] a, b,   // Operand inputs
     input               subEn,  // Use as subtractor
     output  [WIDTH-1:0] result, // Output
@@ -37,8 +35,7 @@ module RCA // Ripple-Carry Adder (slow but more resource efficient)
 endmodule
 
 // ====================================================================================================================
-module CLA  // Carry Lookahead Adder (fast but more resource expensive)
-(
+module CLA (  // Carry Lookahead Adder (fast but more resource expensive)
     input   [WIDTH-1:0] a, b,   // Operand inputs
     input               subEn,  // Use as subtractor
     output  [WIDTH-1:0] result, // Output
@@ -72,8 +69,7 @@ module CLA  // Carry Lookahead Adder (fast but more resource expensive)
 endmodule
 
 // ====================================================================================================================
-module AluControl
-(
+module AluControl (
     input       [3:0] aluOp,
     input       [6:0] funct7,
     input       [2:0] funct3,
@@ -131,8 +127,7 @@ module AluControl
 endmodule
 
 // ====================================================================================================================
-module Alu
-(
+module Alu (
   input         [WIDTH-1:0]         a, b,   // input operands
   input         [ALU_OP_WIDTH-1:0]  op,     // ALU operation
   output reg    [WIDTH-1:0]         result, // ALU output
@@ -195,8 +190,7 @@ module Alu
 endmodule
 
 // ====================================================================================================================
-module Execute
-(
+module Execute (
     input   [6:0]   funct7,
     input   [2:0]   funct3,
     input   [3:0]   aluOp,

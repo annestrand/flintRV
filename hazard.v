@@ -1,6 +1,5 @@
 // ====================================================================================================================
-module Hazard
-(
+module Hazard (
     // Forwarding
     input           MEM_rd_reg_write, WB_rd_reg_write,
     input   [4:0]   EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd,

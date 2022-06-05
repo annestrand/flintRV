@@ -4,7 +4,6 @@ Another RISC-V core (⚠ Currently still in development ⚠)
 
 ## Design 🗺
 - 4-stage in-order pipelined processor
-- Harvard architecture (separate data and instruction memory)
 - Aimed to be implemented as a soft-cpu for use in FPGAs
 
 ## Dependencies ✅

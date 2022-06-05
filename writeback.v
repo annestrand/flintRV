@@ -1,6 +1,5 @@
 // ====================================================================================================================
-module Writeback
-(
+module Writeback (
     input       [2:0]   funct3,
     input       [31:0]  dataIn,
     output reg  [31:0]  dataOut

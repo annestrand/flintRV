@@ -1,6 +1,5 @@
 // ====================================================================================================================
-module DualPortRam
-(
+module DualPortRam (
     input                           clk, we,
     input       [(DATA_WIDTH-1):0]  dataIn,
     input       [(ADDR_WIDTH-1):0]  rAddr, wAddr,
