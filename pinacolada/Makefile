@@ -11,9 +11,9 @@ endif # VCD
 TEST_BASE := ./tests
 vpath %.v $(TEST_BASE)
 SOURCES := $(shell find $(TEST_BASE) -maxdepth 1 -type f -name "*.v" -exec basename {} \;)
-OUTPUTS := $(SOURCES:%.v=$(OUT_DIR)/%.out)
+OUTPUTS := $(SOURCES:%.v=$(OUT_DIR)/%)
 
-$(OUT_DIR)/%.out: %.v
+$(OUT_DIR)/%: %.v
 	$(CC) $(FLAGS) -o $@ $^
 
 .PHONY: all

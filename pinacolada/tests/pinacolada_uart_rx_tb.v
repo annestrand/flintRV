@@ -1,4 +1,4 @@
-`include "pinacolada_uart.v"
+`include "pinacolada_uart_rx.v"
 
 module uart_reciever_tb;
     reg clk = 0;
@@ -20,21 +20,21 @@ module uart_reciever_tb;
     end
 `endif // DUMP_VCD
 
-    integer         i, j;
-    reg             started = 0;
-    reg [31:0]      counter = 0;
-    reg [2:0]       byte_counter = 0;
+    integer         i                       = 0;
+    reg             started                 = 0;
+    reg [31:0]      counter                 = 0;
+    reg [3:0]       byte_counter            = 0;
+    reg [7:0]       test_char               = 0;
     reg [12*8-1:0]  test_vector             = "------------";
     reg [12*8-1:0]  test_gold_vector        = "Hello world!";
     reg [12*8-1:0]  test_gold_vector_cpy    = "Hello world!";
-    reg [7:0]       test_char;
     // Helper uart run loop task
     task uartLoop;
         input [7:0]ascii_char;
         begin
-            started = 0;
-            counter = 0;
-            byte_counter = 0;
+            started         = 0;
+            counter         = 0;
+            byte_counter    = 0;
             for (i=0; i<BAUDRATE; i=i+1) begin
                 if (i == 100) begin
                     rx = 0;
@@ -46,20 +46,19 @@ module uart_reciever_tb;
                     counter = 0;
                 end
                 if (counter > 0 && counter == SAMPLE_PERIOD) begin
-                    counter = 0;
-                    byte_counter = byte_counter + 1;
-                    rx = ascii_char[0];
-                    ascii_char = ascii_char >> 1;
+                    rx              = ascii_char[0];
+                    counter         = 0;
+                    ascii_char      = ascii_char >> 1;
+                    byte_counter    = byte_counter + 1;
                 end
                 if (byte_counter == 9) begin
-                    counter = 0;
-                    byte_counter = 0;
-                    rx = 1;
+                    rx              = 1;
+                    counter         = 0;
+                    byte_counter    = 0;
                 end
                 if (rx_done && started) begin
-                    rx = 1;
-                    // We are done - exit loop
-                    i = BAUDRATE;
+                    i   = BAUDRATE; // We are done, gross early exit...
+                    rx  = 1;
                 end
                 clk = ~clk; #20; clk = ~clk; #20;
             end
@@ -70,10 +69,10 @@ module uart_reciever_tb;
     initial begin
         $display("Running uart_reciever test...\n"); #20;
         for (x=0; x<12; x=x+1) begin
-            test_char = test_gold_vector_cpy[12*8-1:11*8];
+            test_char               = test_gold_vector_cpy[12*8-1:11*8];
             uartLoop(test_char);
-            test_gold_vector_cpy = {test_gold_vector_cpy[11*8-1:0], 8'd0};
-            test_vector = {test_vector, rx_byte};
+            test_gold_vector_cpy    = {test_gold_vector_cpy[11*8-1:0], 8'd0};
+            test_vector             = {test_vector, rx_byte};
             $display("[test_vector]: %s", test_vector);
         end
         if (test_vector != test_gold_vector)    $display("\nFAILED!");
