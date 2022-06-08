@@ -212,12 +212,6 @@ module pineapplecore (
 // === CPU-state dumping for simulation ===============================================================================
 // ====================================================================================================================
 `ifdef SIM
-    initial begin
-        PC              = 0;
-        instrReg        = 0;
-        p_aluOut[MEM]   = 0;
-    end
-
     reg traceValid = 0;
     always @(posedge clk) begin
         if (traceValid && !ifValid) begin
