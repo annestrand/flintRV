@@ -37,21 +37,27 @@ module cpu_tb;
         // Reset CPU
         clk         = 0;
         rst         = 1;
-        ifValid     = 1;
+        ifValid     = 0; // Not valid until we fetch after the reset
         memValid    = 1;
         dataIn      = 32'hcafebabe;
         instr       = 32'd0;
-        // Toggle clk and clear reset line
-        #20; clk = ~clk; #20; clk = ~clk;
-        rst = 0;
         // Run though instructions
         for (i=0; i<20; i=i+1) begin
-            pcReg = pcOut[31:2];
-            instr = `ENDIAN_SWP_32(test_vector[pcReg]);
-            if (instr === 32'dx) instr = 32'd0;
+            if (i > 0) begin
+                rst = 0;
+            end
+            if (instr === 32'dx || instr === 32'd0) begin
+                ifValid = 0;
+            end else begin
+                ifValid = 1;
+            end
+            pcReg       = pcOut[31:2];
+            instr       = `ENDIAN_SWP_32(test_vector[pcReg]);
+
             // Toggle clk
             #20; clk = ~clk; #20; clk = ~clk;
         end
+        $display("%s", `PRINT_LINE);
     end
 
 endmodule

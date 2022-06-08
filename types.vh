@@ -131,20 +131,22 @@
     `DBG_INSTR_TRACE("LUI",    7'h00,      3'h0,       7'h37   )\ // --- U-Type ---
     `DBG_INSTR_TRACE("AUIPC",  7'h00,      3'h0,       7'h17   )\
     `DBG_INSTR_TRACE("JAL",    7'h00,      3'h0,       7'h6f   )  // --- J-Type ---
-`define PRINT_LINE "================================================================================================"
-`define DBG_INSTR_TRACE_OP_FMT(name, opcode, rs1, rs2, rd, imm)                                                   \
-         if (opcode == `R)       $display("    ASM         : %s x%0d, x%0d, x%0d", name, rd, rs1, rs2);           \
-    else if (opcode == `I_JUMP)  $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));              \
-    else if (opcode == `I_LOAD)  $display("    ASM         : %s x%0d, %0d(x%0d)", name, rd, $signed(imm), rs1);   \
-    else if (opcode == `I_ARITH) $display("    ASM         : %s x%0d, x%0d, %0d", name, rd, rs1, $signed(imm));   \
-    else if (opcode == `I_SYS)   $display("    ASM         : %s", name);                                          \
-    else if (opcode == `I_FENCE) $display("    ASM         : %s", name);                                          \
-    else if (opcode == `S)       $display("    ASM         : %s x%0d, %0d(x%0d)", name, rs2, $signed(imm), rs1);  \
-    else if (opcode == `B)       $display("    ASM         : %s x%0d, x%0d, %0d", name, rs1, rs2, $signed(imm));  \
-    else if (opcode == `U_LUI)   $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));              \
-    else if (opcode == `U_AUIPC) $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));              \
-    else if (opcode == `J)       $display("    ASM         : %s x%0d, %0d", name, rd, $signed(imm));
-`define DBG_INSTR_TRACE_PRINT(instrReg, IMM)                                                                    \
+`define PRINT_LINE "============================================================================="
+
+`define DBG_INSTR_TRACE_OP_FMT(name, opcode, rs1, rs2, rd, imm)                                 \
+         if (opcode == `R)       $display("%s x%0d, x%0d, x%0d", name, rd, rs1, rs2);           \
+    else if (opcode == `I_JUMP)  $display("%s x%0d, %0d", name, rd, $signed(imm));              \
+    else if (opcode == `I_LOAD)  $display("%s x%0d, %0d(x%0d)", name, rd, $signed(imm), rs1);   \
+    else if (opcode == `I_ARITH) $display("%s x%0d, x%0d, %0d", name, rd, rs1, $signed(imm));   \
+    else if (opcode == `I_SYS)   $display("%s", name);                                          \
+    else if (opcode == `I_FENCE) $display("%s", name);                                          \
+    else if (opcode == `S)       $display("%s x%0d, %0d(x%0d)", name, rs2, $signed(imm), rs1);  \
+    else if (opcode == `B)       $display("%s x%0d, x%0d, %0d", name, rs1, rs2, $signed(imm));  \
+    else if (opcode == `U_LUI)   $display("%s x%0d, %0d", name, rd, $signed(imm));              \
+    else if (opcode == `U_AUIPC) $display("%s x%0d, %0d", name, rd, $signed(imm));              \
+    else if (opcode == `J)       $display("%s x%0d, %0d", name, rd, $signed(imm));
+
+`define DBG_DISPLAY_ASM(instrReg, IMM)                                                                          \
     case ({`FUNCT7(instrReg), `FUNCT3(instrReg), `OPCODE(instrReg)})                                            \
     `define DBG_INSTR_TRACE(instr, funct7, funct3, opcode) {funct7, funct3, opcode} : begin                    \\
         `DBG_INSTR_TRACE_OP_FMT(instr, opcode, `RS1(instrReg), `RS2(instrReg), `RD(instrReg), IMM)             \\
@@ -163,7 +165,7 @@
                 end                                                                                             \
             `DBG_INSTR_TRACES                                                                                   \
             default : begin                                                                                     \
-                $display("    ASM         : Undefined instruction ( 0x%08h )", instrReg);                       \
+                $display("Undefined instruction ( 0x%08h )", instrReg);                                         \
             end                                                                                                 \
             endcase                                                                                             \
         endcase                                                                                                 \

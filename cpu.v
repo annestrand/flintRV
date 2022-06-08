@@ -212,15 +212,22 @@ module pineapplecore (
 // === CPU-state dumping for simulation ===============================================================================
 // ====================================================================================================================
 `ifdef SIM
+    initial begin
+        PC              = 0;
+        instrReg        = 0;
+        p_aluOut[MEM]   = 0;
+    end
+
+    reg traceValid = 0;
     always @(posedge clk) begin
-        // TODO: Dump other items?
-        $display("[pineapplecore - FETCH_DECODE TRACE]:");
-        $display("-------------------------------------");
-        $display("    PCout       : 0x%08h", PC);
-        $display("    INSTRUCTION : 0x%08h", instrReg);
-        // Dump disassembled instruction
-        `DBG_INSTR_TRACE_PRINT(instrReg, IMM)
-        $display("%s", `PRINT_LINE);
+        if (traceValid && !ifValid) begin
+            traceValid = 0; // Not a typo - using blocking assignment to level-trigger update
+        end else begin
+            traceValid <= ifValid;
+        end
+        if (!rst && traceValid) begin
+            $write("[pineapplecore - TRACE]: %08h: 0x%08h    ", PC-4, instrReg); `DBG_DISPLAY_ASM(instrReg, IMM)
+        end
     end
 `endif // SIM
 
