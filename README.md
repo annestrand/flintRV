@@ -47,7 +47,7 @@ here to take care of this (easy-mode).
 
 First time setup:
 
-    $ docker build -t riscv-gnu-toolchain .
+    $ docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t riscv-gnu-toolchain .
     $ docker create -it -v $(pwd):/src --name pineapplecore-toolchain riscv-gnu-toolchain
 
 Then start/stop container whenever needed:
