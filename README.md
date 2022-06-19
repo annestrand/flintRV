@@ -33,7 +33,7 @@ Formal Verification:
 
 To build the functional tests:
 
-    $ make tests
+    $ make unit
 
 Build and run all tests:
 
@@ -48,12 +48,7 @@ here to take care of this (easy-mode).
 First time setup:
 
     $ docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t riscv-gnu-toolchain .
-    $ docker create -it -v $(pwd):/src --name pineapplecore-toolchain riscv-gnu-toolchain
-
-Then start/stop container whenever needed:
-
-    $ docker <start|stop> pineapplecore-toolchain
 
 Once container is "started"/running, run make by also specifiying `DOCKER=ON`:
 
-    $ make tests DOCKER=ON
+    $ make unit DOCKER=ON

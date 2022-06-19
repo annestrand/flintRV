@@ -16,7 +16,12 @@ FLAGS               += -DSIM
 ifdef VCD
 FLAGS               += -DDUMP_VCD
 endif # VCD
-DOCKER_CMD          := docker exec -w /src pineapplecore-toolchain
+ROOT_DIR            := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+ifdef DOCKER
+DOCKER_CMD          := docker run -t -v $(ROOT_DIR):/src -w /src riscv-gnu-toolchain
+else
+DOCKER_CMD          :=
+endif # DOCKER
 LINE                := ================================================================================================
 
 vpath %.v           tests
@@ -45,20 +50,12 @@ $(OUTPUT)/%.s: %.asm.py
 # Testbench ELF
 .SECONDARY:
 $(OUTPUT)/%.elf: $(OUTPUT)/%.s
-ifdef DOCKER
 	$(DOCKER_CMD) $(AS) -o $@ $<
-else
-	$(AS) -o $@ $<
-endif
 
 # Testbench Objcopy
 .SECONDARY:
 $(OUTPUT)/%.mem: $(OUTPUT)/%.elf
-ifdef DOCKER
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
-else
-	$(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
-endif
 
 # Testbench iverilog
 $(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH) $(CPU_SOURCES)
