@@ -18,7 +18,7 @@ FLAGS               += -DDUMP_VCD
 endif # VCD
 ROOT_DIR            := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
-DOCKER_CMD          := docker run -t -v $(ROOT_DIR):/src -w /src riscv-gnu-toolchain
+DOCKER_CMD          := docker run -v $(ROOT_DIR):/src -w /src riscv-gnu-toolchain
 else
 DOCKER_CMD          :=
 endif # DOCKER
