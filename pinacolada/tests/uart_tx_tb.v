@@ -1,4 +1,4 @@
-`include "pinacolada_uart_tx.v"
+`include "uart_tx.v"
 
 module uart_transmitter_tb;
     reg         clk = 0;
@@ -16,7 +16,7 @@ module uart_transmitter_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("./build/pinacolada/pinacolada_uart_tx.vcd");
+        $dumpfile("./build/pinacolada/uart_tx.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD
