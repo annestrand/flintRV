@@ -11,7 +11,7 @@ OBJCOPY             := $(TOOLCHAIN_PREFIX)-objcopy
 OBJDUMP             := $(TOOLCHAIN_PREFIX)-objdump
 OUTPUT              := build
 FLAGS               := -Wall
-FLAGS               += -I..
+FLAGS               += -Ihdl
 FLAGS               += -DSIM
 ifdef VCD
 FLAGS               += -DDUMP_VCD
@@ -28,6 +28,7 @@ vpath %.v           tests
 vpath %.py          scripts
 
 CPU_SOURCES         := $(shell find . -maxdepth 1 -type f -name "*.v" -exec basename {} \;)
+HDL_SOURCES         := $(shell find hdl -type f -name "*.v" -exec basename {} \;)
 TB_SOURCES          := $(shell find tests -type f -name "*.v" -exec basename {} \;)
 TB_OUTPUTS          := $(TB_SOURCES:%.v=$(OUTPUT)/%)
 TEST_PY             := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
