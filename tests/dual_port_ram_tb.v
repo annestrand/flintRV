@@ -1,4 +1,3 @@
-`include "types.vh"
 `include "dual_port_ram.v"
 
 module DualPortRam_tb;

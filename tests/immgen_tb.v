@@ -1,5 +1,4 @@
-`include "types.vh"
-`include "fetch_decode.v"
+`include "immgen.v"
 
 module ImmGen_tb;
     reg     [31:0]  instr;

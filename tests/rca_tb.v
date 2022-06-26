@@ -1,4 +1,5 @@
-`include "execute.v"
+`include "full_adder.v"
+`include "rca.v"
 
 module RCA_tb;
     reg     [31:0]  a, b;

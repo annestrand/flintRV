@@ -1,10 +1,13 @@
-`include "types.vh"
 `include "cpu.v"
-`include "fetch_decode.v"
-`include "execute.v"
+`include "cla.v"
+`include "ialu.v"
 `include "hazard.v"
 `include "memory.v"
+`include "execute.v"
 `include "writeback.v"
+`include "full_adder.v"
+`include "alu_control.v"
+`include "fetch_decode.v"
 `include "dual_port_ram.v"
 
 module cpu_tb;

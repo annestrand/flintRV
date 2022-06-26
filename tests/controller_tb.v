@@ -1,5 +1,4 @@
-`include "fetch_decode.v"
-`include "types.vh"
+`include "controller.v"
 
 module Controller_tb;
     reg     [6:0]   opcode;

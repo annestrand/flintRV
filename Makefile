@@ -27,8 +27,7 @@ LINE                := =========================================================
 vpath %.v           tests
 vpath %.py          scripts
 
-CPU_SOURCES         := $(shell find . -maxdepth 1 -type f -name "*.v" -exec basename {} \;)
-HDL_SOURCES         := $(shell find hdl -type f -name "*.v" -exec basename {} \;)
+HDL_SOURCES         := $(shell find hdl -type f -name "*.v")
 TB_SOURCES          := $(shell find tests -type f -name "*.v" -exec basename {} \;)
 TB_OUTPUTS          := $(TB_SOURCES:%.v=$(OUTPUT)/%)
 TEST_PY             := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
@@ -59,11 +58,12 @@ $(OUTPUT)/%.mem: $(OUTPUT)/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
 # Testbench iverilog
-$(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH) $(CPU_SOURCES)
+$(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
 .PHONY: all
 all:
+	echo "$(HDL_SOURCES)"
 	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
 
 .PHONY: build-dir

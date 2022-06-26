@@ -1,4 +1,4 @@
-`include "execute.v"
+`include "alu_control.v"
 
 module AluControl_tb;
     reg     [3:0] aluOp;

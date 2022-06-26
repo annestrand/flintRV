@@ -1,19 +1,20 @@
-`include "types.vh"
-`include "execute.v"
+`include "full_adder.v"
+`include "cla.v"
+`include "ialu.v"
 
-module Alu_tb;
+module IAlu_tb;
     reg     [31:0]  a, b;
     reg     [4:0]   op;
     wire    [31:0]  result;
     wire            zflag;
 
-    Alu Alu_dut(.*);
-    defparam Alu_dut.WIDTH = 32;
+    IAlu IAlu_dut(.*);
+    defparam IAlu_dut.WIDTH = 32;
 
 `ifdef DUMP_VCD
     initial begin
         $dumpfile("build/alu_tb.vcd");
-        $dumpvars(0, Alu_tb);
+        $dumpvars(0, IAlu_tb);
     end
 `endif // DUMP_VCD
 

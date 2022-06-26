@@ -1,4 +1,3 @@
-`include "types.vh"
 `include "hazard.v"
 
 module Hazard_tb;
