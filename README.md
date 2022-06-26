@@ -41,14 +41,14 @@ Build and run all tests:
 
 Each case outputs to `build/` directory.
 
-## Docker 🐳
+### Docker 🐳
 RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile
 here to take care of this (easy-mode).
 
-First time setup:
+Example first time setup:
 
-    $ docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t riscv-gnu-toolchain .
+    $ docker build -t riscv-gnu-toolchain .
 
-Once container is "started"/running, run make by also specifiying `DOCKER=ON`:
+To build the functional tests:
 
     $ make unit DOCKER=ON
