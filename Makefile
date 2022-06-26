@@ -86,6 +86,6 @@ runtests: tests
 clean:
 	rm -rf $(OUTPUT) 2> /dev/null || true
 
-.PHONY: pinacolada-unit
-pinacolada-unit:
-	$(MAKE) unit -C ./pinacolada
+.PHONY: soc-unit
+soc-unit:
+	$(MAKE) unit -C ./soc

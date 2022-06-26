@@ -1,5 +1,5 @@
 CC      := iverilog
-OUT_DIR := ../build/pinacolada
+OUT_DIR := ../build/soc
 FLAGS   := -Wall
 FLAGS   += -DSIM
 FLAGS   += -I..

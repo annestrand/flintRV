@@ -1,6 +1,8 @@
-# pineapplecore 🍍
+# boredcore
 
-Another RISC-V core (⚠ Currently still in development ⚠)
+### ⚠ Currently still in early development! ⚠
+---
+Another RISC-V cpu core design.
 
 ## Design 🗺
 - 4-stage in-order pipelined processor

@@ -14,12 +14,12 @@ module cpu_tb;
     wire      [31:0]  pcOut, dataAddr, dataOut;
     wire              dataWe;
 
-    pineapplecore pineapplecore_dut(.*);
+    boredcore boredcore_dut(.*);
 
 `ifdef DUMP_VCD
     initial begin
         $dumpfile("build/cpu_tb.vcd");
-        $dumpvars(0, pineapplecore_dut);
+        $dumpvars(0, boredcore_dut);
     end
 `endif // DUMP_VCD
 

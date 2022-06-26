@@ -1,6 +1,6 @@
 `include "types.vh"
 // ====================================================================================================================
-module pineapplecore (
+module boredcore (
     input               clk, rst,
     input       [31:0]  instr, dataIn,
     input               ifValid, memValid,
@@ -220,7 +220,7 @@ module pineapplecore (
             traceValid <= ifValid;
         end
         if (!rst && traceValid) begin
-            $write("[pineapplecore - TRACE]: %08h: 0x%08h    ", PC-4, instrReg); `DBG_DISPLAY_ASM(instrReg, IMM)
+            $write("[boredcore - TRACE]: %08h: 0x%08h    ", PC-4, instrReg); `DBG_DISPLAY_ASM(instrReg, IMM)
         end
     end
 `endif // SIM
