@@ -168,7 +168,6 @@ module boredcore (
         p_mem2reg   [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_mem2reg   [EXEC] : mem2reg;
         p_rs1Addr   [EXEC]  <= rst || EXEC_flush ?  5'd0 : EXEC_stall ? p_rs1Addr   [EXEC] : `RS1(instrReg);
         p_rs2Addr   [EXEC]  <= rst || EXEC_flush ?  5'd0 : EXEC_stall ? p_rs2Addr   [EXEC] : `RS2(instrReg);
-        p_rdAddr    [EXEC]  <= rst || EXEC_flush ?  5'd0 : EXEC_stall ? p_rdAddr    [EXEC] : `RD(instrReg);
         p_aluOp     [EXEC]  <= rst || EXEC_flush ?  4'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
         p_exec_a    [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_a    [EXEC] : exec_a;
         p_exec_b    [EXEC]  <= rst || EXEC_flush ?  1'd0 : EXEC_stall ? p_exec_b    [EXEC] : exec_b;
@@ -209,9 +208,8 @@ module boredcore (
     assign dataWe   = p_mem_w[MEM];
 
 // ====================================================================================================================
-// === CPU-state dumping for simulation ===============================================================================
-// ====================================================================================================================
 `ifdef SIM
+    // Trace dumping
     reg traceValid = 0;
     always @(posedge clk) begin
         if (traceValid && !ifValid) begin

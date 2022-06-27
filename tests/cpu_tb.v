@@ -3,8 +3,10 @@
 `include "ialu.v"
 `include "hazard.v"
 `include "memory.v"
+`include "immgen.v"
 `include "execute.v"
 `include "writeback.v"
+`include "controller.v"
 `include "full_adder.v"
 `include "alu_control.v"
 `include "fetch_decode.v"
@@ -29,6 +31,32 @@ module cpu_tb;
     reg [31:0] test_vector [0:8];
     initial begin
         $readmemh("build/cpu.mem", test_vector);
+    end
+
+    // Init pipeline reg "memory-cells"
+    integer x;
+    initial begin
+        for (x=0; x<3; x=x+1) begin
+            $dumpvars(0, boredcore_dut.p_mem_w    [x]);
+            $dumpvars(0, boredcore_dut.p_reg_w    [x]);
+            $dumpvars(0, boredcore_dut.p_mem2reg  [x]);
+            $dumpvars(0, boredcore_dut.p_funct3   [x]);
+            $dumpvars(0, boredcore_dut.p_funct7   [x]);
+            $dumpvars(0, boredcore_dut.p_rs1      [x]);
+            $dumpvars(0, boredcore_dut.p_rs2      [x]);
+            $dumpvars(0, boredcore_dut.p_aluOut   [x]);
+            $dumpvars(0, boredcore_dut.p_readData [x]);
+            $dumpvars(0, boredcore_dut.p_PC       [x]);
+            $dumpvars(0, boredcore_dut.p_IMM      [x]);
+            $dumpvars(0, boredcore_dut.p_rs1Addr  [x]);
+            $dumpvars(0, boredcore_dut.p_rs2Addr  [x]);
+            $dumpvars(0, boredcore_dut.p_rdAddr   [x]);
+            $dumpvars(0, boredcore_dut.p_aluOp    [x]);
+            $dumpvars(0, boredcore_dut.p_exec_a   [x]);
+            $dumpvars(0, boredcore_dut.p_exec_b   [x]);
+            $dumpvars(0, boredcore_dut.p_bra      [x]);
+            $dumpvars(0, boredcore_dut.p_jmp      [x]);
+        end
     end
 
     // Test loop
