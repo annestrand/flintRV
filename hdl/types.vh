@@ -88,7 +88,7 @@
 `define U_AUIPC_CTRL        { `ALU_OP_U_AUIPC,  `PC,     `IMM,    `N,     `Y,     `N,       `N,   `N  }
 `define J_CTRL              { `ALU_OP_J,        `PC,     `REG,    `N,     `Y,     `N,       `N,   `Y  }
 
-// Utility, Debug, and Simulation related macro(s)
 `define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
+`define IS_SHIFT_IMM(x)     (~x[13] && x[12])
 
 `endif // TYPES_VH

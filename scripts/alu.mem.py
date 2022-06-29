@@ -57,5 +57,4 @@ if __name__ == "__main__":
                 val = (test_vector_a[i] & 0xffffffff) >= (test_vector_b[i] & 0xffffffff)
             # Write gold vector
             test_vector  = f"{val:032b}"
-            test_vector += f"{1 if val == 0 else 0:01b}"
             print(test_vector, file=fp)

@@ -39,21 +39,16 @@ module Execute (
         .funct3     (funct3),
         .aluControl (aluControl)
     );
-    IALU ialu_unit(
+
+    IALU #(
+        .WIDTH(32)
+    ) ialu_unit (
         .a      (aluSrcAin),
         .b      (aluSrcBin),
         .op     (aluControl),
-        .result (aluOut),
-        .zflag  (/* No use for now... */)
+        .result (aluOut)
     );
-    defparam ialu_unit.WIDTH = 32;
 
     // Address generator
-    CLA addr_gen_unit(
-        .a      (PC),
-        .b      (IMM),
-        .subEn  (1'b0),
-        .result (addrGenOut),
-        .cout   (/* No use for now... */)
-    );
+    assign addrGenOut = PC + IMM;
 endmodule

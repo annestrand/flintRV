@@ -3,8 +3,7 @@
 module IALU (
   input         [WIDTH-1:0]         a, b,   // input operands
   input         [ALU_OP_WIDTH-1:0]  op,     // ALU operation
-  output reg    [WIDTH-1:0]         result, // ALU output
-  output                            zflag   // Zero-flag
+  output reg    [WIDTH-1:0]         result  // ALU output
 );
     parameter                       WIDTH               = 32;
     localparam                      ALU_OP_WIDTH        = 5;
@@ -16,18 +15,19 @@ module IALU (
     reg                             ALU_SLT;
     reg                             SUB;
     reg         [WIDTH-1:0]         B_in;
-    // Using fast adder (CLA) for ALU
-    cla                             ALU_ADDER(a, B_in, SUB, ALU_ADDER_result, cflag);
+
+    // Add/Sub logic
+    assign {cflag, ALU_ADDER_result[WIDTH-1:0]} = a + B_in + {{(WIDTH){1'b0}}, SUB};
 
     always @(*) begin
         // --- ALU internal op setup ---
         case (op)
             default     : begin B_in = b; SUB = 0;          end
-            `OP_SUB     : begin B_in = b; SUB = 1;          end
+            `OP_SUB     : begin B_in = ~b; SUB = 1;         end
             `OP_SLT,
             `OP_SLTU,
             `OP_SGTE,
-            `OP_SGTEU   : begin B_in = b; SUB = 1;          end
+            `OP_SGTEU   : begin B_in = ~b; SUB = 1;         end
             `OP_ADD4A   : begin B_in = CONST_4; SUB = 0;    end
         endcase
         // --- SLT setup ---
@@ -58,6 +58,4 @@ module IALU (
             `OP_SGTEU   : result = {31'd0,  cflag};
         endcase
     end
-    // Zero-flag out
-    assign zflag = ~|result;
 endmodule

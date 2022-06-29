@@ -4,8 +4,7 @@ module ImmGen (
     input       [31:0]  instr,
     output reg  [31:0]  imm
 );
-    wire [2:0] funct3   = `FUNCT3(instr);
-    wire isShiftImm     = ~funct3[1] && funct3[0];
+    wire isShiftImm = `IS_SHIFT_IMM(instr);
     always @* begin
         case (`OPCODE(instr))
             default          :   imm = 32'd0;

@@ -1,12 +1,9 @@
-`include "FullAdder.v"
-`include "CLA.v"
 `include "IALU.v"
 
 module IAlu_tb;
     reg     [31:0]  a, b;
     reg     [4:0]   op;
     wire    [31:0]  result;
-    wire            zflag;
 
     IALU IAlu_dut(.*);
     defparam IAlu_dut.WIDTH = 32;
@@ -20,7 +17,7 @@ module IAlu_tb;
 
     // Test vectors
     reg [68:0]  test_vector         [0:15];
-    reg [32:0]  test_gold_vector    [0:15];
+    reg [31:0]  test_gold_vector    [0:15];
     initial begin
         $readmemb("build/alu.mem", test_vector);
         $readmemb("build/alu_gold.mem", test_gold_vector);
@@ -39,10 +36,10 @@ module IAlu_tb;
             subfail = 0;
             {a,b,op} = test_vector[i];
             #20;
-            if ({$signed(result), zflag} != $signed(test_gold_vector[i]))   resultStr = "ERROR";
-            else                                                            resultStr = "PASS ";
-            $display("Test[ %2d ]: a = %10d | b = %10d | op = %2d || result = %10d | zflag = %d ... %s",
-                i, $signed(a), $signed(b), op, $signed(result), zflag, resultStr
+            if ($signed(result) != $signed(test_gold_vector[i]))   resultStr = "ERROR";
+            else                                                   resultStr = "PASS ";
+            $display("Test[ %2d ]: a = %10d | b = %10d | op = %2d || result = %10d ... %s",
+                i, $signed(a), $signed(b), op, $signed(result), resultStr
             );
             if (resultStr == "ERROR") errs = errs + 1;
         end

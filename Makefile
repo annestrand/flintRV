@@ -64,7 +64,7 @@ $(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 # Main build is simulating CPU with Verilator
 .PHONY: all
 all:
-	verilator -Wall -Ihdl -cc $(HDL_SOURCES)
+	verilator -Wall -Ihdl --top-module boredcore -cc $(HDL_SOURCES)
 
 # Unit testing (i.e. sub-module testing)
 .PHONY: unit
@@ -78,6 +78,7 @@ build-dir:
 .PHONY: clean
 clean:
 	rm -rf $(OUTPUT) 2> /dev/null || true
+	rm -rf obj_dir 2> /dev/null || true
 
 .PHONY: soc-unit
 soc-unit:

@@ -132,7 +132,10 @@ module boredcore (
                 (no duplication with this approach but adds some more Tpcq at the output).
     */
     wire [31:0] rs1Out, rs2Out;
-    DualPortRam RS1_PORT (
+    DualPortRam #(
+        .DATA_WIDTH(32),
+        .ADDR_WIDTH(5)
+    ) RS1_PORT (
         .clk                (clk                ),
         .we                 (p_reg_w[WB]        ),
         .dataIn             (WB_result          ),
@@ -140,7 +143,10 @@ module boredcore (
         .wAddr              (p_rdAddr[WB]       ),
         .q                  (rs1Out             )
     );
-    DualPortRam RS2_PORT (
+    DualPortRam #(
+        .DATA_WIDTH(32),
+        .ADDR_WIDTH(5)
+    ) RS2_PORT (
         .clk                (clk                ),
         .we                 (p_reg_w[WB]        ),
         .dataIn             (WB_result          ),
@@ -148,10 +154,6 @@ module boredcore (
         .wAddr              (p_rdAddr[WB]       ),
         .q                  (rs2Out             )
     );
-    defparam RS1_PORT.DATA_WIDTH = 32;
-    defparam RS2_PORT.DATA_WIDTH = 32;
-    defparam RS1_PORT.ADDR_WIDTH = 5;
-    defparam RS2_PORT.ADDR_WIDTH = 5;
 
     // Pipeline assignments
     always @(posedge clk) begin
@@ -182,7 +184,7 @@ module boredcore (
         p_aluOut    [MEM]   <= rst || MEM_flush ? 32'd0 : aluOut;
         p_rdAddr    [MEM]   <= rst || MEM_flush ?  5'd0 : p_rdAddr     [EXEC];
         // Writeback
-        p_reg_w     [WB]    <= rst ? 32'd0  : p_reg_w       [MEM];
+        p_reg_w     [WB]    <= rst ? 1'd0   : p_reg_w       [MEM];
         p_mem2reg   [WB]    <= rst ? 1'd0   : p_mem2reg     [MEM];
         p_funct3    [WB]    <= rst ? 3'd0   : p_funct3      [MEM];
         p_aluOut    [WB]    <= rst ? 32'd0  : p_aluOut      [MEM];
