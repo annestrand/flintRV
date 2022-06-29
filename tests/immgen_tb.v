@@ -1,4 +1,4 @@
-`include "immgen.v"
+`include "ImmGen.v"
 
 module ImmGen_tb;
     reg     [31:0]  instr;

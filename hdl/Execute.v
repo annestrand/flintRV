@@ -33,23 +33,23 @@ module Execute (
 
     // ALU/ALU_Control
     wire [4:0]  aluControl;
-    AluControl ALU_CTRL_unit(
+    IALU_Control ALU_CTRL_unit(
         .aluOp      (aluOp),
         .funct7     (funct7),
         .funct3     (funct3),
         .aluControl (aluControl)
     );
-    IAlu IALU_unit(
+    IALU ialu_unit(
         .a      (aluSrcAin),
         .b      (aluSrcBin),
         .op     (aluControl),
         .result (aluOut),
         .zflag  (/* No use for now... */)
     );
-    defparam IALU_unit.WIDTH = 32;
+    defparam ialu_unit.WIDTH = 32;
 
     // Address generator
-    CLA ADDR_GEN_unit(
+    CLA addr_gen_unit(
         .a      (PC),
         .b      (IMM),
         .subEn  (1'b0),

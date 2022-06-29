@@ -1,4 +1,4 @@
-`include "alu_control.v"
+`include "IALU_Control.v"
 
 module AluControl_tb;
     reg     [3:0] aluOp;
@@ -6,7 +6,7 @@ module AluControl_tb;
     reg     [2:0] funct3;
     wire    [4:0] aluControl;
 
-    AluControl AluControl_dut(.*);
+    IALU_Control IAluControl_dut(.*);
 
 `ifdef DUMP_VCD
     initial begin

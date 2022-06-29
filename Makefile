@@ -61,27 +61,19 @@ $(OUTPUT)/%.mem: $(OUTPUT)/%.elf
 $(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
+# Main build is simulating CPU with Verilator
 .PHONY: all
 all:
-	echo "$(HDL_SOURCES)"
-	@printf "TODO: NOP build recipe for now - need to have this run full synth, PnR, etc later...\n"
+	verilator -Wall -Ihdl -cc $(HDL_SOURCES)
 
-.PHONY: build-dir
-build-dir:
-	@mkdir -p $(OUTPUT)
-
+# Unit testing (i.e. sub-module testing)
 .PHONY: unit
 unit: build-dir $(TB_OUTPUTS)
 	@printf "\nAll done building unit-tests.\n"
 
-.PHONY: runtests
-runtests: tests
-	@printf "Running tests...\n"
-	@for out in $(TB_OUTPUTS); do \
-	    printf "\n[ $$out ]\n$(LINE)\n"; \
-		./$$out; \
-		printf "$(LINE)\n"; \
-	done
+.PHONY: build-dir
+build-dir:
+	@mkdir -p $(OUTPUT)
 
 .PHONY: clean
 clean:

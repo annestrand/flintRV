@@ -1,6 +1,6 @@
-`include "full_adder.v"
-`include "cla.v"
-`include "ialu.v"
+`include "FullAdder.v"
+`include "CLA.v"
+`include "IALU.v"
 
 module IAlu_tb;
     reg     [31:0]  a, b;
@@ -8,7 +8,7 @@ module IAlu_tb;
     wire    [31:0]  result;
     wire            zflag;
 
-    IAlu IAlu_dut(.*);
+    IALU IAlu_dut(.*);
     defparam IAlu_dut.WIDTH = 32;
 
 `ifdef DUMP_VCD

@@ -1,4 +1,4 @@
-`include "controller.v"
+`include "Controller.v"
 
 module Controller_tb;
     reg     [6:0]   opcode;

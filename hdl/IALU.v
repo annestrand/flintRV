@@ -1,6 +1,6 @@
 `include "types.vh"
 
-module IAlu (
+module IALU (
   input         [WIDTH-1:0]         a, b,   // input operands
   input         [ALU_OP_WIDTH-1:0]  op,     // ALU operation
   output reg    [WIDTH-1:0]         result, // ALU output
@@ -17,7 +17,7 @@ module IAlu (
     reg                             SUB;
     reg         [WIDTH-1:0]         B_in;
     // Using fast adder (CLA) for ALU
-    CLA                             ALU_ADDER(a, B_in, SUB, ALU_ADDER_result, cflag);
+    cla                             ALU_ADDER(a, B_in, SUB, ALU_ADDER_result, cflag);
 
     always @(*) begin
         // --- ALU internal op setup ---

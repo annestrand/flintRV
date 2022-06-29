@@ -1,4 +1,4 @@
-`include "dual_port_ram.v"
+`include "DualPortRam.v"
 
 module DualPortRam_tb;
     localparam DATA_WIDTH = 32;

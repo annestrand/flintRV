@@ -1,4 +1,4 @@
-module CLA (  // Carry Lookahead Adder (fast but more resource expensive)
+module cla (  // Carry Lookahead Adder (fast but more resource expensive)
     input   [WIDTH-1:0] a, b,   // Operand inputs
     input               subEn,  // Use as subtractor
     output  [WIDTH-1:0] result, // Output

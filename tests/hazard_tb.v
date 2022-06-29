@@ -1,4 +1,4 @@
-`include "hazard.v"
+`include "Hazard.v"
 
 module Hazard_tb;
     // Forwarding

@@ -1,5 +1,5 @@
-`include "full_adder.v"
-`include "cla.v"
+`include "FullAdder.v"
+`include "CLA.v"
 
 module CLA_tb;
     reg     [31:0]  a, b;
@@ -7,7 +7,7 @@ module CLA_tb;
     wire    [31:0]  result;
     wire            cout;
 
-    CLA CLA_dut(.*);
+    cla CLA_dut(.*);
     defparam CLA_dut.WIDTH = 32;
 
 `ifdef DUMP_VCD

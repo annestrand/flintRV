@@ -207,20 +207,4 @@ module boredcore (
     assign dataAddr = p_aluOut[MEM];
     assign dataWe   = p_mem_w[MEM];
 
-// ====================================================================================================================
-`ifdef SIM
-    // Trace dumping
-    reg traceValid = 0;
-    always @(posedge clk) begin
-        if (traceValid && !ifValid) begin
-            traceValid = 0; // Not a typo - using blocking assignment to level-trigger update
-        end else begin
-            traceValid <= ifValid;
-        end
-        if (!rst && traceValid) begin
-            $write("[boredcore - TRACE]: %08h: 0x%08h    ", PC-4, instrReg); `DBG_DISPLAY_ASM(instrReg, IMM)
-        end
-    end
-`endif // SIM
-
 endmodule

@@ -1,5 +1,5 @@
-`include "full_adder.v"
-`include "rca.v"
+`include "FullAdder.v"
+`include "RCA.v"
 
 module RCA_tb;
     reg     [31:0]  a, b;
