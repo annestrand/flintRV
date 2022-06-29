@@ -28,6 +28,7 @@ vpath %.v           tests
 vpath %.py          scripts
 
 HDL_SOURCES         := $(shell find hdl -type f -name "*.v")
+VERILATOR_TB		:= $(shell find tests/verilator -type f -name "*.cpp")
 TB_SOURCES          := $(shell find tests -type f -name "*.v" -exec basename {} \;)
 TB_OUTPUTS          := $(TB_SOURCES:%.v=$(OUTPUT)/%)
 TEST_PY             := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
@@ -61,10 +62,14 @@ $(OUTPUT)/%.mem: $(OUTPUT)/%.elf
 $(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH)
 	$(TB_CC) $(FLAGS) -o $@ $<
 
+obj_dir/%.cpp: $(VERILATOR_TB)
+	verilator -Wall -Ihdl --trace --exe tests/verilator/cpu_test.cpp --top-module boredcore -cc $(HDL_SOURCES)
+
 # Main build is simulating CPU with Verilator
 .PHONY: all
-all:
-	verilator -Wall -Ihdl --top-module boredcore -cc $(HDL_SOURCES)
+all: obj_dir/Vboredcore.cpp
+	$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
+	@printf "\nDone.\n"
 
 # Unit testing (i.e. sub-module testing)
 .PHONY: unit
