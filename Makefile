@@ -1,5 +1,3 @@
-TB_CC               := iverilog
-PYTHON              := python3
 ifdef TC_TRIPLE
 TOOLCHAIN_PREFIX    := $(TC_TRIPLE)
 else
@@ -13,16 +11,20 @@ OUTPUT              := build
 FLAGS               := -Wall
 FLAGS               += -Ihdl
 FLAGS               += -DSIM
-ifdef VCD
 FLAGS               += -DDUMP_VCD
-endif # VCD
-ROOT_DIR            := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
 ifdef DOCKER
+ROOT_DIR            := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 DOCKER_CMD          := docker run -v $(ROOT_DIR):/src -w /src riscv-gnu-toolchain
 else
 DOCKER_CMD          :=
-endif # DOCKER
-LINE                := ================================================================================================
+endif
+
+VERILATOR_FLAGS     := -Wall
+VERILATOR_FLAGS     += -Ihdl
+VERILATOR_FLAGS     += --trace
+VERILATOR_FLAGS     += --x-assign unique
+VERILATOR_FLAGS     += --x-initial unique
 
 vpath %.v           tests
 vpath %.py          scripts
@@ -41,12 +43,12 @@ TEST_ASM_MEMH       := $(TEST_ASM_ELF:%.elf=%.mem)
 # Testbench mem
 .SECONDARY:
 $(OUTPUT)/%.mem: %.mem.py
-	$(PYTHON) $<
+	python3 $<
 
 # Testbench ASM
 .SECONDARY:
 $(OUTPUT)/%.s: %.asm.py
-	$(PYTHON) $<
+	python3 $<
 
 # Testbench ELF
 .SECONDARY:
@@ -60,16 +62,15 @@ $(OUTPUT)/%.mem: $(OUTPUT)/%.elf
 
 # Testbench iverilog
 $(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH)
-	$(TB_CC) $(FLAGS) -o $@ $<
+	iverilog $(FLAGS) -o $@ $<
 
 obj_dir/%.cpp: $(VERILATOR_TB)
-	verilator -Wall -Ihdl --trace --exe tests/verilator/cpu_test.cpp --top-module boredcore -cc $(HDL_SOURCES)
+	verilator $(VERILATOR_FLAGS) --exe tests/verilator/cpu_test.cpp --top-module boredcore -cc $(HDL_SOURCES)
 
 # Main build is simulating CPU with Verilator
 .PHONY: all
 all: obj_dir/Vboredcore.cpp
-	$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
-	@printf "\nDone.\n"
+	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
 
 # Unit testing (i.e. sub-module testing)
 .PHONY: unit

@@ -1,3 +1,5 @@
+`include "types.vh"
+
 module Writeback (
     input       [2:0]   funct3,
     input       [31:0]  dataIn,

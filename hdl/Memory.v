@@ -1,3 +1,5 @@
+`include "types.vh"
+
 module Memory (
     input       [2:0]   funct3,
     input       [31:0]  dataIn,

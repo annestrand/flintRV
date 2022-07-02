@@ -21,7 +21,6 @@ Another RISC-V cpu core design.
 Below are a table of Make config variables:
 | Variable | Behavior                   | Usage                                   | Default             |
 |:---------|:---------------------------|:----------------------------------------|:--------------------|
-|VCD       |Dump VCD file               |$ make VCD=1 ...                         | 0 (OFF)             |
 |TC_TRIPLE |RISCV-GCC toolcahin triple  |$ make TC_TRIPLE=riscv64-unknown-elf ... | riscv64-unknown-elf |
 |DOCKER    |Use Docker GCC toolchain    |$ make DOCKER=1 ...                      | 0 (OFF)             |
 
