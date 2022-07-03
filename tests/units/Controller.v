@@ -9,7 +9,7 @@ module Controller_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("build/controller_tb.vcd");
+        $dumpfile("build/Controller.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD
@@ -18,7 +18,7 @@ module Controller_tb;
     reg [31:0]  test_vector         [0:39];
     reg [12:0]  test_gold_vector    [0:39];
     initial begin
-        $readmemh("build/controller.mem", test_vector);
+        $readmemh("build/Controller.mem", test_vector);
     end
     reg [31:0]  instr;
     initial begin
@@ -61,6 +61,7 @@ module Controller_tb;
         end
         if (errs > 0)   $display("\nFAILED: %0d", errs);
         else            $display("\nPASSED");
+        $stop;
         // TODO: Use VPI to have $myReturn(...) return the "errs" value?
     end
 

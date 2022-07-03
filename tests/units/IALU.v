@@ -10,7 +10,7 @@ module IAlu_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("build/alu_tb.vcd");
+        $dumpfile("build/IALU.vcd");
         $dumpvars(0, IAlu_tb);
     end
 `endif // DUMP_VCD
@@ -19,8 +19,8 @@ module IAlu_tb;
     reg [68:0]  test_vector         [0:15];
     reg [31:0]  test_gold_vector    [0:15];
     initial begin
-        $readmemb("build/alu.mem", test_vector);
-        $readmemb("build/alu_gold.mem", test_gold_vector);
+        $readmemb("build/IALU.mem", test_vector);
+        $readmemb("build/IALU_gold.mem", test_gold_vector);
     end
 
     // Test loop

@@ -30,43 +30,51 @@ VERILATOR_FLAGS     += --x-initial unique
 vpath %.v           tests
 vpath %.py          scripts
 
-HDL_SOURCES         := $(shell find hdl -type f -name "*.v")
-VERILATOR_TB		:= $(shell find tests/verilator -type f -name "*.cpp")
-TB_SOURCES          := $(shell find tests -type f -name "*.v" -exec basename {} \;)
-TB_OUTPUTS          := $(TB_SOURCES:%.v=$(OUTPUT)/%)
-TEST_PY             := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
-TEST_MEMH           := $(TEST_PY:%.mem.py=$(OUTPUT)/%.mem)
+HDL_SRCS            := $(shell find hdl -type f -name "*.v")
+TEST_PY_MEM         := $(shell find scripts -type f -name "*.mem.py" -exec basename {} \;)
+TEST_PY_MEMH        := $(TEST_PY_MEM:%.mem.py=$(OUTPUT)/%.mem)
 TEST_PY_ASM         := $(shell find scripts -type f -name "*.asm.py" -exec basename {} \;)
-TEST_ASM            := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
-TEST_ASM_ELF        := $(TEST_ASM:%.s=%.elf)
-TEST_ASM_MEMH       := $(TEST_ASM_ELF:%.elf=%.mem)
+TEST_PY_ASM_OUT     := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
+TEST_PY_ASM_ELF     := $(TEST_PY_ASM_OUT:%.s=%.elf)
+TEST_PY_ASM_MEMH    := $(TEST_PY_ASM_ELF:%.elf=%.mem)
 
-# Testbench mem
+VERILATOR_SRCS		:= $(shell find tests/cpu -type f -name "*.cpp")
+
+IVERILOG_ALL_SRCS   := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
+IVERILOG_MEMH_SRCS  := $(TEST_PY_MEM:%.mem.py=%.v)
+IVERILOG_MEMH_OBJS  := $(IVERILOG_MEMH_SRCS:%.v=$(OUTPUT)/%_mem.out)
+IVERILOG_ASM_SRCS   := $(TEST_PY_ASM:%.asm.py=%.v)
+IVERILOG_ASM_OBJS   := $(IVERILOG_ASM_SRCS:%.v=$(OUTPUT)/%_asm.out)
+IVERILOG_PLAIN_SRCS := $(filter-out $(IVERILOG_MEMH_SRCS) $(IVERILOG_ASM_SRCS), $(IVERILOG_ALL_SRCS))
+IVERILOG_PLAIN_OBJS := $(IVERILOG_PLAIN_SRCS:%.v=$(OUTPUT)/%.out)
+
 .SECONDARY:
 $(OUTPUT)/%.mem: %.mem.py
 	python3 $<
 
-# Testbench ASM
 .SECONDARY:
 $(OUTPUT)/%.s: %.asm.py
 	python3 $<
 
-# Testbench ELF
 .SECONDARY:
 $(OUTPUT)/%.elf: $(OUTPUT)/%.s
 	$(DOCKER_CMD) $(AS) -o $@ $<
 
-# Testbench Objcopy
 .SECONDARY:
 $(OUTPUT)/%.mem: $(OUTPUT)/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
-# Testbench iverilog
-$(OUTPUT)/%: tests/%.v $(TEST_MEMH) $(TEST_ASM_MEMH)
+$(OUTPUT)/%_asm.out: tests/units/%.v hdl/%.v $(OUTPUT)/%.mem $(OUTPUT)/%.s
 	iverilog $(FLAGS) -o $@ $<
 
-obj_dir/%.cpp: $(VERILATOR_TB)
-	verilator $(VERILATOR_FLAGS) --exe tests/verilator/cpu_test.cpp --top-module boredcore -cc $(HDL_SOURCES)
+$(OUTPUT)/%_mem.out: tests/units/%.v hdl/%.v $(OUTPUT)/%.mem
+	iverilog $(FLAGS) -o $@ $<
+
+$(OUTPUT)/%.out: tests/units/%.v hdl/%.v
+	iverilog $(FLAGS) -o $@ $<
+
+obj_dir/%.cpp: $(VERILATOR_SRCS)
+	verilator $(VERILATOR_FLAGS) --exe tests/cpu/cpu_test.cpp --top-module boredcore -cc $(HDL_SRCS)
 
 # Main build is simulating CPU with Verilator
 .PHONY: all
@@ -84,7 +92,7 @@ endif
 
 # Unit testing (i.e. sub-module testing)
 .PHONY: unit
-unit: build-dir $(TB_OUTPUTS)
+unit: build-dir $(IVERILOG_PLAIN_OBJS) $(IVERILOG_ASM_OBJS) $(IVERILOG_MEMH_OBJS)
 	@printf "\nAll done building unit-tests.\n"
 
 .PHONY: build-dir
