@@ -61,7 +61,6 @@ module Controller_tb;
         end
         if (errs > 0)   $display("\nFAILED: %0d", errs);
         else            $display("\nPASSED");
-        $stop;
         // TODO: Use VPI to have $myReturn(...) return the "errs" value?
     end
 
