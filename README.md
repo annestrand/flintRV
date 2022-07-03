@@ -46,9 +46,9 @@ Each case outputs to `build/` directory.
 RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile
 here to take care of this (easy-mode).
 
-Example first time setup:
+To build and start the container:
 
-    $ docker build -t riscv-gnu-toolchain .
+    $ make docker
 
 To build the functional tests:
 

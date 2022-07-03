@@ -13,9 +13,10 @@ FLAGS               += -Ihdl
 FLAGS               += -DSIM
 FLAGS               += -DDUMP_VCD
 
-ifdef DOCKER
 ROOT_DIR            := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-DOCKER_CMD          := docker run -v $(ROOT_DIR):/src -w /src riscv-gnu-toolchain
+ifdef DOCKER
+DOCKER_CMD          := docker exec -u user -w /src boredcore
+DOCKER_RUNNING		:= $(shell docker ps -a -q -f name=boredcore)
 else
 DOCKER_CMD          :=
 endif
@@ -71,6 +72,15 @@ obj_dir/%.cpp: $(VERILATOR_TB)
 .PHONY: all
 all: obj_dir/Vboredcore.cpp
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
+
+# Create the docker container (if needed) and start
+.PHONY: docker
+docker:
+ifeq ($(DOCKER_RUNNING),)
+	@docker build -t riscv-gnu-toolchain .
+	@docker create -it -v $(ROOT_DIR):/src --name boredcore riscv-gnu-toolchain
+endif
+	@docker start boredcore
 
 # Unit testing (i.e. sub-module testing)
 .PHONY: unit
