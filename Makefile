@@ -16,7 +16,7 @@ FLAGS               += -DDUMP_VCD
 ROOT_DIR            := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
 DOCKER_CMD          := docker exec -u user -w /src boredcore
-DOCKER_RUNNING		:= $(shell docker ps -a -q -f name=boredcore)
+DOCKER_RUNNING      := $(shell docker ps -a -q -f name=boredcore)
 else
 DOCKER_CMD          :=
 endif
@@ -39,7 +39,7 @@ TEST_PY_ASM_OUT     := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
 TEST_PY_ASM_ELF     := $(TEST_PY_ASM_OUT:%.s=%.elf)
 TEST_PY_ASM_MEMH    := $(TEST_PY_ASM_ELF:%.elf=%.mem)
 
-VERILATOR_SRCS		:= $(shell find tests/cpu -type f -name "*.cc")
+VERILATOR_SRCS      := $(shell find tests/cpu -type f -name "*.cc")
 
 IVERILOG_ALL_SRCS   := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
 IVERILOG_MEMH_SRCS  := $(TEST_PY_MEM:%.mem.py=%.v)
