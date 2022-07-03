@@ -24,6 +24,7 @@ endif
 VERILATOR_FLAGS     := -Wall
 VERILATOR_FLAGS     += -Ihdl
 VERILATOR_FLAGS     += --trace
+VERILATOR_FLAGS     += -CFLAGS "-g"
 VERILATOR_FLAGS     += --x-assign unique
 VERILATOR_FLAGS     += --x-initial unique
 
@@ -38,7 +39,7 @@ TEST_PY_ASM_OUT     := $(TEST_PY_ASM:%.asm.py=$(OUTPUT)/%.s)
 TEST_PY_ASM_ELF     := $(TEST_PY_ASM_OUT:%.s=%.elf)
 TEST_PY_ASM_MEMH    := $(TEST_PY_ASM_ELF:%.elf=%.mem)
 
-VERILATOR_SRCS		:= $(shell find tests/cpu -type f -name "*.cpp")
+VERILATOR_SRCS		:= $(shell find tests/cpu -type f -name "*.cc")
 
 IVERILOG_ALL_SRCS   := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
 IVERILOG_MEMH_SRCS  := $(TEST_PY_MEM:%.mem.py=%.v)
@@ -74,7 +75,7 @@ $(OUTPUT)/%.out: tests/units/%.v hdl/%.v
 	iverilog $(FLAGS) -o $@ $<
 
 obj_dir/%.cpp: $(VERILATOR_SRCS)
-	verilator $(VERILATOR_FLAGS) --exe tests/cpu/cpu_test.cpp --top-module boredcore -cc $(HDL_SRCS)
+	verilator $(VERILATOR_FLAGS) --exe tests/cpu/boredcore.cc --top-module boredcore -cc $(HDL_SRCS)
 
 # Main build is simulating CPU with Verilator
 .PHONY: all
