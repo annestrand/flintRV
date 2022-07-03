@@ -59,23 +59,21 @@ simulation::~simulation() {
 
 // ====================================================================================================================
 int main(int argc, char** argv, char** env) {
-    {
-        // Init
-        Verilated::commandArgs(argc, argv);
-        Vboredcore *cpu = new Vboredcore;
-        simulation sim = simulation(200);
-        if (!sim.create(cpu, "obj_dir/waveform.vcd")) {
-            return -1;
-        }
-        sim.reset();
+    // Init
+    Verilated::commandArgs(argc, argv);
+    Vboredcore *cpu = new Vboredcore;
+    simulation sim  = simulation(200);
+    if (!sim.create(cpu, "obj_dir/waveform.vcd")) {
+        return -1;
+    }
+    sim.reset();
 
-        // Simulation loop
-        while (!sim.end()) {
-            // TODO: add some test vectors here
-            // ...
+    // Simulation loop
+    while (!sim.end()) {
+        // TODO: add some test vectors here
+        // ...
 
-            sim.tick();
-        }
+        sim.tick();
     }
     return 0;
 }
