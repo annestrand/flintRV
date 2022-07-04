@@ -34,7 +34,8 @@ module boredcore (
     reg         p_jmp       [EXEC:WB];
 
     // Internal wires/regs
-    reg     [31:0]  PC, PCReg, instrReg;
+    reg     [31:0]  PC, PCReg, instrReg, rdDataSkid;
+    reg     [4:0]   rdAddrSkid;
     wire    [31:0]  IMM,
                     aluOut,
                     jumpAddr,
@@ -52,7 +53,9 @@ module boredcore (
                     FETCH_stall,
                     EXEC_stall,
                     EXEC_flush,
-                    MEM_flush;
+                    MEM_flush,
+                    rs1FetchFwd,
+                    rs2FetchFwd;
     wire    [31:0]  WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
     wire            writeRd         = (`RD(instrReg) != REG_0) ? reg_w : 1'b0;  // Skip regfile write for x0
@@ -108,8 +111,11 @@ module boredcore (
         .EXEC_rs2           (p_rs2Addr[EXEC]    ),
         .MEM_rd             (p_rdAddr[MEM]      ),
         .WB_rd              (p_rdAddr[WB]       ),
+        .WB_rd_skid         (rdAddrSkid         ),
         .FWD_rs1            (fwdRs1             ),
         .FWD_rs2            (fwdRs2             ),
+        .FWD_rs1_fetch      (rs1FetchFwd        ),
+        .FWD_rs2_fetch      (rs2FetchFwd        ),
         // Stall and Flush
         .BRA                (braMispredict      ),
         .JMP                (p_jmp[EXEC]        ),
@@ -133,7 +139,7 @@ module boredcore (
                 BRAMs w/ additional banking logic for wr_en and output forwarding
                 (no duplication with this approach but adds some more Tpcq at the output).
     */
-    wire [31:0] rs1Out, rs2Out;
+    wire [31:0] rs1Out, rs2Out, rs1FinalOut, rs2FinalOut;
     DualPortRam #(
         .DATA_WIDTH(32),
         .ADDR_WIDTH(5)
@@ -156,12 +162,15 @@ module boredcore (
         .wAddr              (p_rdAddr[WB]       ),
         .q                  (rs2Out             )
     );
+    // Check if any registers need to be forwarded on fetch stage
+    assign rs1FinalOut = rs1FetchFwd ? rdDataSkid : rs1Out;
+    assign rs2FinalOut = rs2FetchFwd ? rdDataSkid : rs2Out;
 
     // Pipeline assignments
     always @(posedge clk) begin
         // Execute
-        p_rs1       [EXEC]  <= rst || EXEC_flush || rs1R0 ? 32'd0 : EXEC_stall ? p_rs1     [EXEC] : rs1Out;
-        p_rs2       [EXEC]  <= rst || EXEC_flush || rs2R0 ? 32'd0 : EXEC_stall ? p_rs2     [EXEC] : rs2Out;
+        p_rs1       [EXEC]  <= rst || EXEC_flush || rs1R0 ? 32'd0 : EXEC_stall ? p_rs1     [EXEC] : rs1FinalOut;
+        p_rs2       [EXEC]  <= rst || EXEC_flush || rs2R0 ? 32'd0 : EXEC_stall ? p_rs2     [EXEC] : rs2FinalOut;
         p_rdAddr    [EXEC]  <= rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
         p_IMM       [EXEC]  <= rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_IMM     [EXEC] : IMM;
         p_PC        [EXEC]  <= rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_PC      [EXEC] : PCReg;
@@ -194,20 +203,26 @@ module boredcore (
         p_readData  [WB]    <= rst ? 32'd0  : dataIn;
     end
 
-    // Program counter and instruction reg assignments
+    // Other CPU datapath reg assignments
     always @(posedge clk) begin
         PC          <=  rst         ?   32'd0       :
                         FETCH_stall ?   PC          :
                         pcJump      ?   jumpAddr    :
                                         PC + 32'd4;
         // Buffer instruction fetch to balance the 2cc BRAM-based regfile read
-        instrReg    <=  rst || EXEC_flush   ?   32'd0    :
-                        FETCH_stall         ?   instrReg :
+        instrReg    <=  rst || EXEC_flush   ?   32'd0       :
+                        FETCH_stall         ?   instrReg    :
                                                 instr;
         // Buffer PC reg to balance the 2cc BRAM-based regfile read
-        PCReg       <=  rst || EXEC_flush   ?   32'd0    :
-                        FETCH_stall         ?   PCReg :
+        PCReg       <=  rst || EXEC_flush   ?   32'd0       :
+                        FETCH_stall         ?   PCReg       :
                                                 PC;
+
+        // Regs handle hazard case when writing to regfile at the same time we grab reg data during fetch/decode stage
+        rdDataSkid  <=  rst ?   32'd0       :
+                                WB_result;
+        rdAddrSkid  <=  rst ?   5'd0        :
+                                p_rdAddr[WB];
     end
 
     // Other output assignments

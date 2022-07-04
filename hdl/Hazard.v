@@ -1,8 +1,9 @@
 module Hazard (
     // Forwarding
     input           MEM_rd_reg_write, WB_rd_reg_write,
-    input   [4:0]   EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd,
+    input   [4:0]   EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd, WB_rd_skid,
     output  [1:0]   FWD_rs1, FWD_rs2,
+    output          FWD_rs1_fetch, FWD_rs2_fetch,
     // Stall and Flush
     input           BRA, JMP, FETCH_valid, MEM_valid, EXEC_mem2reg,
     input   [4:0]   FETCH_rs1, FETCH_rs2, EXEC_rd,
@@ -10,12 +11,14 @@ module Hazard (
                     EXEC_flush,  MEM_flush
 );
     // Forwarding logic
-    wire RS1_fwd_mem    = MEM_rd_reg_write && (EXEC_rs1 == MEM_rd);
-    wire RS1_fwd_wb     = ~RS1_fwd_mem && WB_rd_reg_write && (EXEC_rs1 == WB_rd);
-    wire RS2_fwd_mem    = MEM_rd_reg_write && (EXEC_rs2 == MEM_rd);
-    wire RS2_fwd_wb     = ~RS2_fwd_mem && WB_rd_reg_write && (EXEC_rs2 == WB_rd);
-    assign FWD_rs1      = {RS1_fwd_wb, RS1_fwd_mem};
-    assign FWD_rs2      = {RS2_fwd_wb, RS2_fwd_mem};
+    wire RS1_fwd_mem        = MEM_rd_reg_write && (EXEC_rs1 == MEM_rd);
+    wire RS1_fwd_wb         = ~RS1_fwd_mem && WB_rd_reg_write && (EXEC_rs1 == WB_rd);
+    wire RS2_fwd_mem        = MEM_rd_reg_write && (EXEC_rs2 == MEM_rd);
+    wire RS2_fwd_wb         = ~RS2_fwd_mem && WB_rd_reg_write && (EXEC_rs2 == WB_rd);
+    assign FWD_rs1          = {RS1_fwd_wb, RS1_fwd_mem};
+    assign FWD_rs2          = {RS2_fwd_wb, RS2_fwd_mem};
+    assign FWD_rs1_fetch    = FETCH_rs1 == WB_rd_skid;
+    assign FWD_rs2_fetch    = FETCH_rs2 == WB_rd_skid;
 
     // Stall and flush logic
     wire   load_stall   = EXEC_mem2reg  && ((FETCH_rs1 == EXEC_rd) || (FETCH_rs2 == EXEC_rd));
