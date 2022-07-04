@@ -7,7 +7,7 @@ module ImmGen (
     wire isShiftImm = `IS_SHIFT_IMM(instr);
     always @* begin
         case (`OPCODE(instr))
-            default          :   imm = 32'd0;
+            default          :   imm = 32'hffffffff;
         // Immediate cases
             `I_JUMP, `I_LOAD :   imm = {{21{instr[31]}}, instr[30:20]};
             `I_ARITH         :   imm = isShiftImm ? {{27{instr[31]}}, instr[24:20]} : {{21{instr[31]}}, instr[30:20]};

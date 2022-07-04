@@ -20,7 +20,7 @@ module Controller (
             `U_LUI      : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `U_LUI_CTRL;
             `U_AUIPC    : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `U_AUIPC_CTRL;
             `J          : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `J_CTRL;
-            // Invalid opcode
+            // Invalid opcode - set all lines to 0
             default     : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = 11'd0;
         endcase
     end

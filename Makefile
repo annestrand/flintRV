@@ -40,6 +40,9 @@ TEST_PY_ASM_ELF     := $(TEST_PY_ASM_OUT:%.s=%.elf)
 TEST_PY_ASM_MEMH    := $(TEST_PY_ASM_ELF:%.elf=%.mem)
 
 VERILATOR_SRCS      := $(shell find tests/cpu -type f -name "*.cc")
+VERILATOR_TEST_ASM  := $(shell find tests/cpu/src -type f -name "*.s" -exec basename {} \;)
+VERILATOR_TEST_ELF  := $(VERILATOR_TEST_ASM:%.s=obj_dir/%.elf)
+VERILATOR_TEST_MEM  := $(VERILATOR_TEST_ELF:%.elf=%.mem)
 
 IVERILOG_ALL_SRCS   := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
 IVERILOG_MEMH_SRCS  := $(TEST_PY_MEM:%.mem.py=%.v)
@@ -74,12 +77,18 @@ $(OUTPUT)/%_mem.out: tests/units/%.v hdl/%.v $(OUTPUT)/%.mem
 $(OUTPUT)/%.out: tests/units/%.v hdl/%.v
 	iverilog $(FLAGS) -o $@ $<
 
-obj_dir/%.cpp: $(VERILATOR_SRCS)
+obj_dir/%.cpp: $(VERILATOR_SRCS) $(HDL_SRCS)
 	verilator $(VERILATOR_FLAGS) --exe tests/cpu/boredcore.cc --top-module boredcore -cc $(HDL_SRCS)
+
+obj_dir/%.elf: tests/cpu/src/%.s
+	$(DOCKER_CMD) $(AS) -o $@ $<
+
+obj_dir/%.mem: obj_dir/%.elf
+	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
 # Main build is simulating CPU with Verilator
 .PHONY: all
-all: obj_dir/Vboredcore.cpp
+all: build-dir $(VERILATOR_TEST_MEM) obj_dir/Vboredcore.cpp
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
 
 # Create the docker container (if needed) and start
@@ -99,6 +108,7 @@ unit: build-dir $(IVERILOG_PLAIN_OBJS) $(IVERILOG_ASM_OBJS) $(IVERILOG_MEMH_OBJS
 .PHONY: build-dir
 build-dir:
 	@mkdir -p $(OUTPUT)
+	@mkdir -p obj_dir
 
 .PHONY: clean
 clean:
