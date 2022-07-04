@@ -18,7 +18,7 @@ module Controller_tb;
     reg [31:0]  test_vector         [0:39];
     reg [12:0]  test_gold_vector    [0:39];
     initial begin
-        $readmemh("build/Controller.mem", test_vector);
+        $readmemh("build/unit_Controller.mem", test_vector);
     end
     reg [31:0]  instr;
     initial begin

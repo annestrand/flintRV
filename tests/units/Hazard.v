@@ -3,8 +3,9 @@
 module Hazard_tb;
     // Forwarding
     reg           MEM_rd_reg_write, WB_rd_reg_write;
-    reg   [4:0]   EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd;
+    reg   [4:0]   EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd, WB_rd_skid;
     wire  [1:0]   FWD_rs1, FWD_rs2;
+    wire          FWD_rs1_fetch, FWD_rs2_fetch;
     // Stall and Flush
     reg           BRA, JMP, FETCH_valid, MEM_valid, EXEC_mem2reg;
     reg   [4:0]   FETCH_rs1, FETCH_rs2, EXEC_rd;
@@ -25,10 +26,10 @@ module Hazard_tb;
     reg [7:0]   test_gold_fwd_vector    [0:31];
     reg [7:0]   test_gold_hzd_vector    [0:31];
     initial begin
-        $readmemb("build/Hazard_fwd.mem", test_fwd_vector);
-        $readmemb("build/Hazard_fwd_gold.mem", test_gold_fwd_vector);
-        $readmemb("build/Hazard_hzd.mem", test_hzd_vector);
-        $readmemb("build/Hazard_hzd_gold.mem", test_gold_hzd_vector);
+        $readmemb("build/unit_Hazard_fwd.mem", test_fwd_vector);
+        $readmemb("build/unit_Hazard_fwd_gold.mem", test_gold_fwd_vector);
+        $readmemb("build/unit_Hazard_hzd.mem", test_hzd_vector);
+        $readmemb("build/unit_Hazard_hzd_gold.mem", test_gold_hzd_vector);
     end
 
     // Test loop

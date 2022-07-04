@@ -19,8 +19,8 @@ module IAlu_tb;
     reg [68:0]  test_vector         [0:15];
     reg [31:0]  test_gold_vector    [0:15];
     initial begin
-        $readmemb("build/IALU.mem", test_vector);
-        $readmemb("build/IALU_gold.mem", test_gold_vector);
+        $readmemb("build/unit_IALU.mem", test_vector);
+        $readmemb("build/unit_IALU_gold.mem", test_gold_vector);
     end
 
     // Test loop
