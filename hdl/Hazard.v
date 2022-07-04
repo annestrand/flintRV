@@ -27,8 +27,10 @@ module Hazard (
                           EXEC_stall    ||
                           load_stall;
     assign MEM_flush    = EXEC_stall;       // Bubble
-    assign EXEC_flush   = BRA           ||  // Mispredicted branch
+    assign EXEC_flush   = (~EXEC_stall) && (
+                          BRA           ||  // Mispredicted branch
                           JMP           ||
-                          FETCH_stall;      // Bubble
+                          FETCH_stall       // Bubble
+                        );
 
 endmodule

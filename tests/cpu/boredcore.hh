@@ -6,11 +6,11 @@
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define LOG_TAG "boredcore"
 #define LOG_I(msg, ...) \
-    printf("[" LOG_TAG "]:[INFO ]:[%14s]:[%6d]:[%14s] - " msg, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
+    printf("[INFO ]:[%14s]:[%6d]:[%14s] - " msg, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
 #define LOG_W(msg, ...) \
-    printf("[" LOG_TAG "]:[WARN ]:[%14s]:[%6d]:[%14s] - " msg, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
+    printf("[WARN ]:[%14s]:[%6d]:[%14s] - " msg, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
 #define LOG_E(msg, ...) \
-    printf("[" LOG_TAG "]:[ERROR]:[%14s]:[%6d]:[%14s] - " msg, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
+    printf("[ERROR]:[%14s]:[%6d]:[%14s] - " msg, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 class simulation {
 public:
