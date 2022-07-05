@@ -16,7 +16,7 @@ module uart_transmitter_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("./build/pinacolada/uart_tx.vcd");
+        $dumpfile("./out/pinacolada/uart_tx.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD

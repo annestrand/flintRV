@@ -8,7 +8,7 @@ module ImmGen_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("build/ImmGen.vcd");
+        $dumpfile("out/ImmGen.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD
@@ -17,8 +17,8 @@ module ImmGen_tb;
     reg [31:0]  test_vector         [0:26];
     reg [31:0]  test_gold_vector    [0:26];
     initial begin
-        $readmemh("build/unit_ImmGen.mem", test_vector);
-        $readmemb("build/unit_ImmGen_gold.mem", test_gold_vector);
+        $readmemh("out/unit_ImmGen.mem", test_vector);
+        $readmemb("out/unit_ImmGen_gold.mem", test_gold_vector);
     end
 
     // Test loop

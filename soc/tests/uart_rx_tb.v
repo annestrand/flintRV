@@ -15,7 +15,7 @@ module uart_reciever_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("./build/pinacolada/uart_rx.vcd");
+        $dumpfile("./out/pinacolada/uart_rx.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD

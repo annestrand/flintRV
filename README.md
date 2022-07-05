@@ -40,7 +40,7 @@ Build and run all tests:
 
     $ make runtests
 
-Each case outputs to `build/` directory.
+Each case outputs to `out/` directory.
 
 ### Docker 🐳
 RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile

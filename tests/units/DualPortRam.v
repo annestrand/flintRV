@@ -14,7 +14,7 @@ module DualPortRam_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("build/DualPortRam.vcd");
+        $dumpfile("out/DualPortRam.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD

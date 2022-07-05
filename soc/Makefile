@@ -1,5 +1,5 @@
 CC      := iverilog
-OUT_DIR := ../build/soc
+OUT_DIR := ../out/soc
 FLAGS   := -Wall
 FLAGS   += -DSIM
 FLAGS   += -I..
