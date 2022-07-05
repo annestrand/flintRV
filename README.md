@@ -10,9 +10,10 @@ Another RISC-V cpu core design.
 
 ## Dependencies ✅
 - GNU Make
-- GCC RISC-V compiler/cross-compiler toolcahin
-- Icarus Verilog
-- SymbiYosys
+- GCC RISC-V compiler/cross-compiler toolchain
+- Icarus Verilog (testing)
+- Verilator (testing)
+- SymbiYosys (testing)
     - Yosys
     - z3
 - Python >= 3.6
@@ -26,8 +27,8 @@ Below are a table of Make config variables:
 
 ## Testing 🧪
 Functional Verification:
-- `iverilog`    : Unit testing sub-modules (maaaaybe TB for the final core to use VPI to interact with CPU)
-- `Verilator`   : Full-design run on RISC-V programs/benchmarks (TODO)
+- `iverilog`    : Unit testing CPU sub-modules
+- `Verilator`   : Full-design run on RISC-V programs/benchmarks
 
 Formal Verification:
 - `SymbiYosys`  : Formal verify critical pieces of sub-module logic (TODO)
@@ -36,20 +37,22 @@ To build the functional tests:
 
     $ make unit
 
-Build and run all tests:
+Each unit test outputs to `out/<module_name>.out`
 
-    $ make runtests
+To build CPU tests:
 
-Each case outputs to `out/` directory.
+    # make
+
+CPU testing program outputs to `obj_dir/Vboredcore`
 
 ### Docker 🐳
 RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile
 here to take care of this (easy-mode).
 
-To build and start the container:
+To build and start the container (need to run at least once to ensure container is running):
 
     $ make docker
 
-To build the functional tests:
+Then to build the functional tests:
 
     $ make unit DOCKER=ON
