@@ -33,11 +33,7 @@ vpath %.py          scripts
 
 HDL_SRCS            := $(shell find hdl -type f -name "*.v")
 TEST_PY_MEM         := $(shell find scripts -type f -name "unit_*.mem.py" -exec basename {} \;)
-TEST_PY_MEMH        := $(TEST_PY_MEM:%.mem.py=out/%.mem)
 TEST_PY_ASM         := $(shell find scripts -type f -name "unit_*.asm.py" -exec basename {} \;)
-TEST_PY_ASM_OUT     := $(TEST_PY_ASM:%.asm.py=out/%.s)
-TEST_PY_ASM_ELF     := $(TEST_PY_ASM_OUT:%.s=%.elf)
-TEST_PY_ASM_MEMH    := $(TEST_PY_ASM_ELF:%.elf=%.mem)
 
 VERILATOR_SRCS      := $(shell find tests/cpu -type f -name "*.cc")
 VERILATOR_PY_SRCS	:= $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)

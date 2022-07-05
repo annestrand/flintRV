@@ -27,10 +27,6 @@
 `define FWD_MEM             2'b01
 `define FWD_WB              2'b10
 
-// Fetch forward select
-`define NO_FETCH_FWD        1'b0
-`define FETCH_FWD           1'b1
-
 // EXEC operand select
 `define REG                 1'b0
 `define PC                  1'b1    // Operand A
