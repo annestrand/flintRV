@@ -37,7 +37,6 @@ void simulation::reset(int count) {
     m_cpu->dataIn   = 0x00c0ffee;
     m_cpu->ifValid  = 0;
     m_cpu->memValid = 0;
-    m_cpu->boredcore__DOT__RS1_PORT__DOT__ram[4] = 0xcafebabe;
 
     // Toggle reset
     m_cpu->rst = 1;
@@ -151,18 +150,7 @@ int main(int argc, char** argv, char** env) {
         cpu->dataIn         = 0xdeadc0de;
         cpu->ifValid        = 1;
         cpu->memValid       = 1;
-        bool pipelineFlush  = cpu->boredcore__DOT__EXEC_flush;
-
         LOG_I("0x%08x: %s\n", machine_instr, instr.c_str());
-        if (cpu->boredcore__DOT__RS1_PORT__DOT__ram[4] == 10) {
-            done = true;
-            LOG_I("    cpu->regFile[x4] = %d\n", cpu->boredcore__DOT__RS1_PORT__DOT__ram[4]);
-            LOG_I("    cpu->regFile[x5] = %d\n", cpu->boredcore__DOT__RS1_PORT__DOT__ram[5]);
-        } else if (reg_x4 != cpu->boredcore__DOT__RS1_PORT__DOT__ram[4]) {
-            LOG_I("    cpu->regFile[x4] = %d\n", cpu->boredcore__DOT__RS1_PORT__DOT__ram[4]);
-            LOG_I("    cpu->regFile[x5] = %d\n", cpu->boredcore__DOT__RS1_PORT__DOT__ram[5]);
-            reg_x4 = cpu->boredcore__DOT__RS1_PORT__DOT__ram[4];
-        }
 
         // Evaluate
         sim.tick();
