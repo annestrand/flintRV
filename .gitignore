@@ -4,3 +4,11 @@ build/
 __pycache__/
 *.gtkw
 obj_dir/
+
+# Chisel ignores
+.bloop/
+.metals/
+.vscode/
+generated/
+target/
+project/
