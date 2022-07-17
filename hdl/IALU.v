@@ -22,13 +22,13 @@ module IALU (
     always @(*) begin
         // --- ALU internal op setup ---
         case (op)
-            default     : begin B_in = b; SUB = 0;          end
-            `OP_SUB     : begin B_in = ~b; SUB = 1;         end
+            `OP_SUB,
             `OP_SLT,
             `OP_SLTU,
             `OP_SGTE,
             `OP_SGTEU   : begin B_in = ~b; SUB = 1;         end
             `OP_ADD4A   : begin B_in = CONST_4; SUB = 0;    end
+            default     : begin B_in = b; SUB = 0;          end
         endcase
         // --- SLT setup ---
         case ({a[WIDTH-1], b[WIDTH-1]})
