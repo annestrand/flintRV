@@ -2,7 +2,6 @@ package boredcore
 
 import chisel3._
 import chisel3.util._
-import chisel3.testers._
 
 class RegFile(width: Int, depth: Int) extends Module {
   val io = IO(new Bundle {
@@ -21,16 +20,16 @@ class RegFile(width: Int, depth: Int) extends Module {
             BRAMs w/ additional banking logic for wr_en and output forwarding
             (no duplication with this approach but adds some more Tpcq at the output).
   */
-  val memA      = SyncReadMem(depth, UInt(width.W));
-  val memB      = SyncReadMem(depth, UInt(width.W));
+  val memA = SyncReadMem(depth, UInt(width.W));
+  val memB = SyncReadMem(depth, UInt(width.W));
   // Forwarding needed for read-on-write cases
-  val needFwd   = RegNext(io.i_wrEn && (io.i_aAddr === io.i_wrAddr) || (io.i_bAddr === io.i_wrAddr));
-  val fwdData   = RegNext(io.i_wrData);
+  val needFwd = RegNext(io.i_wrEn && (io.i_aAddr === io.i_wrAddr) || (io.i_bAddr === io.i_wrAddr));
+  val fwdData = RegNext(io.i_wrData);
   // Write
   when (io.i_wrEn) { memA.write(io.i_wrAddr, io.i_wrData); memB.write(io.i_wrAddr, io.i_wrData); }
   // Read
-  io.o_aRead    := Mux(needFwd, fwdData, memA.read(io.i_aAddr));
-  io.o_bRead    := Mux(needFwd, fwdData, memB.read(io.i_bAddr));
+  io.o_aRead := Mux(needFwd, fwdData, memA.read(io.i_aAddr));
+  io.o_bRead := Mux(needFwd, fwdData, memB.read(io.i_bAddr));
 }
 
 object RegFileGen extends App {

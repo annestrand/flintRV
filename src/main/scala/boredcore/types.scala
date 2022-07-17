@@ -12,8 +12,3 @@ object types {
                 op_u_auipc :: op_j :: Nil) = Enum(11);
     }
 }
-
-//object Tester extends App {
-//    val test = utils.rv32.swapEndianStr("6364E001");
-//    println(test);
-//}
