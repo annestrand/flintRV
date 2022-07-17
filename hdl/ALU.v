@@ -1,6 +1,6 @@
 `include "types.vh"
 
-module IALU (
+module ALU (
   input         [WIDTH-1:0]         a, b,   // input operands
   input         [ALU_OP_WIDTH-1:0]  op,     // ALU operation
   output reg    [WIDTH-1:0]         result  // ALU output

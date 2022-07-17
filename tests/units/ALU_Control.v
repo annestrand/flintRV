@@ -1,4 +1,4 @@
-`include "IALU_Control.v"
+`include "ALU_Control.v"
 
 module AluControl_tb;
     reg     [3:0] aluOp;
@@ -6,11 +6,11 @@ module AluControl_tb;
     reg     [2:0] funct3;
     wire    [4:0] aluControl;
 
-    IALU_Control IAluControl_dut(.*);
+    ALU_Control IAluControl_dut(.*);
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("out/IALU_Control.vcd");
+        $dumpfile("out/ALU_Control.vcd");
         $dumpvars(0, AluControl_tb);
     end
 `endif // DUMP_VCD
@@ -19,8 +19,8 @@ module AluControl_tb;
     reg [31:0]  test_vector         [0:39];
     reg [4:0]   test_gold_vector    [0:39];
     initial begin
-        $readmemh("out/unit_IALU_Control.mem", test_vector);
-        $readmemb("out/unit_IALU_Control_gold.mem", test_gold_vector);
+        $readmemh("out/unit_ALU_Control.mem", test_vector);
+        $readmemb("out/unit_ALU_Control_gold.mem", test_gold_vector);
     end
 
     // Test loop

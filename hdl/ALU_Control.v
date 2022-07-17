@@ -1,6 +1,6 @@
 `include "types.vh"
 
-module IALU_Control (
+module ALU_Control (
     input       [3:0] aluOp,
     input       [6:0] funct7,
     input       [2:0] funct3,

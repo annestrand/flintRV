@@ -1,16 +1,16 @@
-`include "IALU.v"
+`include "ALU.v"
 
 module IAlu_tb;
     reg     [31:0]  a, b;
     reg     [4:0]   op;
     wire    [31:0]  result;
 
-    IALU IAlu_dut(.*);
-    defparam IAlu_dut.WIDTH = 32;
+    ALU Alu_dut(.*);
+    defparam Alu_dut.WIDTH = 32;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("out/IALU.vcd");
+        $dumpfile("out/ALU.vcd");
         $dumpvars(0, IAlu_tb);
     end
 `endif // DUMP_VCD
@@ -19,8 +19,8 @@ module IAlu_tb;
     reg [68:0]  test_vector         [0:15];
     reg [31:0]  test_gold_vector    [0:15];
     initial begin
-        $readmemb("out/unit_IALU.mem", test_vector);
-        $readmemb("out/unit_IALU_gold.mem", test_gold_vector);
+        $readmemb("out/unit_ALU.mem", test_vector);
+        $readmemb("out/unit_ALU_gold.mem", test_gold_vector);
     end
 
     // Test loop

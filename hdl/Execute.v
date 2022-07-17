@@ -33,16 +33,16 @@ module Execute (
 
     // ALU/ALU_Control
     wire [4:0]  aluControl;
-    IALU_Control ALU_CTRL_unit(
+    ALU_Control ALU_CTRL_unit(
         .aluOp      (aluOp),
         .funct7     (funct7),
         .funct3     (funct3),
         .aluControl (aluControl)
     );
 
-    IALU #(
+    ALU #(
         .WIDTH(32)
-    ) ialu_unit (
+    ) alu_unit (
         .a      (aluSrcAin),
         .b      (aluSrcBin),
         .op     (aluControl),
