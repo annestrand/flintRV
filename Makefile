@@ -21,10 +21,13 @@ else
 DOCKER_CMD          :=
 endif
 
+GTEST_BASEDIR       ?= /usr/local/lib
+
 VERILATOR_FLAGS     := -Wall
 VERILATOR_FLAGS     += -Ihdl
 VERILATOR_FLAGS     += --trace
-VERILATOR_FLAGS     += -CFLAGS "-g"
+VERILATOR_FLAGS     += -CFLAGS "-g -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'"
+VERILATOR_FLAGS     += -LDFLAGS "$(GTEST_BASEDIR)/libgtest_main.a $(GTEST_BASEDIR)/libgtest.a -lpthread"
 VERILATOR_FLAGS     += --x-assign unique
 VERILATOR_FLAGS     += --x-initial unique
 
@@ -36,10 +39,10 @@ TEST_PY_MEM         := $(shell find scripts -type f -name "unit_*.mem.py" -exec 
 TEST_PY_ASM         := $(shell find scripts -type f -name "unit_*.asm.py" -exec basename {} \;)
 
 VERILATOR_SRCS      := $(shell find tests/cpu -type f -name "*.cc")
-VERILATOR_PY_SRCS	:= $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
-VERILATOR_TEST_SRCS	:= $(VERILATOR_PY_SRCS:%.asm.py=obj_dir/%.s)
-VERILATOR_TEST_ELF	:= $(VERILATOR_TEST_SRCS:%.s=%.elf)
-VERILATOR_TEST_MEM	:= $(VERILATOR_TEST_ELF:%.elf=%.mem)
+VERILATOR_PY_SRCS   := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
+VERILATOR_TEST_SRCS := $(VERILATOR_PY_SRCS:%.asm.py=obj_dir/%.s)
+VERILATOR_TEST_ELF  := $(VERILATOR_TEST_SRCS:%.s=%.elf)
+VERILATOR_TEST_MEM  := $(VERILATOR_TEST_ELF:%.elf=%.mem)
 
 IVERILOG_ALL_SRCS   := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
 IVERILOG_MEMH_SRCS  := $(TEST_PY_MEM:unit_%.mem.py=%.v)
@@ -76,7 +79,7 @@ out/%.asm.out: tests/units/%.v hdl/%.v out/unit_%.mem
 	iverilog $(IVERILOG_FLAGS) -o $@ $<
 
 obj_dir/%.cpp: $(VERILATOR_SRCS) $(HDL_SRCS)
-	verilator $(VERILATOR_FLAGS) --exe tests/cpu/boredcore.cc --top-module boredcore -cc $(HDL_SRCS)
+	verilator $(VERILATOR_FLAGS) --exe tests/cpu/boredcore.cc $(VERILATOR_SRCS) --top-module boredcore -cc $(HDL_SRCS)
 
 obj_dir/cpu_%.elf: obj_dir/cpu_%.s
 	$(DOCKER_CMD) $(AS) -o $@ $<
@@ -85,7 +88,7 @@ obj_dir/cpu_%.mem: obj_dir/cpu_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
 # Remove these ones later
-obj_dir/%.elf: tests/cpu/src/%.s
+obj_dir/%.elf: tests/cpu/programs/%.s
 	$(DOCKER_CMD) $(AS) -o $@ $<
 
 obj_dir/%.mem: obj_dir/%.elf
