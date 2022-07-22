@@ -20,15 +20,16 @@ Another RISC-V cpu core design.
 
 ## Make configs ⚙
 Below are a table of Make config variables:
-| Variable | Behavior                   | Usage                                   | Default             |
-|:---------|:---------------------------|:----------------------------------------|:--------------------|
-|TC_TRIPLE |RISCV-GCC toolcahin triple  |$ make TC_TRIPLE=riscv64-unknown-elf ... | riscv64-unknown-elf |
-|DOCKER    |Use Docker GCC toolchain    |$ make DOCKER=1 ...                      | 0 (OFF)             |
+| Variable     | Behavior                   | Usage                                   | Default             |
+|:-------------|:---------------------------|:----------------------------------------|:--------------------|
+|TC_TRIPLE     |RISCV-GCC toolcahin triple  |$ make TC_TRIPLE=riscv64-unknown-elf ... | riscv64-unknown-elf |
+|GTEST_BASEDIR |GoogleTest install dir      |$ make GTEST_BASEDIR=/opt/gtest/lib ...  | /usr/local/lib      |
+|DOCKER        |Use Docker GCC toolchain    |$ make DOCKER=1 ...                      | 0 (OFF)             |
 
 ## Testing 🧪
 Functional Verification:
 - `iverilog`    : Unit testing CPU sub-modules
-- `Verilator`   : Full-design run on RISC-V programs/benchmarks
+- `Verilator`   : CPU testing
 
 Formal Verification:
 - `SymbiYosys`  : Formal verify critical pieces of sub-module logic (TODO)
