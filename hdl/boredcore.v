@@ -94,14 +94,14 @@ module boredcore (
         .o_addrGenOut         (jumpAddr           )
     );
     Memory MEMORY_unit(
-        .funct3             (p_funct3[MEM]      ),
-        .dataIn             (p_rs2[MEM]         ),
-        .dataOut            (dataOut            )
+        .i_funct3             (p_funct3[MEM]),
+        .i_dataIn             (p_rs2[MEM]),
+        .o_dataOut            (dataOut)
     );
     Writeback WRITEBACK_unit(
-        .funct3             (p_funct3[WB]       ),
-        .dataIn             (p_readData[WB]     ),
-        .dataOut            (loadData           )
+        .i_funct3             (p_funct3[WB]),
+        .i_dataIn             (p_readData[WB]),
+        .o_dataOut            (loadData)
     );
     Hazard HZD_FWD_unit(
         // Forwarding
