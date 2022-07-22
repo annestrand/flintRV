@@ -9,6 +9,7 @@ module Regfile (
     parameter DATA_WIDTH    = 32;
     parameter ADDR_WIDTH    = 5;
 
+    // Need to forward when accessing new value as it is being written to in Regfile
     reg                     r_fwdRs1En, r_fwdRs2En;
     reg  [(DATA_WIDTH-1):0] r_rdDataSave;
     wire [(DATA_WIDTH-1):0] w_rs1PortOut, w_rs2PortOut;
