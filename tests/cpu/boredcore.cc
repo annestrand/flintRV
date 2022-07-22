@@ -35,22 +35,22 @@ bool simulation::create(Vboredcore* cpu, const char* traceFile) {
 // ====================================================================================================================
 void simulation::reset(int count) {
     // Some dummy values for now
-    m_cpu->instr    = 0x0badc0de;
-    m_cpu->dataIn   = 0x00c0ffee;
-    m_cpu->ifValid  = 0;
-    m_cpu->memValid = 0;
+    m_cpu->i_instr    = 0x0badc0de;
+    m_cpu->i_dataIn   = 0x00c0ffee;
+    m_cpu->i_ifValid  = 0;
+    m_cpu->i_memValid = 0;
 
     // Toggle reset
-    m_cpu->rst = 1;
+    m_cpu->i_rst = 1;
     for (int i=0; i<count; ++i) { tick(); }
-    m_cpu->rst = 0;
+    m_cpu->i_rst = 0;
 }
 // ====================================================================================================================
 void simulation::tick() {
-    m_cpu->clk = 0;
+    m_cpu->i_clk = 0;
     m_cpu->eval();
     if(m_trace) { m_trace->dump(m_cycles++); }
-    m_cpu->clk = 1;
+    m_cpu->i_clk = 1;
     m_cpu->eval();
     if(m_trace) { m_trace->dump(m_cycles++); m_trace->flush(); }
 }

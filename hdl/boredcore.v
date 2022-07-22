@@ -1,11 +1,10 @@
 `include "types.vh"
 
 module boredcore (
-    input               clk, rst,
-    input       [31:0]  instr, dataIn,
-    input               ifValid, memValid,
-    output      [31:0]  pcOut, dataAddr, dataOut,
-    output              dataWe
+    input           i_clk, i_rst, i_ifValid, i_memValid,
+    input   [31:0]  i_instr, i_dataIn,
+    output          o_dataWe,
+    output  [31:0]  o_pcOut, o_dataAddr, o_dataOut
 );
     localparam  [4:0] REG_0 = 5'b00000; // Register x0
 
@@ -75,26 +74,26 @@ module boredcore (
         .o_jmp                (jmp)
     );
     Execute EXECUTE_unit(
-        .i_funct7             (p_funct7[EXEC]     ),
-        .i_funct3             (p_funct3[EXEC]     ),
-        .i_aluOp              (p_aluOp[EXEC]      ),
-        .i_fwdRs1             (fwdRs1             ),
-        .i_fwdRs2             (fwdRs2             ),
-        .i_aluSrcA            (p_exec_a[EXEC]     ),
-        .i_aluSrcB            (p_exec_b[EXEC]     ),
-        .i_EXEC_rs1           (p_rs1[EXEC]        ),
-        .i_EXEC_rs2           (p_rs2[EXEC]        ),
-        .i_MEM_rd             (p_aluOut[MEM]      ),
-        .i_WB_rd              (WB_result          ),
-        .i_PC                 (p_PC[EXEC]         ),
-        .i_IMM                (p_IMM[EXEC]        ),
-        .o_aluOut             (aluOut             ),
-        .o_addrGenOut         (jumpAddr           )
+        .i_funct7             (p_funct7[EXEC]),
+        .i_funct3             (p_funct3[EXEC]),
+        .i_aluOp              (p_aluOp[EXEC]),
+        .i_fwdRs1             (fwdRs1),
+        .i_fwdRs2             (fwdRs2),
+        .i_aluSrcA            (p_exec_a[EXEC]),
+        .i_aluSrcB            (p_exec_b[EXEC]),
+        .i_EXEC_rs1           (p_rs1[EXEC]),
+        .i_EXEC_rs2           (p_rs2[EXEC]),
+        .i_MEM_rd             (p_aluOut[MEM]),
+        .i_WB_rd              (WB_result),
+        .i_PC                 (p_PC[EXEC]),
+        .i_IMM                (p_IMM[EXEC]),
+        .o_aluOut             (aluOut),
+        .o_addrGenOut         (jumpAddr)
     );
     Memory MEMORY_unit(
         .i_funct3             (p_funct3[MEM]),
         .i_dataIn             (p_rs2[MEM]),
-        .o_dataOut            (dataOut)
+        .o_dataOut            (o_dataOut)
     );
     Writeback WRITEBACK_unit(
         .i_funct3             (p_funct3[WB]),
@@ -103,33 +102,33 @@ module boredcore (
     );
     Hazard HZD_FWD_unit(
         // Forwarding
-        .i_MEM_rd_reg_write   (p_reg_w[MEM]       ),
-        .i_WB_rd_reg_write    (p_reg_w[WB]        ),
-        .i_EXEC_rs1           (p_rs1Addr[EXEC]    ),
-        .i_EXEC_rs2           (p_rs2Addr[EXEC]    ),
-        .i_MEM_rd             (p_rdAddr[MEM]      ),
-        .i_WB_rd              (p_rdAddr[WB]       ),
-        .o_FWD_rs1            (fwdRs1             ),
-        .o_FWD_rs2            (fwdRs2             ),
+        .i_MEM_rd_reg_write   (p_reg_w[MEM]),
+        .i_WB_rd_reg_write    (p_reg_w[WB]),
+        .i_EXEC_rs1           (p_rs1Addr[EXEC]),
+        .i_EXEC_rs2           (p_rs2Addr[EXEC]),
+        .i_MEM_rd             (p_rdAddr[MEM]),
+        .i_WB_rd              (p_rdAddr[WB]),
+        .o_FWD_rs1            (fwdRs1),
+        .o_FWD_rs2            (fwdRs2),
         // Stall and Flush
-        .i_BRA                (braMispredict      ),
-        .i_JMP                (p_jmp[EXEC]        ),
-        .i_FETCH_valid        (ifValid            ),
-        .i_MEM_valid          (memValid           ),
-        .i_EXEC_mem2reg       (p_mem2reg[EXEC]    ),
-        .i_FETCH_rs1          (`RS1(instrReg)     ),
-        .i_FETCH_rs2          (`RS2(instrReg)     ),
-        .i_EXEC_rd            (p_rdAddr[EXEC]     ),
-        .o_FETCH_stall        (FETCH_stall        ),
-        .o_EXEC_stall         (EXEC_stall         ),
-        .o_EXEC_flush         (EXEC_flush         ),
-        .o_MEM_flush          (MEM_flush          )
+        .i_BRA                (braMispredict),
+        .i_JMP                (p_jmp[EXEC]),
+        .i_FETCH_valid        (i_ifValid),
+        .i_MEM_valid          (i_memValid),
+        .i_EXEC_mem2reg       (p_mem2reg[EXEC]),
+        .i_FETCH_rs1          (`RS1(instrReg)),
+        .i_FETCH_rs2          (`RS2(instrReg)),
+        .i_EXEC_rd            (p_rdAddr[EXEC]),
+        .o_FETCH_stall        (FETCH_stall),
+        .o_EXEC_stall         (EXEC_stall),
+        .o_EXEC_flush         (EXEC_flush),
+        .o_MEM_flush          (MEM_flush)
     );
     Regfile #(.DATA_WIDTH(32), .ADDR_WIDTH(5)) REGFILE_unit (
-        .i_clk      (clk),
+        .i_clk      (i_clk),
         .i_wrEn     (p_reg_w[WB]),
-        .i_rs1Addr  (`RS1(instr)),
-        .i_rs2Addr  (`RS2(instr)),
+        .i_rs1Addr  (`RS1(i_instr)),
+        .i_rs2Addr  (`RS2(i_instr)),
         .i_rdAddr   (p_rdAddr[WB]),
         .i_rdData   (WB_result),
         .o_rs1Data  (rs1Out),
@@ -137,61 +136,61 @@ module boredcore (
     );
 
     // Pipeline assignments
-    always @(posedge clk) begin
+    always @(posedge i_clk) begin
         // Execute
-        p_rs1       [EXEC]  <= rst || EXEC_flush || rs1R0 ? 32'd0 : EXEC_stall ? p_rs1     [EXEC] : rs1Out;
-        p_rs2       [EXEC]  <= rst || EXEC_flush || rs2R0 ? 32'd0 : EXEC_stall ? p_rs2     [EXEC] : rs2Out;
-        p_rdAddr    [EXEC]  <= rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
-        p_IMM       [EXEC]  <= rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_IMM     [EXEC] : IMM;
-        p_PC        [EXEC]  <= rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_PC      [EXEC] : PCReg;
-        p_funct3    [EXEC]  <= rst || EXEC_flush ?  3'd0          : EXEC_stall ? p_funct3  [EXEC] : `FUNCT3(instrReg);
-        p_funct7    [EXEC]  <= rst || EXEC_flush ?  7'd0          : EXEC_stall ? p_funct7  [EXEC] : `FUNCT7(instrReg);
-        p_mem_w     [EXEC]  <= rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_mem_w   [EXEC] : mem_w;
-        p_reg_w     [EXEC]  <= rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_reg_w   [EXEC] : writeRd;
-        p_mem2reg   [EXEC]  <= rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_mem2reg [EXEC] : mem2reg;
-        p_rs1Addr   [EXEC]  <= rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rs1Addr [EXEC] : `RS1(instrReg);
-        p_rs2Addr   [EXEC]  <= rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
-        p_aluOp     [EXEC]  <= rst || EXEC_flush ?  4'd0          : EXEC_stall ? p_aluOp   [EXEC] : aluOp;
-        p_exec_a    [EXEC]  <= rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_exec_a  [EXEC] : exec_a;
-        p_exec_b    [EXEC]  <= rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_exec_b  [EXEC] : exec_b;
-        p_bra       [EXEC]  <= rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_bra     [EXEC] : bra;
-        p_jmp       [EXEC]  <= rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_jmp     [EXEC] : jmp;
+        p_rs1       [EXEC]  <= i_rst || EXEC_flush || rs1R0 ? 32'd0 : EXEC_stall ? p_rs1     [EXEC] : rs1Out;
+        p_rs2       [EXEC]  <= i_rst || EXEC_flush || rs2R0 ? 32'd0 : EXEC_stall ? p_rs2     [EXEC] : rs2Out;
+        p_rdAddr    [EXEC]  <= i_rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
+        p_IMM       [EXEC]  <= i_rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_IMM     [EXEC] : IMM;
+        p_PC        [EXEC]  <= i_rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_PC      [EXEC] : PCReg;
+        p_funct3    [EXEC]  <= i_rst || EXEC_flush ?  3'd0          : EXEC_stall ? p_funct3  [EXEC] : `FUNCT3(instrReg);
+        p_funct7    [EXEC]  <= i_rst || EXEC_flush ?  7'd0          : EXEC_stall ? p_funct7  [EXEC] : `FUNCT7(instrReg);
+        p_mem_w     [EXEC]  <= i_rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_mem_w   [EXEC] : mem_w;
+        p_reg_w     [EXEC]  <= i_rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_reg_w   [EXEC] : writeRd;
+        p_mem2reg   [EXEC]  <= i_rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_mem2reg [EXEC] : mem2reg;
+        p_rs1Addr   [EXEC]  <= i_rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rs1Addr [EXEC] : `RS1(instrReg);
+        p_rs2Addr   [EXEC]  <= i_rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
+        p_aluOp     [EXEC]  <= i_rst || EXEC_flush ?  4'd0          : EXEC_stall ? p_aluOp   [EXEC] : aluOp;
+        p_exec_a    [EXEC]  <= i_rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_exec_a  [EXEC] : exec_a;
+        p_exec_b    [EXEC]  <= i_rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_exec_b  [EXEC] : exec_b;
+        p_bra       [EXEC]  <= i_rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_bra     [EXEC] : bra;
+        p_jmp       [EXEC]  <= i_rst || EXEC_flush ?  1'd0          : EXEC_stall ? p_jmp     [EXEC] : jmp;
         // Memory
-        p_mem_w     [MEM]   <= rst || MEM_flush ?  1'd0 : p_mem_w      [EXEC];
-        p_reg_w     [MEM]   <= rst || MEM_flush ?  1'd0 : p_reg_w      [EXEC];
-        p_mem2reg   [MEM]   <= rst || MEM_flush ?  1'd0 : p_mem2reg    [EXEC];
-        p_funct3    [MEM]   <= rst || MEM_flush ?  3'd0 : p_funct3     [EXEC];
-        p_rs2       [MEM]   <= rst || MEM_flush ? 32'd0 : p_rs2        [EXEC];
-        p_aluOut    [MEM]   <= rst || MEM_flush ? 32'd0 : aluOut;
-        p_rdAddr    [MEM]   <= rst || MEM_flush ?  5'd0 : p_rdAddr     [EXEC];
+        p_mem_w     [MEM]   <= i_rst || MEM_flush ?  1'd0 : p_mem_w      [EXEC];
+        p_reg_w     [MEM]   <= i_rst || MEM_flush ?  1'd0 : p_reg_w      [EXEC];
+        p_mem2reg   [MEM]   <= i_rst || MEM_flush ?  1'd0 : p_mem2reg    [EXEC];
+        p_funct3    [MEM]   <= i_rst || MEM_flush ?  3'd0 : p_funct3     [EXEC];
+        p_rs2       [MEM]   <= i_rst || MEM_flush ? 32'd0 : p_rs2        [EXEC];
+        p_aluOut    [MEM]   <= i_rst || MEM_flush ? 32'd0 : aluOut;
+        p_rdAddr    [MEM]   <= i_rst || MEM_flush ?  5'd0 : p_rdAddr     [EXEC];
         // Writeback
-        p_reg_w     [WB]    <= rst ? 1'd0   : p_reg_w       [MEM];
-        p_mem2reg   [WB]    <= rst ? 1'd0   : p_mem2reg     [MEM];
-        p_funct3    [WB]    <= rst ? 3'd0   : p_funct3      [MEM];
-        p_aluOut    [WB]    <= rst ? 32'd0  : p_aluOut      [MEM];
-        p_rdAddr    [WB]    <= rst ? 5'd0   : p_rdAddr      [MEM];
-        p_readData  [WB]    <= rst ? 32'd0  : dataIn;
+        p_reg_w     [WB]    <= i_rst ? 1'd0   : p_reg_w       [MEM];
+        p_mem2reg   [WB]    <= i_rst ? 1'd0   : p_mem2reg     [MEM];
+        p_funct3    [WB]    <= i_rst ? 3'd0   : p_funct3      [MEM];
+        p_aluOut    [WB]    <= i_rst ? 32'd0  : p_aluOut      [MEM];
+        p_rdAddr    [WB]    <= i_rst ? 5'd0   : p_rdAddr      [MEM];
+        p_readData  [WB]    <= i_rst ? 32'd0  : i_dataIn;
     end
 
     // Other CPU datapath reg assignments
-    always @(posedge clk) begin
-        PC          <=  rst         ?   32'd0       :
+    always @(posedge i_clk) begin
+        PC          <=  i_rst       ?   32'd0       :
                         FETCH_stall ?   PC          :
                         pcJump      ?   jumpAddr    :
                                         PC + 32'd4;
         // Buffer PC reg to balance the 2cc BRAM-based regfile read
-        PCReg       <=  rst || EXEC_flush   ?   32'd0       :
+        PCReg       <=  i_rst || EXEC_flush ?   32'd0       :
                         FETCH_stall         ?   PCReg       :
                                                 PC;
         // Buffer instruction fetch to balance the 2cc BRAM-based regfile read
-        instrReg    <=  rst || EXEC_flush   ?   32'd0       :
+        instrReg    <=  i_rst || EXEC_flush ?   32'd0       :
                         FETCH_stall         ?   instrReg    :
-                                                instr;
+                                                i_instr;
     end
 
     // Other output assignments
-    assign pcOut    = PC;
-    assign dataAddr = p_aluOut[MEM];
-    assign dataWe   = p_mem_w[MEM];
+    assign o_pcOut    = PC;
+    assign o_dataAddr = p_aluOut[MEM];
+    assign o_dataWe   = p_mem_w[MEM];
 
 endmodule

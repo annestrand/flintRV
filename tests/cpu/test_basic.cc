@@ -43,13 +43,13 @@ TEST(boredcore, placeholder) {
     int reg_x4 = 0;
     bool done = false;
     while (!sim.end() && !done) {
-        std::string instr   = instructions[cpu->pcOut >> 2];
-        int machine_instr   = (int)std::strtol(machine_code[cpu->pcOut >> 2].c_str(), NULL, 16);
-        cpu->instr          = machine_instr;
-        cpu->dataIn         = 0xdeadc0de;
-        cpu->ifValid        = 1;
-        cpu->memValid       = 1;
-        LOG_I("%08x: 0x%08x   %s\n",cpu->pcOut, machine_instr, instr.c_str());
+        std::string instr   = instructions[cpu->o_pcOut >> 2];
+        int machine_instr   = (int)std::strtol(machine_code[cpu->o_pcOut >> 2].c_str(), NULL, 16);
+        cpu->i_instr          = machine_instr;
+        cpu->i_dataIn         = 0xdeadc0de;
+        cpu->i_ifValid        = 1;
+        cpu->i_memValid       = 1;
+        LOG_I("%08x: 0x%08x   %s\n",cpu->o_pcOut, machine_instr, instr.c_str());
         // Evaluate
         sim.tick();
     }
