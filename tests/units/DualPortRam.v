@@ -3,10 +3,10 @@
 module DualPortRam_tb;
     localparam DATA_WIDTH = 32;
     localparam ADDR_WIDTH = 5;
-    reg                         clk, we;
-    reg     [(DATA_WIDTH-1):0]  dataIn;
-    reg     [(ADDR_WIDTH-1):0]  rAddr, wAddr;
-    wire    [(DATA_WIDTH-1):0]  q;
+    reg                         i_clk, i_we;
+    reg     [(DATA_WIDTH-1):0]  i_dataIn;
+    reg     [(ADDR_WIDTH-1):0]  i_rAddr, i_wAddr;
+    wire    [(DATA_WIDTH-1):0]  o_q;
 
     DualPortRam DualPortRam_dut(.*);
     defparam DualPortRam_dut.DATA_WIDTH = DATA_WIDTH;
@@ -37,29 +37,29 @@ module DualPortRam_tb;
     reg [39:0] resultStr;
     integer i = 0, errs = 0, subfail = 0;
     initial begin
-        clk     = 0;
-        we      = 1;
-        dataIn  = 'd0;
-        rAddr   = 'd0;
-        wAddr   = 'd0;
+        i_clk     = 0;
+        i_we      = 1;
+        i_dataIn  = 'd0;
+        i_rAddr   = 'd0;
+        i_wAddr   = 'd0;
         #20;
         $display("\n=== Writing data =========================================");
         for (i=0; i<10; i=i+1) begin // Write
-            #20; clk = ~clk;
-            wAddr  = i[4:0];
-            dataIn = testData[i];
-            #20; clk = ~clk;
-            $display("Test[ %2d ]: wAddr = %b || dataIn = 0x%08h", i, wAddr, dataIn);
+            #20; i_clk = ~i_clk;
+            i_wAddr  = i[4:0];
+            i_dataIn = testData[i];
+            #20; i_clk = ~i_clk;
+            $display("Test[ %2d ]: i_wAddr = %b || i_dataIn = 0x%08h", i, i_wAddr, i_dataIn);
         end
-        we      = 0;
+        i_we      = 0;
         $display("\n=== Reading data =========================================");
         for (i=0; i<10; i=i+1) begin // Read
-            #20; clk = ~clk;
-            rAddr = i[4:0];
-            #20; clk = ~clk;
-            if (q != testData[i]) resultStr = "ERROR";
-            else                  resultStr = "PASS ";
-            $display("Test[ %2d ]: rAddr = %b || q      = 0x%08h ... %s", i, rAddr, q, resultStr);
+            #20; i_clk = ~i_clk;
+            i_rAddr = i[4:0];
+            #20; i_clk = ~i_clk;
+            if (o_q != testData[i]) resultStr = "ERROR";
+            else                    resultStr = "PASS ";
+            $display("Test[ %2d ]: i_rAddr = %b || o_q      = 0x%08h ... %s", i, i_rAddr, o_q, resultStr);
             if (resultStr == "ERROR") errs = errs + 1;
         end
         if (errs > 0)   $display("\nFAILED: %0d", errs);

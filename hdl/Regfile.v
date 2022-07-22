@@ -24,23 +24,23 @@ module Regfile (
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH)
     ) RS1_PORT (
-        .clk                (i_clk          ),
-        .we                 (i_wrEn         ),
-        .dataIn             (i_rdData       ),
-        .rAddr              (i_rs1Addr      ),
-        .wAddr              (i_rdAddr       ),
-        .q                  (w_rs1PortOut   )
+        .i_clk                (i_clk),
+        .i_we                 (i_wrEn),
+        .i_dataIn             (i_rdData),
+        .i_rAddr              (i_rs1Addr),
+        .i_wAddr              (i_rdAddr),
+        .o_q                  (w_rs1PortOut)
     );
     DualPortRam #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH)
     ) RS2_PORT (
-        .clk                (i_clk          ),
-        .we                 (i_wrEn         ),
-        .dataIn             (i_rdData       ),
-        .rAddr              (i_rs2Addr      ),
-        .wAddr              (i_rdAddr       ),
-        .q                  (w_rs2PortOut   )
+        .i_clk                (i_clk),
+        .i_we                 (i_wrEn),
+        .i_dataIn             (i_rdData),
+        .i_rAddr              (i_rs2Addr),
+        .i_wAddr              (i_rdAddr),
+        .o_q                  (w_rs2PortOut)
     );
 
     always @(posedge i_clk) begin

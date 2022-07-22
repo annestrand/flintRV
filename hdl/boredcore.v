@@ -144,23 +144,23 @@ module boredcore (
         .DATA_WIDTH(32),
         .ADDR_WIDTH(5)
     ) RS1_PORT (
-        .clk                (clk                ),
-        .we                 (p_reg_w[WB]        ),
-        .dataIn             (WB_result          ),
-        .rAddr              (`RS1(instr)        ),
-        .wAddr              (p_rdAddr[WB]       ),
-        .q                  (rs1Out             )
+        .i_clk                (clk),
+        .i_we                 (p_reg_w[WB]),
+        .i_dataIn             (WB_result),
+        .i_rAddr              (`RS1(instr)),
+        .i_wAddr              (p_rdAddr[WB]),
+        .o_q                  (rs1Out)
     );
     DualPortRam #(
         .DATA_WIDTH(32),
         .ADDR_WIDTH(5)
     ) RS2_PORT (
-        .clk                (clk                ),
-        .we                 (p_reg_w[WB]        ),
-        .dataIn             (WB_result          ),
-        .rAddr              (`RS2(instr)        ),
-        .wAddr              (p_rdAddr[WB]       ),
-        .q                  (rs2Out             )
+        .i_clk                (clk),
+        .i_we                 (p_reg_w[WB]),
+        .i_dataIn             (WB_result),
+        .i_rAddr              (`RS2(instr)),
+        .i_wAddr              (p_rdAddr[WB]),
+        .o_q                  (rs2Out)
     );
     // Check if any registers need to be forwarded on fetch stage
     assign rs1FinalOut = rs1FetchFwd ? rdDataSkid : rs1Out;
