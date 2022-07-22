@@ -1,27 +1,27 @@
 `include "types.vh"
 
 module Controller (
-    input       [6:0]   opcode,
-    output  reg [3:0]   aluOp,
-    output  reg         exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp
+    input       [6:0]   i_opcode,
+    output  reg [3:0]   o_aluOp,
+    output  reg         o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp
 );
     // Main ctrl. signals
     always @* begin
-        case (opcode)
-        // Instruction formats
-            `R          : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `R_CTRL;
-            `I_JUMP     : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_JUMP_CTRL;
-            `I_LOAD     : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_LOAD_CTRL;
-            `I_ARITH    : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_ARITH_CTRL;
-            `I_SYS      : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_SYS_CTRL;
-            `I_FENCE    : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `I_FENCE_CTRL;
-            `S          : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `S_CTRL;
-            `B          : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `B_CTRL;
-            `U_LUI      : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `U_LUI_CTRL;
-            `U_AUIPC    : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `U_AUIPC_CTRL;
-            `J          : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = `J_CTRL;
+        case (i_opcode)
             // Invalid opcode - set all lines to 0
-            default     : {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp} = 11'd0;
+            default     : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = 11'd0;
+            // Instruction formats
+            `R          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `R_CTRL;
+            `I_JUMP     : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_JUMP_CTRL;
+            `I_LOAD     : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_LOAD_CTRL;
+            `I_ARITH    : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_ARITH_CTRL;
+            `I_SYS      : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_SYS_CTRL;
+            `I_FENCE    : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_FENCE_CTRL;
+            `S          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `S_CTRL;
+            `B          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `B_CTRL;
+            `U_LUI      : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `U_LUI_CTRL;
+            `U_AUIPC    : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `U_AUIPC_CTRL;
+            `J          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `J_CTRL;
         endcase
     end
 endmodule

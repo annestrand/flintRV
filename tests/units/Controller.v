@@ -1,9 +1,9 @@
 `include "Controller.v"
 
 module Controller_tb;
-    reg     [6:0]   opcode;
-    wire    [3:0]   aluOp;
-    wire            exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp;
+    reg     [6:0]   i_opcode;
+    wire    [3:0]   o_aluOp;
+    wire            o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp;
 
     Controller Controller_dut(.*);
 
@@ -44,14 +44,15 @@ module Controller_tb;
     integer i = 0, errs = 0;
     initial begin
         $display("Running Controller tests...\n");
-        opcode   = 'd0;
+        i_opcode   = 'd0;
         #20;
         for (i=0; i<40; i=i+1) begin
             // Note: RISC-V Verilog Objcopy seems to output big-endian for some reason, swap to little here
             instr  = `ENDIAN_SWP_32(test_vector[i]);
-            opcode = `OPCODE(instr);
+
+            i_opcode = `OPCODE(instr);
             #20;
-            ctrlSignals = {aluOp, exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp};
+            ctrlSignals = {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp};
             if (ctrlSignals != test_gold_vector[i]) resultStr = "ERROR";
             else                                    resultStr = "PASS ";
             $display("Test[ %2d ]: instr = 0x%8h || ctrlSigs = %b ... %s",

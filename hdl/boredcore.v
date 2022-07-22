@@ -65,16 +65,16 @@ module boredcore (
 
     // Core modules
     FetchDecode FETCH_DECODE_unit(
-        .instr              (instrReg           ),
-        .imm                (IMM                ),
-        .aluOp              (aluOp              ),
-        .exec_a             (exec_a             ),
-        .exec_b             (exec_b             ),
-        .mem_w              (mem_w              ),
-        .reg_w              (reg_w              ),
-        .mem2reg            (mem2reg            ),
-        .bra                (bra                ),
-        .jmp                (jmp                )
+        .i_instr              (instrReg),
+        .o_imm                (IMM),
+        .o_aluOp              (aluOp),
+        .o_exec_a             (exec_a),
+        .o_exec_b             (exec_b),
+        .o_mem_w              (mem_w),
+        .o_reg_w              (reg_w),
+        .o_mem2reg            (mem2reg),
+        .o_bra                (bra),
+        .o_jmp                (jmp)
     );
     Execute EXECUTE_unit(
         .i_funct7             (p_funct7[EXEC]     ),
