@@ -34,8 +34,7 @@ module boredcore (
     reg         p_jmp       [EXEC:WB];
 
     // Internal wires/regs
-    reg     [31:0]  PC, PCReg, instrReg, rdDataSkid;
-    reg     [4:0]   rdAddrSkid;
+    reg     [31:0]  PC, PCReg, instrReg;
     wire    [31:0]  IMM,
                     aluOut,
                     jumpAddr,
@@ -53,15 +52,14 @@ module boredcore (
                     FETCH_stall,
                     EXEC_stall,
                     EXEC_flush,
-                    MEM_flush,
-                    rs1FetchFwd,
-                    rs2FetchFwd;
+                    MEM_flush;
     wire    [31:0]  WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
     wire            writeRd         = (`RD(instrReg) != REG_0) ? reg_w : 1'b0;  // Skip regfile write for x0
     wire            pcJump          = braMispredict || p_jmp[EXEC];
     wire            rs1R0           = `RS1(instrReg) == REG_0;
     wire            rs2R0           = `RS2(instrReg) == REG_0;
+    wire    [31:0]  rs1Out, rs2Out;
 
     // Core modules
     FetchDecode FETCH_DECODE_unit(
@@ -105,72 +103,44 @@ module boredcore (
     );
     Hazard HZD_FWD_unit(
         // Forwarding
-        .MEM_rd_reg_write   (p_reg_w[MEM]       ),
-        .WB_rd_reg_write    (p_reg_w[WB]        ),
-        .EXEC_rs1           (p_rs1Addr[EXEC]    ),
-        .EXEC_rs2           (p_rs2Addr[EXEC]    ),
-        .MEM_rd             (p_rdAddr[MEM]      ),
-        .WB_rd              (p_rdAddr[WB]       ),
-        .WB_rd_skid         (rdAddrSkid         ),
-        .FWD_rs1            (fwdRs1             ),
-        .FWD_rs2            (fwdRs2             ),
-        .FWD_rs1_fetch      (rs1FetchFwd        ),
-        .FWD_rs2_fetch      (rs2FetchFwd        ),
+        .i_MEM_rd_reg_write   (p_reg_w[MEM]       ),
+        .i_WB_rd_reg_write    (p_reg_w[WB]        ),
+        .i_EXEC_rs1           (p_rs1Addr[EXEC]    ),
+        .i_EXEC_rs2           (p_rs2Addr[EXEC]    ),
+        .i_MEM_rd             (p_rdAddr[MEM]      ),
+        .i_WB_rd              (p_rdAddr[WB]       ),
+        .o_FWD_rs1            (fwdRs1             ),
+        .o_FWD_rs2            (fwdRs2             ),
         // Stall and Flush
-        .BRA                (braMispredict      ),
-        .JMP                (p_jmp[EXEC]        ),
-        .FETCH_valid        (ifValid            ),
-        .MEM_valid          (memValid           ),
-        .EXEC_mem2reg       (p_mem2reg[EXEC]    ),
-        .FETCH_rs1          (`RS1(instrReg)     ),
-        .FETCH_rs2          (`RS2(instrReg)     ),
-        .EXEC_rd            (p_rdAddr[EXEC]     ),
-        .FETCH_stall        (FETCH_stall        ),
-        .EXEC_stall         (EXEC_stall         ),
-        .EXEC_flush         (EXEC_flush         ),
-        .MEM_flush          (MEM_flush          )
+        .i_BRA                (braMispredict      ),
+        .i_JMP                (p_jmp[EXEC]        ),
+        .i_FETCH_valid        (ifValid            ),
+        .i_MEM_valid          (memValid           ),
+        .i_EXEC_mem2reg       (p_mem2reg[EXEC]    ),
+        .i_FETCH_rs1          (`RS1(instrReg)     ),
+        .i_FETCH_rs2          (`RS2(instrReg)     ),
+        .i_EXEC_rd            (p_rdAddr[EXEC]     ),
+        .o_FETCH_stall        (FETCH_stall        ),
+        .o_EXEC_stall         (EXEC_stall         ),
+        .o_EXEC_flush         (EXEC_flush         ),
+        .o_MEM_flush          (MEM_flush          )
     );
-
-    // Regfile assignments
-    /*
-        NOTE:   Infer 2 copied/synced 32x32 (2048 KBits) BRAMs (i.e. one BRAM per read-port)
-                rather than just 1 32x32 (1024 KBits) BRAM. This is somewhat wasteful but is
-                simpler. Alternate approach is to have the 2 "banks" configured as 2 32x16
-                BRAMs w/ additional banking logic for wr_en and output forwarding
-                (no duplication with this approach but adds some more Tpcq at the output).
-    */
-    wire [31:0] rs1Out, rs2Out, rs1FinalOut, rs2FinalOut;
-    DualPortRam #(
-        .DATA_WIDTH(32),
-        .ADDR_WIDTH(5)
-    ) RS1_PORT (
-        .i_clk                (clk),
-        .i_we                 (p_reg_w[WB]),
-        .i_dataIn             (WB_result),
-        .i_rAddr              (`RS1(instr)),
-        .i_wAddr              (p_rdAddr[WB]),
-        .o_q                  (rs1Out)
+    Regfile #(.DATA_WIDTH(32), .ADDR_WIDTH(5)) REGFILE_unit (
+        .i_clk      (clk),
+        .i_wrEn     (p_reg_w[WB]),
+        .i_rs1Addr  (`RS1(instr)),
+        .i_rs2Addr  (`RS2(instr)),
+        .i_rdAddr   (p_rdAddr[WB]),
+        .i_rdData   (WB_result),
+        .o_rs1Data  (rs1Out),
+        .o_rs2Data  (rs2Out)
     );
-    DualPortRam #(
-        .DATA_WIDTH(32),
-        .ADDR_WIDTH(5)
-    ) RS2_PORT (
-        .i_clk                (clk),
-        .i_we                 (p_reg_w[WB]),
-        .i_dataIn             (WB_result),
-        .i_rAddr              (`RS2(instr)),
-        .i_wAddr              (p_rdAddr[WB]),
-        .o_q                  (rs2Out)
-    );
-    // Check if any registers need to be forwarded on fetch stage
-    assign rs1FinalOut = rs1FetchFwd ? rdDataSkid : rs1Out;
-    assign rs2FinalOut = rs2FetchFwd ? rdDataSkid : rs2Out;
 
     // Pipeline assignments
     always @(posedge clk) begin
         // Execute
-        p_rs1       [EXEC]  <= rst || EXEC_flush || rs1R0 ? 32'd0 : EXEC_stall ? p_rs1     [EXEC] : rs1FinalOut;
-        p_rs2       [EXEC]  <= rst || EXEC_flush || rs2R0 ? 32'd0 : EXEC_stall ? p_rs2     [EXEC] : rs2FinalOut;
+        p_rs1       [EXEC]  <= rst || EXEC_flush || rs1R0 ? 32'd0 : EXEC_stall ? p_rs1     [EXEC] : rs1Out;
+        p_rs2       [EXEC]  <= rst || EXEC_flush || rs2R0 ? 32'd0 : EXEC_stall ? p_rs2     [EXEC] : rs2Out;
         p_rdAddr    [EXEC]  <= rst || EXEC_flush ?  5'd0          : EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
         p_IMM       [EXEC]  <= rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_IMM     [EXEC] : IMM;
         p_PC        [EXEC]  <= rst || EXEC_flush ? 32'd0          : EXEC_stall ? p_PC      [EXEC] : PCReg;
@@ -209,20 +179,14 @@ module boredcore (
                         FETCH_stall ?   PC          :
                         pcJump      ?   jumpAddr    :
                                         PC + 32'd4;
-        // Buffer instruction fetch to balance the 2cc BRAM-based regfile read
-        instrReg    <=  rst || EXEC_flush   ?   32'd0       :
-                        FETCH_stall         ?   instrReg    :
-                                                instr;
         // Buffer PC reg to balance the 2cc BRAM-based regfile read
         PCReg       <=  rst || EXEC_flush   ?   32'd0       :
                         FETCH_stall         ?   PCReg       :
                                                 PC;
-
-        // Regs handle hazard case when writing to regfile at the same time we grab reg data during fetch/decode stage
-        rdDataSkid  <=  rst ?   32'd0       :
-                                WB_result;
-        rdAddrSkid  <=  rst ?   5'd0        :
-                                p_rdAddr[WB];
+        // Buffer instruction fetch to balance the 2cc BRAM-based regfile read
+        instrReg    <=  rst || EXEC_flush   ?   32'd0       :
+                        FETCH_stall         ?   instrReg    :
+                                                instr;
     end
 
     // Other output assignments
