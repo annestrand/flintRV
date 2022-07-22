@@ -1,9 +1,9 @@
 `include "ALU.v"
 
 module IAlu_tb;
-    reg     [31:0]  a, b;
-    reg     [4:0]   op;
-    wire    [31:0]  result;
+    reg     [31:0]  i_a, i_b;
+    reg     [4:0]   i_op;
+    wire    [31:0]  o_result;
 
     ALU Alu_dut(.*);
     defparam Alu_dut.WIDTH = 32;
@@ -28,18 +28,18 @@ module IAlu_tb;
     integer i = 0, errs = 0, subfail = 0;
     initial begin
         $display("Running random ALU tests...\n");
-        a       = 'd0;
-        b       = 'd0;
-        op      = 'd0;
+        i_a       = 'd0;
+        i_b       = 'd0;
+        i_op      = 'd0;
         #20;
         for (i=0; i<16; i=i+1) begin
             subfail = 0;
-            {a,b,op} = test_vector[i];
+            {i_a,i_b,i_op} = test_vector[i];
             #20;
-            if ($signed(result) != $signed(test_gold_vector[i]))   resultStr = "ERROR";
+            if ($signed(o_result) != $signed(test_gold_vector[i])) resultStr = "ERROR";
             else                                                   resultStr = "PASS ";
-            $display("Test[ %2d ]: a = %10d | b = %10d | op = %2d || result = %10d ... %s",
-                i, $signed(a), $signed(b), op, $signed(result), resultStr
+            $display("Test[ %2d ]: i_a = %10d | i_b = %10d | i_op = %2d || o_result = %10d ... %s",
+                i, $signed(i_a), $signed(i_b), i_op, $signed(o_result), resultStr
             );
             if (resultStr == "ERROR") errs = errs + 1;
         end

@@ -1,10 +1,10 @@
 `include "ALU_Control.v"
 
 module AluControl_tb;
-    reg     [3:0] aluOp;
-    reg     [6:0] funct7;
-    reg     [2:0] funct3;
-    wire    [4:0] aluControl;
+    reg     [3:0] i_aluOp;
+    reg     [6:0] i_funct7;
+    reg     [2:0] i_funct3;
+    wire    [4:0] o_aluControl;
 
     ALU_Control IAluControl_dut(.*);
 
@@ -29,30 +29,30 @@ module AluControl_tb;
     integer i = 0, errs = 0, subfail = 0;
     initial begin
         $display("Running ALU control tests...\n");
-        aluOp   = 'd0;
-        funct3  = 'd0;
-        funct7  = 'd0;
+        i_aluOp   = 'd0;
+        i_funct3  = 'd0;
+        i_funct7  = 'd0;
         #20;
         for (i=0; i<40; i=i+1) begin
             instr = `ENDIAN_SWP_32(test_vector[i]);
-            if      (`OPCODE(instr) == `R      ) aluOp = `ALU_OP_R;
-            else if (`OPCODE(instr) == `I_JUMP ) aluOp = `ALU_OP_I_JUMP;
-            else if (`OPCODE(instr) == `I_LOAD ) aluOp = `ALU_OP_I_LOAD;
-            else if (`OPCODE(instr) == `I_ARITH) aluOp = `ALU_OP_I_ARITH;
-            else if (`OPCODE(instr) == `I_SYS  ) aluOp = `ALU_OP_I_SYS;
-            else if (`OPCODE(instr) == `I_FENCE) aluOp = `ALU_OP_I_FENCE;
-            else if (`OPCODE(instr) == `S      ) aluOp = `ALU_OP_S;
-            else if (`OPCODE(instr) == `B      ) aluOp = `ALU_OP_B;
-            else if (`OPCODE(instr) == `U_LUI  ) aluOp = `ALU_OP_U_LUI;
-            else if (`OPCODE(instr) == `U_AUIPC) aluOp = `ALU_OP_U_AUIPC;
-            else if (`OPCODE(instr) == `J      ) aluOp = `ALU_OP_J;
-            funct3 = `FUNCT3(instr);
-            funct7 = `FUNCT7(instr);
+            if      (`OPCODE(instr) == `R      ) i_aluOp = `ALU_OP_R;
+            else if (`OPCODE(instr) == `I_JUMP ) i_aluOp = `ALU_OP_I_JUMP;
+            else if (`OPCODE(instr) == `I_LOAD ) i_aluOp = `ALU_OP_I_LOAD;
+            else if (`OPCODE(instr) == `I_ARITH) i_aluOp = `ALU_OP_I_ARITH;
+            else if (`OPCODE(instr) == `I_SYS  ) i_aluOp = `ALU_OP_I_SYS;
+            else if (`OPCODE(instr) == `I_FENCE) i_aluOp = `ALU_OP_I_FENCE;
+            else if (`OPCODE(instr) == `S      ) i_aluOp = `ALU_OP_S;
+            else if (`OPCODE(instr) == `B      ) i_aluOp = `ALU_OP_B;
+            else if (`OPCODE(instr) == `U_LUI  ) i_aluOp = `ALU_OP_U_LUI;
+            else if (`OPCODE(instr) == `U_AUIPC) i_aluOp = `ALU_OP_U_AUIPC;
+            else if (`OPCODE(instr) == `J      ) i_aluOp = `ALU_OP_J;
+            i_funct3 = `FUNCT3(instr);
+            i_funct7 = `FUNCT7(instr);
             #20;
-            if (aluControl != test_gold_vector[i]) resultStr = "ERROR";
-            else                                   resultStr = "PASS ";
-            $display("Test[ %2d ]: aluOp = %b | funct3 = %b | funct7 = %b || aluControl = %b ... %s",
-                i, aluOp, funct3, funct7, aluControl, resultStr
+            if (o_aluControl != test_gold_vector[i]) resultStr = "ERROR";
+            else                                     resultStr = "PASS ";
+            $display("Test[ %2d ]: i_aluOp = %b | i_funct3 = %b | i_funct7 = %b || o_aluControl = %b ... %s",
+                i, i_aluOp, i_funct3, i_funct7, o_aluControl, resultStr
             );
             if (resultStr == "ERROR") errs = errs + 1;
         end

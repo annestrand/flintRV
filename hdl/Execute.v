@@ -1,54 +1,52 @@
 `include "types.vh"
 
 module Execute (
-    input   [6:0]   funct7,
-    input   [2:0]   funct3,
-    input   [3:0]   aluOp,
-    input   [1:0]   fwdRs1, fwdRs2,
-    input           aluSrcA, aluSrcB,
-    input   [31:0]  EXEC_rs1, EXEC_rs2, MEM_rd, WB_rd,
-    input   [31:0]  PC, IMM,
-    output  [31:0]  aluOut, addrGenOut
+    input   [6:0]   i_funct7,
+    input   [2:0]   i_funct3,
+    input   [3:0]   i_aluOp,
+    input   [1:0]   i_fwdRs1, i_fwdRs2,
+    input           i_aluSrcA, i_aluSrcB,
+    input   [31:0]  i_EXEC_rs1, i_EXEC_rs2, i_MEM_rd, i_WB_rd,
+    input   [31:0]  i_PC, i_IMM,
+    output  [31:0]  o_aluOut, o_addrGenOut
 );
     // Datapath for register forwarding
     reg [31:0] rs1Out, rs2Out;
     always@(*) begin
-        case (fwdRs1)
-            `NO_FWD     : rs1Out = EXEC_rs1;
-            `FWD_MEM    : rs1Out = MEM_rd;
-            `FWD_WB     : rs1Out = WB_rd;
-            default     : rs1Out = EXEC_rs1;
+        case (i_fwdRs1)
+            `NO_FWD     : rs1Out = i_EXEC_rs1;
+            `FWD_MEM    : rs1Out = i_MEM_rd;
+            `FWD_WB     : rs1Out = i_WB_rd;
+            default     : rs1Out = i_EXEC_rs1;
         endcase
-        case (fwdRs2)
-            `NO_FWD     : rs2Out = EXEC_rs2;
-            `FWD_MEM    : rs2Out = MEM_rd;
-            `FWD_WB     : rs2Out = WB_rd;
-            default     : rs2Out = EXEC_rs2;
+        case (i_fwdRs2)
+            `NO_FWD     : rs2Out = i_EXEC_rs2;
+            `FWD_MEM    : rs2Out = i_MEM_rd;
+            `FWD_WB     : rs2Out = i_WB_rd;
+            default     : rs2Out = i_EXEC_rs2;
         endcase
     end
 
     // Datapath for ALU srcs
-    wire [31:0] aluSrcAin = (aluSrcA == `PC ) ? PC  : rs1Out;
-    wire [31:0] aluSrcBin = (aluSrcB == `IMM) ? IMM : rs2Out;
+    wire [31:0] aluSrcAin = (i_aluSrcA == `PC ) ? i_PC  : rs1Out;
+    wire [31:0] aluSrcBin = (i_aluSrcB == `IMM) ? i_IMM : rs2Out;
 
     // ALU/ALU_Control
     wire [4:0]  aluControl;
-    ALU_Control ALU_CTRL_unit(
-        .aluOp      (aluOp),
-        .funct7     (funct7),
-        .funct3     (funct3),
-        .aluControl (aluControl)
+    ALU_Control ALU_CTRL_unit (
+        .i_aluOp        (i_aluOp),
+        .i_funct7       (i_funct7),
+        .i_funct3       (i_funct3),
+        .o_aluControl   (aluControl)
     );
-
-    ALU #(
-        .WIDTH(32)
-    ) alu_unit (
-        .a      (aluSrcAin),
-        .b      (aluSrcBin),
-        .op     (aluControl),
-        .result (aluOut)
+    ALU #(.WIDTH(32)) alu_unit (
+        .i_a      (aluSrcAin),
+        .i_b      (aluSrcBin),
+        .i_op     (aluControl),
+        .o_result (o_aluOut)
     );
 
     // Address generator
-    assign addrGenOut = PC + IMM;
+    assign o_addrGenOut = i_PC + i_IMM;
+
 endmodule

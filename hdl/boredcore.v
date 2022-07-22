@@ -77,21 +77,21 @@ module boredcore (
         .jmp                (jmp                )
     );
     Execute EXECUTE_unit(
-        .funct7             (p_funct7[EXEC]     ),
-        .funct3             (p_funct3[EXEC]     ),
-        .aluOp              (p_aluOp[EXEC]      ),
-        .fwdRs1             (fwdRs1             ),
-        .fwdRs2             (fwdRs2             ),
-        .aluSrcA            (p_exec_a[EXEC]     ),
-        .aluSrcB            (p_exec_b[EXEC]     ),
-        .EXEC_rs1           (p_rs1[EXEC]        ),
-        .EXEC_rs2           (p_rs2[EXEC]        ),
-        .MEM_rd             (p_aluOut[MEM]      ),
-        .WB_rd              (WB_result          ),
-        .PC                 (p_PC[EXEC]         ),
-        .IMM                (p_IMM[EXEC]        ),
-        .aluOut             (aluOut             ),
-        .addrGenOut         (jumpAddr           )
+        .i_funct7             (p_funct7[EXEC]     ),
+        .i_funct3             (p_funct3[EXEC]     ),
+        .i_aluOp              (p_aluOp[EXEC]      ),
+        .i_fwdRs1             (fwdRs1             ),
+        .i_fwdRs2             (fwdRs2             ),
+        .i_aluSrcA            (p_exec_a[EXEC]     ),
+        .i_aluSrcB            (p_exec_b[EXEC]     ),
+        .i_EXEC_rs1           (p_rs1[EXEC]        ),
+        .i_EXEC_rs2           (p_rs2[EXEC]        ),
+        .i_MEM_rd             (p_aluOut[MEM]      ),
+        .i_WB_rd              (WB_result          ),
+        .i_PC                 (p_PC[EXEC]         ),
+        .i_IMM                (p_IMM[EXEC]        ),
+        .o_aluOut             (aluOut             ),
+        .o_addrGenOut         (jumpAddr           )
     );
     Memory MEMORY_unit(
         .funct3             (p_funct3[MEM]      ),
