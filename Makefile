@@ -1,51 +1,51 @@
 ifdef TC_TRIPLE
-TOOLCHAIN_PREFIX    := $(TC_TRIPLE)
+TOOLCHAIN_PREFIX       := $(TC_TRIPLE)
 else
-TOOLCHAIN_PREFIX    := riscv64-unknown-elf
+TOOLCHAIN_PREFIX       := riscv64-unknown-elf
 endif
-CC                  := $(TOOLCHAIN_PREFIX)-gcc
-AS                  := $(TOOLCHAIN_PREFIX)-as
-OBJCOPY             := $(TOOLCHAIN_PREFIX)-objcopy
-OBJDUMP             := $(TOOLCHAIN_PREFIX)-objdump
+CC                     := $(TOOLCHAIN_PREFIX)-gcc
+AS                     := $(TOOLCHAIN_PREFIX)-as
+OBJCOPY                := $(TOOLCHAIN_PREFIX)-objcopy
+OBJDUMP                := $(TOOLCHAIN_PREFIX)-objdump
 
-IVERILOG_FLAGS      := -Wall
-IVERILOG_FLAGS      += -Ihdl
-IVERILOG_FLAGS      += -DSIM
-IVERILOG_FLAGS      += -DDUMP_VCD
+IVERILOG_FLAGS         := -Wall
+IVERILOG_FLAGS         += -Ihdl
+IVERILOG_FLAGS         += -DSIM
+IVERILOG_FLAGS         += -DDUMP_VCD
 
-ROOT_DIR            := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
-DOCKER_CMD          := docker exec -u user -w /src boredcore
-DOCKER_RUNNING      := $(shell docker ps -a -q -f name=boredcore)
+DOCKER_CMD             := docker exec -u user -w /src boredcore
+DOCKER_RUNNING         := $(shell docker ps -a -q -f name=boredcore)
 else
-DOCKER_CMD          :=
+DOCKER_CMD             :=
 endif
 
-GTEST_BASEDIR       ?= /usr/local/lib
+GTEST_BASEDIR          ?= /usr/local/lib
 
-VERILATOR_VER       := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
+VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
 
-VERILATOR_CFLAGS    := -g
-VERILATOR_CFLAGS    += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
-VERILATOR_CFLAGS    += -DVERILATOR_VER=$(VERILATOR_VER)
+VERILATOR_CFLAGS       := -g
+VERILATOR_CFLAGS       += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
+VERILATOR_CFLAGS       += -DVERILATOR_VER=$(VERILATOR_VER)
 ifdef TEST_VERBOSE
-VERILATOR_CFLAGS    += -DVERBOSE
+VERILATOR_CFLAGS       += -DVERBOSE
 endif
 
-VERILATOR_FLAGS     := -Wall
-VERILATOR_FLAGS     += -Ihdl
-VERILATOR_FLAGS     += --trace
-VERILATOR_FLAGS     += -CFLAGS "$(VERILATOR_CFLAGS)"
-VERILATOR_FLAGS     += -LDFLAGS "$(GTEST_BASEDIR)/libgtest_main.a $(GTEST_BASEDIR)/libgtest.a -lpthread"
-VERILATOR_FLAGS     += --x-assign unique
-VERILATOR_FLAGS     += --x-initial unique
+VERILATOR_FLAGS        := -Wall
+VERILATOR_FLAGS        += -Ihdl
+VERILATOR_FLAGS        += --trace
+VERILATOR_FLAGS        += -CFLAGS "$(VERILATOR_CFLAGS)"
+VERILATOR_FLAGS        += -LDFLAGS "$(GTEST_BASEDIR)/libgtest_main.a $(GTEST_BASEDIR)/libgtest.a -lpthread"
+VERILATOR_FLAGS        += --x-assign unique
+VERILATOR_FLAGS        += --x-initial unique
 
-vpath %.v           tests
-vpath %.py          scripts
+vpath %.v tests
+vpath %.py scripts
 
-HDL_SRCS            := $(shell find hdl -type f -name "*.v")
-TEST_PY_MEM         := $(shell find scripts -type f -name "unit_*.mem.py" -exec basename {} \;)
-TEST_PY_ASM         := $(shell find scripts -type f -name "unit_*.asm.py" -exec basename {} \;)
+HDL_SRCS               := $(shell find hdl -type f -name "*.v")
+TEST_PY_MEM            := $(shell find scripts -type f -name "unit_*.mem.py" -exec basename {} \;)
+TEST_PY_ASM            := $(shell find scripts -type f -name "unit_*.asm.py" -exec basename {} \;)
 
 VERILATOR_SRCS         := $(shell find tests/cpu -type f -name "*.cc")
 VERILATOR_TEST_ASM     := $(shell find tests/cpu/programs -type f -name "*.s" -exec basename {} \;)
@@ -55,13 +55,13 @@ VERILATOR_TEST_ELF     := $(VERILATOR_TEST_SRCS:%.s=%.elf)
 VERILATOR_TEST_MEM     := $(VERILATOR_TEST_ELF:%.elf=%.mem)
 VERILATOR_TEST_ASM_MEM := $(VERILATOR_TEST_ASM:%.s=obj_dir/%.mem)
 
-IVERILOG_ALL_SRCS   := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
-IVERILOG_MEMH_SRCS  := $(TEST_PY_MEM:unit_%.mem.py=%.v)
-IVERILOG_MEMH_OBJS  := $(IVERILOG_MEMH_SRCS:%.v=out/%.mem.out)
-IVERILOG_ASM_SRCS   := $(TEST_PY_ASM:unit_%.asm.py=%.v)
-IVERILOG_ASM_OBJS   := $(IVERILOG_ASM_SRCS:%.v=out/%.asm.out)
-IVERILOG_PLAIN_SRCS := $(filter-out $(IVERILOG_MEMH_SRCS) $(IVERILOG_ASM_SRCS), $(IVERILOG_ALL_SRCS))
-IVERILOG_PLAIN_OBJS := $(IVERILOG_PLAIN_SRCS:%.v=out/%.out)
+IVERILOG_ALL_SRCS      := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
+IVERILOG_MEMH_SRCS     := $(TEST_PY_MEM:unit_%.mem.py=%.v)
+IVERILOG_MEMH_OBJS     := $(IVERILOG_MEMH_SRCS:%.v=out/%.mem.out)
+IVERILOG_ASM_SRCS      := $(TEST_PY_ASM:unit_%.asm.py=%.v)
+IVERILOG_ASM_OBJS      := $(IVERILOG_ASM_SRCS:%.v=out/%.asm.out)
+IVERILOG_PLAIN_SRCS    := $(filter-out $(IVERILOG_MEMH_SRCS) $(IVERILOG_ASM_SRCS), $(IVERILOG_ALL_SRCS))
+IVERILOG_PLAIN_OBJS    := $(IVERILOG_PLAIN_SRCS:%.v=out/%.out)
 
 out/unit_%.mem: unit_%.mem.py
 	python3 $<
