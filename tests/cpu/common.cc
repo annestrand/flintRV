@@ -54,10 +54,11 @@ std::vector<std::string> asmFileReader(std::string filePath) {
     }
     std::string line;
     while (std::getline(f, line)) {
-        if (line.find("#") != std::string::npos) {
+        leftTrimWhitespace(line);
+        // Skip line if it starts off as a code comment
+        if (line.find("#") != std::string::npos && line.find("#") == 0) {
             continue;
         }
-        leftTrimWhitespace(line);
         contents.push_back(line);
     }
     f.close();

@@ -13,12 +13,8 @@
 #include "boredcore.hh"
 #include "common.hh"
 
-#ifndef BASE_PATH // This is defined to be in "obj_dir/" by default - just adding placeholder here
-#define BASE_PATH "."
-#endif
-
 // ====================================================================================================================
-TEST(boredcore, placeholder) {
+TEST(boredcore, simple_loop) {
     Vboredcore *cpu = new Vboredcore;
     simulation sim  = simulation(200);
     if (!sim.create(cpu, "obj_dir/waveform.vcd")) {
@@ -28,11 +24,11 @@ TEST(boredcore, placeholder) {
     std::vector<std::string> instructions;
     std::vector<std::string> machine_code;
     std::string basedir(BASE_PATH);
-    instructions = asmFileReader(basedir + "/../tests/cpu/programs/test_asm.s");
+    instructions = asmFileReader(basedir + "/../tests/cpu/programs/cpu_simple_loop.s");
     if (instructions.empty()) {
         FAIL() << "Could not read ASM file!";
     }
-    machine_code = machineCodeFileReader(basedir + "/test_asm.mem");
+    machine_code = machineCodeFileReader(basedir + "/cpu_simple_loop.mem");
     if (machine_code.empty()) {
         FAIL() << "Could not read machine-code file!";
     }
@@ -40,17 +36,21 @@ TEST(boredcore, placeholder) {
 
     // Simulation loop
     sim.reset(2); // Hold reset line for 2cc
-    int reg_x4 = 0;
     bool done = false;
+    constexpr int j = 8;
+    constexpr int doneReg = 1;
+    constexpr int expectedResult = 45;
     while (!sim.end() && !done) {
         std::string instr   = instructions[cpu->o_pcOut >> 2];
         int machine_instr   = (int)std::strtol(machine_code[cpu->o_pcOut >> 2].c_str(), NULL, 16);
-        cpu->i_instr          = machine_instr;
-        cpu->i_dataIn         = 0xdeadc0de;
-        cpu->i_ifValid        = 1;
-        cpu->i_memValid       = 1;
-        LOG_I("%08x: 0x%08x   %s\n",cpu->o_pcOut, machine_instr, instr.c_str());
+        cpu->i_instr        = machine_instr;
+        cpu->i_dataIn       = 0xdeadc0de;
+        cpu->i_ifValid      = 1;
+        cpu->i_memValid     = 1;
+        LOG_I("%08x: 0x%08x   %s\n", cpu->o_pcOut, machine_instr, instr.c_str());
+        done = cpu(&sim)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[doneReg] == -1;
         // Evaluate
         sim.tick();
     }
+    EXPECT_EQ(cpu(&sim)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[j], expectedResult);
 }

@@ -23,10 +23,19 @@ endif
 
 GTEST_BASEDIR       ?= /usr/local/lib
 
+VERILATOR_VER       := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
+
+VERILATOR_CFLAGS    := -g
+VERILATOR_CFLAGS    += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
+VERILATOR_CFLAGS    += -DVERILATOR_VER=$(VERILATOR_VER)
+ifdef TEST_VERBOSE
+VERILATOR_CFLAGS    += -DVERBOSE
+endif
+
 VERILATOR_FLAGS     := -Wall
 VERILATOR_FLAGS     += -Ihdl
 VERILATOR_FLAGS     += --trace
-VERILATOR_FLAGS     += -CFLAGS "-g -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'"
+VERILATOR_FLAGS     += -CFLAGS "$(VERILATOR_CFLAGS)"
 VERILATOR_FLAGS     += -LDFLAGS "$(GTEST_BASEDIR)/libgtest_main.a $(GTEST_BASEDIR)/libgtest.a -lpthread"
 VERILATOR_FLAGS     += --x-assign unique
 VERILATOR_FLAGS     += --x-initial unique
@@ -38,11 +47,13 @@ HDL_SRCS            := $(shell find hdl -type f -name "*.v")
 TEST_PY_MEM         := $(shell find scripts -type f -name "unit_*.mem.py" -exec basename {} \;)
 TEST_PY_ASM         := $(shell find scripts -type f -name "unit_*.asm.py" -exec basename {} \;)
 
-VERILATOR_SRCS      := $(shell find tests/cpu -type f -name "*.cc")
-VERILATOR_PY_SRCS   := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
-VERILATOR_TEST_SRCS := $(VERILATOR_PY_SRCS:%.asm.py=obj_dir/%.s)
-VERILATOR_TEST_ELF  := $(VERILATOR_TEST_SRCS:%.s=%.elf)
-VERILATOR_TEST_MEM  := $(VERILATOR_TEST_ELF:%.elf=%.mem)
+VERILATOR_SRCS         := $(shell find tests/cpu -type f -name "*.cc")
+VERILATOR_TEST_ASM     := $(shell find tests/cpu/programs -type f -name "*.s" -exec basename {} \;)
+VERILATOR_PY_SRCS      := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
+VERILATOR_TEST_SRCS    := $(VERILATOR_PY_SRCS:%.asm.py=obj_dir/%.s)
+VERILATOR_TEST_ELF     := $(VERILATOR_TEST_SRCS:%.s=%.elf)
+VERILATOR_TEST_MEM     := $(VERILATOR_TEST_ELF:%.elf=%.mem)
+VERILATOR_TEST_ASM_MEM := $(VERILATOR_TEST_ASM:%.s=obj_dir/%.mem)
 
 IVERILOG_ALL_SRCS   := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
 IVERILOG_MEMH_SRCS  := $(TEST_PY_MEM:unit_%.mem.py=%.v)
@@ -87,7 +98,6 @@ obj_dir/cpu_%.elf: obj_dir/cpu_%.s
 obj_dir/cpu_%.mem: obj_dir/cpu_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
-# Remove these ones later
 obj_dir/%.elf: tests/cpu/programs/%.s
 	$(DOCKER_CMD) $(AS) -o $@ $<
 
@@ -96,7 +106,7 @@ obj_dir/%.mem: obj_dir/%.elf
 
 # Main build is simulating CPU with Verilator
 .PHONY: all
-all: build-dir $(VERILATOR_TEST_MEM) obj_dir/test_asm.mem obj_dir/Vboredcore.cpp
+all: build-dir $(VERILATOR_TEST_MEM) $(VERILATOR_TEST_ASM_MEM) obj_dir/Vboredcore.cpp
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
 	@printf "\nAll done building cpu-tests.\n"
 
