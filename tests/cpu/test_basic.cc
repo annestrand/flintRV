@@ -15,9 +15,8 @@
 
 // ====================================================================================================================
 TEST(boredcore, simple_loop) {
-    Vboredcore *cpu = new Vboredcore;
     simulation sim  = simulation(200);
-    if (!sim.create(cpu, "obj_dir/waveform.vcd")) {
+    if (!sim.create(new Vboredcore(), "obj_dir/waveform.vcd")) {
         FAIL() << "Failed to create waveform.vcd file!";
     }
     // Read test vector files
@@ -39,16 +38,17 @@ TEST(boredcore, simple_loop) {
     bool done = false;
     constexpr int j = 8;
     constexpr int doneReg = 1;
+    constexpr int simDoneVal = -1;
     constexpr int expectedResult = 45;
     while (!sim.end() && !done) {
-        std::string instr   = instructions[cpu->o_pcOut >> 2];
-        int machine_instr   = (int)std::strtol(machine_code[cpu->o_pcOut >> 2].c_str(), NULL, 16);
-        cpu->i_instr        = machine_instr;
-        cpu->i_dataIn       = 0xdeadc0de;
-        cpu->i_ifValid      = 1;
-        cpu->i_memValid     = 1;
+        std::string instr       = instructions[sim.m_cpu->o_pcOut >> 2];
+        int machine_instr       = (int)std::strtol(machine_code[sim.m_cpu->o_pcOut >> 2].c_str(), NULL, 16);
+        sim.m_cpu->i_instr      = machine_instr;
+        sim.m_cpu->i_dataIn     = 0xdeadc0de;
+        sim.m_cpu->i_ifValid    = 1;
+        sim.m_cpu->i_memValid   = 1;
         LOG_I("%08x: 0x%08x   %s\n", cpu->o_pcOut, machine_instr, instr.c_str());
-        done = cpu(&sim)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[doneReg] == -1;
+        done = cpu(&sim)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[doneReg] == simDoneVal;
         // Evaluate
         sim.tick();
     }

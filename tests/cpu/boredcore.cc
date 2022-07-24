@@ -19,6 +19,11 @@ simulation::simulation(vluint64_t maxSimTime) :
 // ====================================================================================================================
 bool simulation::create(Vboredcore* cpu, const char* traceFile) {
     LOG_I("Creating simulation...\n");
+    if (cpu == nullptr) {
+        LOG_E("Failed to create Verilated boredcore module!\n");
+        return false;
+    }
+    m_cpu = cpu;
     Verilated::traceEverOn(true);
     if (m_trace == nullptr) {
         m_trace = new VerilatedVcdC;
@@ -26,7 +31,6 @@ bool simulation::create(Vboredcore* cpu, const char* traceFile) {
             LOG_W("Failed to create boredcore trace unit!\n");
             return false;
         }
-        m_cpu = cpu;
         m_cpu->trace(m_trace, 99);
         m_trace->open(traceFile);
     }
@@ -58,7 +62,6 @@ void simulation::tick() {
 bool simulation::end() { return (Verilated::gotFinish() || m_cycles > m_maxSimTime); }
 // ====================================================================================================================
 simulation::~simulation() {
-    printf("\n");
     LOG_I("Cleaning up simulation...\n");
     m_trace->close();
     delete m_cpu;
