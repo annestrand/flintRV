@@ -67,7 +67,7 @@ TEST(boredcore, simple_logic) { // Tests all the core logic functions of ALU (e.
 
     bool done = false;
     constexpr int doneReg = 6;      // x6
-    constexpr int resultReg = 31;   // x30
+    constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
     while (!sim.end() && !done) {
         std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
@@ -105,7 +105,7 @@ TEST(boredcore, simple_arith) { // Tests all the core arithmetic functions of AL
 
     bool done = false;
     constexpr int doneReg = 13;     // x13
-    constexpr int resultReg = 31;   // x30
+    constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
     while (!sim.end() && !done) {
         std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
@@ -136,7 +136,7 @@ TEST(boredcore, simple_jump) { // Tests all the core branch instructions (e.g. B
 
     bool done = false;
     constexpr int doneReg = 13;     // x13
-    constexpr int resultReg = 31;   // x30
+    constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
     while (!sim.end() && !done) {
         std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
