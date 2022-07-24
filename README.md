@@ -55,6 +55,10 @@ To build and start the container (need to run at least once to ensure container 
 
     $ make docker
 
-Then to build the functional tests:
+To build the CPU tests:
 
-    $ make unit DOCKER=ON
+    $ make DOCKER=ON
+
+Then to build the submodule tests:
+
+    $ make sub DOCKER=ON
