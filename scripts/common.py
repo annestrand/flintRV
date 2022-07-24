@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 
 import os
+import sys
 import random
+import argparse
 from enum import Enum
 from typing import List
 
@@ -33,6 +35,12 @@ class AluTypes(Enum):
     SLTU    = 13
     SGTE    = 14
     SGTEU   = 15
+
+def parseArgv(argv):
+    parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument("-out", dest="outDir", default="obj_dir/sub", help="Output directory.")
+    args, unknown = parser.parse_known_args(args=argv)
+    return args
 
 def basenameNoExt(outputBaseDir, file):
     '''My testgen scripts use double extensions for naming - helper function for just getting name with no extension'''

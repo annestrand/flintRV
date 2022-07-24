@@ -78,11 +78,11 @@ arithTestProgram    = f'''
 
 if __name__ == "__main__":
     # Input test vectors
-    outfile = f"{basenameNoExt('obj_dir', __file__)}.s"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.s"
     with open(outfile, 'w') as fp:
         print(arithTestProgram, file=fp)
     # Init regfile values:
-    outfile = f"{basenameNoExt('obj_dir', __file__)}.regs"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.regs"
     with open(outfile, 'w') as fp:
         print(arithRs1 , file=fp)
         print(arithRs2 , file=fp)

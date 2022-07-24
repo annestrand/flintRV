@@ -11,7 +11,7 @@ test_vector_b       = [
 test_vector_op      = [x for x in range(2**4)]
 
 if __name__ == "__main__":
-    outfile = f"{basenameNoExt('out', __file__)}.mem"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.mem"
     with open(outfile, 'w') as fp:
         for i in range(2**4):
             test_vector  = f"{test_vector_a[i]  & 0xffffffff:032b}"
@@ -19,7 +19,7 @@ if __name__ == "__main__":
             test_vector += f"{test_vector_op[i] & 0xf:05b}"
             print(test_vector, file=fp)
 
-    outfileGold = f"{basenameNoExt('out', __file__)}_gold.mem"
+    outfileGold = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_gold.mem"
     with open(outfileGold, 'w') as fp:
         for i in range(2**4):
             val = 0

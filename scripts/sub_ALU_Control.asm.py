@@ -50,11 +50,11 @@ test_gold = getComments(test_assembly)
 
 if __name__ == "__main__":
     # Input test vector
-    outfile = f"{basenameNoExt('out', __file__)}.s"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.s"
     with open(outfile, 'w') as fp:
         print(test_assembly, file=fp)
 
-    outfileGold = f"{basenameNoExt('out', __file__)}_gold.mem"
+    outfileGold = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_gold.mem"
     with open(outfileGold, 'w') as fp:
         for x in test_gold:
             print(f"{AluTypes[x[2:]].value:05b}", file=fp)

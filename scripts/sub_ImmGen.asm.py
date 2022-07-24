@@ -36,12 +36,12 @@ L20:    jal     x{randReg(x0=False)}, L{random.randint(0,20)}
 
 if __name__ == "__main__":
     # Input test vector
-    outfile = f"{basenameNoExt('out', __file__)}.s"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.s"
     with open(outfile, 'w') as fp:
         print(test_assembly, file=fp)
 
     # Output/gold test vector
-    outfileGold = f"{basenameNoExt('out', __file__)}_gold.mem"
+    outfileGold = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_gold.mem"
     test_gold   = asmStr2AsmList(test_assembly)
     with open(outfileGold, 'w') as fp:
         lineCount = 0

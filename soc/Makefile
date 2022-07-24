@@ -1,5 +1,5 @@
 CC      := iverilog
-OUT_DIR := ../out/soc
+OUT_DIR := ../obj_dir/sub/soc
 FLAGS   := -Wall
 FLAGS   += -DSIM
 FLAGS   += -I..
@@ -20,8 +20,8 @@ $(OUT_DIR)/%: %.v
 all:
 	@echo "TODO..."
 
-.PHONY: unit
-unit: set-up $(OUTPUTS)
+.PHONY: sub
+sub: set-up $(OUTPUTS)
 
 .PHONY: set-up
 set-up:

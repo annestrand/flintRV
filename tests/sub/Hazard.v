@@ -14,7 +14,7 @@ module Hazard_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("out/sub_Hazard.vcd");
+        $dumpfile("obj_dir/sub/sub_Hazard.vcd");
         $dumpvars(0, Hazard_tb);
     end
 `endif // DUMP_VCD
@@ -25,10 +25,10 @@ module Hazard_tb;
     reg [7:0]   test_gold_fwd_vector    [0:31];
     reg [7:0]   test_gold_hzd_vector    [0:31];
     initial begin
-        $readmemb("out/sub_Hazard_fwd.mem", test_fwd_vector);
-        $readmemb("out/sub_Hazard_fwd_gold.mem", test_gold_fwd_vector);
-        $readmemb("out/sub_Hazard_hzd.mem", test_hzd_vector);
-        $readmemb("out/sub_Hazard_hzd_gold.mem", test_gold_hzd_vector);
+        $readmemb("obj_dir/sub/sub_Hazard_fwd.mem", test_fwd_vector);
+        $readmemb("obj_dir/sub/sub_Hazard_fwd_gold.mem", test_gold_fwd_vector);
+        $readmemb("obj_dir/sub/sub_Hazard_hzd.mem", test_hzd_vector);
+        $readmemb("obj_dir/sub/sub_Hazard_hzd_gold.mem", test_gold_hzd_vector);
     end
 
     // Test loop

@@ -42,11 +42,11 @@ logicTestProgram    = f'''
 
 if __name__ == "__main__":
     # Input test vectors
-    outfile = f"{basenameNoExt('obj_dir', __file__)}.s"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.s"
     with open(outfile, 'w') as fp:
         print(logicTestProgram, file=fp)
     # Init regfile values:
-    outfile = f"{basenameNoExt('obj_dir', __file__)}.regs"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.regs"
     with open(outfile, 'w') as fp:
         print(logicRs1, file=fp)
         print(logicRs2, file=fp)

@@ -48,6 +48,6 @@ L14:    srai    x{randReg(x0=False)}, x{randReg(x0=False)}, {randShamt()}
 
 if __name__ == "__main__":
     # Input test vector
-    outfile = f"{basenameNoExt('out', __file__)}.s"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.s"
     with open(outfile, 'w') as fp:
         print(test_assembly, file=fp)

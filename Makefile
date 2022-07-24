@@ -13,6 +13,8 @@ IVERILOG_FLAGS         += -Ihdl
 IVERILOG_FLAGS         += -DSIM
 IVERILOG_FLAGS         += -DDUMP_VCD
 
+IVERILOG_OUT           := obj_dir/sub
+
 ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
 DOCKER_CMD             := docker exec -u user -w /src boredcore
@@ -57,36 +59,36 @@ VERILATOR_TEST_ASM_MEM := $(VERILATOR_TEST_ASM:%.s=obj_dir/%.mem)
 
 IVERILOG_ALL_SRCS      := $(shell find tests/sub -type f -name "*.v" -exec basename {} \;)
 IVERILOG_MEMH_SRCS     := $(TEST_PY_MEM:sub_%.mem.py=%.v)
-IVERILOG_MEMH_OBJS     := $(IVERILOG_MEMH_SRCS:%.v=out/%.mem.out)
+IVERILOG_MEMH_OBJS     := $(IVERILOG_MEMH_SRCS:%.v=$(IVERILOG_OUT)/%.mem.out)
 IVERILOG_ASM_SRCS      := $(TEST_PY_ASM:sub_%.asm.py=%.v)
-IVERILOG_ASM_OBJS      := $(IVERILOG_ASM_SRCS:%.v=out/%.asm.out)
+IVERILOG_ASM_OBJS      := $(IVERILOG_ASM_SRCS:%.v=$(IVERILOG_OUT)/%.asm.out)
 IVERILOG_PLAIN_SRCS    := $(filter-out $(IVERILOG_MEMH_SRCS) $(IVERILOG_ASM_SRCS), $(IVERILOG_ALL_SRCS))
-IVERILOG_PLAIN_OBJS    := $(IVERILOG_PLAIN_SRCS:%.v=out/%.out)
+IVERILOG_PLAIN_OBJS    := $(IVERILOG_PLAIN_SRCS:%.v=$(IVERILOG_OUT)/%.out)
 
-out/sub_%.mem: sub_%.mem.py
-	python3 $<
+$(IVERILOG_OUT)/sub_%.mem: sub_%.mem.py
+	python3 $< -out $(IVERILOG_OUT)
 
-out/sub_%.s: sub_%.asm.py
-	python3 $<
+$(IVERILOG_OUT)/sub_%.s: sub_%.asm.py
+	python3 $< -out $(IVERILOG_OUT)
 
 obj_dir/cpu_%.s: scripts/cpu_%.asm.py
-	python3 $<
+	python3 $< -out obj_dir
 
 .SECONDARY:
-out/sub_%.elf: out/sub_%.s
+$(IVERILOG_OUT)/sub_%.elf: $(IVERILOG_OUT)/sub_%.s
 	$(DOCKER_CMD) $(AS) -o $@ $<
 
 .SECONDARY:
-out/sub_%.mem: out/sub_%.elf
+$(IVERILOG_OUT)/sub_%.mem: $(IVERILOG_OUT)/sub_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
-out/%.out: tests/sub/%.v hdl/%.v
+$(IVERILOG_OUT)/%.out: tests/sub/%.v hdl/%.v
 	iverilog $(IVERILOG_FLAGS) -o $@ $<
 
-out/%.mem.out: tests/sub/%.v hdl/%.v out/sub_%.mem
+$(IVERILOG_OUT)/%.mem.out: tests/sub/%.v hdl/%.v $(IVERILOG_OUT)/sub_%.mem
 	iverilog $(IVERILOG_FLAGS) -o $@ $<
 
-out/%.asm.out: tests/sub/%.v hdl/%.v out/sub_%.mem
+$(IVERILOG_OUT)/%.asm.out: tests/sub/%.v hdl/%.v $(IVERILOG_OUT)/sub_%.mem
 	iverilog $(IVERILOG_FLAGS) -o $@ $<
 
 obj_dir/%.cpp: $(VERILATOR_SRCS) $(HDL_SRCS)
@@ -128,13 +130,12 @@ sub: build-dir $(IVERILOG_PLAIN_OBJS) $(IVERILOG_ASM_OBJS) $(IVERILOG_MEMH_OBJS)
 .PHONY: build-dir
 build-dir:
 	@mkdir -p obj_dir/
-	@mkdir -p out/
+	@mkdir -p $(IVERILOG_OUT)/
 
 .PHONY: clean
 clean:
-	rm -rf out/ 2> /dev/null || true
 	rm -rf obj_dir 2> /dev/null || true
 
-.PHONY: soc-unit
-soc-unit:
-	$(MAKE) unit -C ./soc
+.PHONY: soc-sub
+soc-sub:
+	$(MAKE) sub -C ./soc

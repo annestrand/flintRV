@@ -35,17 +35,17 @@ Functional Verification:
 Formal Verification:
 - `SymbiYosys`  : Formal verify critical pieces of sub-module logic (TODO)
 
-To build the functional tests:
-
-    $ make unit
-
-Each unit test outputs to `out/<module_name>.out`
-
 To build CPU tests:
 
     # make
 
 CPU testing program outputs to `obj_dir/Vboredcore`
+
+To build the submodule tests:
+
+    $ make sub
+
+Each submodule test outputs to `obj_dir/sub/sub_<module_name>.out`
 
 ### Docker 🐳
 RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile

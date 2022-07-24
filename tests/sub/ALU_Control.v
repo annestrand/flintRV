@@ -10,7 +10,7 @@ module AluControl_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("out/ALU_Control.vcd");
+        $dumpfile("obj_dir/sub/ALU_Control.vcd");
         $dumpvars(0, AluControl_tb);
     end
 `endif // DUMP_VCD
@@ -19,8 +19,8 @@ module AluControl_tb;
     reg [31:0]  test_vector         [0:39];
     reg [4:0]   test_gold_vector    [0:39];
     initial begin
-        $readmemh("out/sub_ALU_Control.mem", test_vector);
-        $readmemb("out/sub_ALU_Control_gold.mem", test_gold_vector);
+        $readmemh("obj_dir/sub/sub_ALU_Control.mem", test_vector);
+        $readmemb("obj_dir/sub/sub_ALU_Control_gold.mem", test_gold_vector);
     end
 
     // Test loop

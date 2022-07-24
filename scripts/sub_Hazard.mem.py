@@ -46,9 +46,9 @@ def genHzd():
 n_vectors = 32
 
 if __name__ == "__main__":
-    outfile = f"{basenameNoExt('out', __file__)}_fwd.mem"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_fwd.mem"
     with open(outfile, 'w') as fp:
-        outfileGold = f"{basenameNoExt('out', __file__)}_fwd_gold.mem"
+        outfileGold = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_fwd_gold.mem"
         with open(outfileGold, 'w') as fp_gold:
             for i in range(n_vectors):
                 # TODO: Add non-random tests too?
@@ -56,9 +56,9 @@ if __name__ == "__main__":
                 print(f"{in_vec}", file=fp)
                 print(f"{out_vec}", file=fp_gold)
 
-    outfile = f"{basenameNoExt('out', __file__)}_hzd.mem"
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_hzd.mem"
     with open(outfile, 'w') as fp:
-        outfileGold = f"{basenameNoExt('out', __file__)}_hzd_gold.mem"
+        outfileGold = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_hzd_gold.mem"
         with open(outfileGold, 'w') as fp_gold:
             for i in range(n_vectors):
                 # TODO: Add non-random tests too?
