@@ -3,9 +3,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "Vboredcore.h"
-#include "Vboredcore__Syms.h"
-#include "boredcore.hh"
 #include "common.hh"
 
 // ====================================================================================================================
@@ -59,6 +56,22 @@ std::vector<std::string> asmFileReader(std::string filePath) {
         if (line.find("#") != std::string::npos && line.find("#") == 0) {
             continue;
         }
+        contents.push_back(line);
+    }
+    f.close();
+    return contents;
+}
+// ====================================================================================================================
+std::vector<std::string> initRegfileReader(std::string filePath) {
+    std::vector<std::string> contents;
+    std::ifstream f(filePath);
+    if (!f) {
+        LOG_E("Failed reading from: [ %s ]", filePath.c_str());
+        return contents;
+    }
+    std::string line;
+    while (std::getline(f, line)) {
+        leftTrimWhitespace(line);
         contents.push_back(line);
     }
     f.close();

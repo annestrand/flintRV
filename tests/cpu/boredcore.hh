@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdio>
+#include <string>
+#include <vector>
 #include <verilated_vcd_c.h>
 
 // Placeholder defines here
@@ -11,15 +13,25 @@
 #define VERILATOR_VER 4028
 #endif // VERILATOR_VER
 
+struct stimulus {
+    std::vector<std::string> instructions;
+    std::vector<std::string> machine_code;
+    std::vector<std::string> init_regfile;
+};
+
 class simulation {
 public:
     simulation(vluint64_t maxSimTime);
     ~simulation();
     bool create(Vboredcore* cpu, const char* traceFile);
+    bool createStimuli( std::string asmFilePath,
+                        std::string machineCodeFilePath,
+                        std::string initRegfilePath=std::string());
     void reset(int count=1);
     void tick();
     bool end();
-    Vboredcore*             m_cpu; // Reference to CPU object
+    Vboredcore*             m_cpu;      // Reference to CPU object
+    stimulus                m_stimulus; // Test vector data for CPU tests
 
 private:
     vluint64_t              m_cycles;

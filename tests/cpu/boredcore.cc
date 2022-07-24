@@ -15,7 +15,7 @@
 
 // ====================================================================================================================
 simulation::simulation(vluint64_t maxSimTime) :
-    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr) {}
+    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_stimulus({}) {}
 // ====================================================================================================================
 bool simulation::create(Vboredcore* cpu, const char* traceFile) {
     LOG_I("Creating simulation...\n");
@@ -33,6 +33,32 @@ bool simulation::create(Vboredcore* cpu, const char* traceFile) {
         }
         m_cpu->trace(m_trace, 99);
         m_trace->open(traceFile);
+    }
+    return true;
+}
+// ====================================================================================================================
+bool simulation::createStimuli( std::string asmFilePath,
+                                std::string machineCodeFilePath,
+                                std::string initRegfilePath) {
+    // Read test vector files
+    m_stimulus.instructions = asmFileReader(asmFilePath);
+    if (m_stimulus.instructions.empty()) {
+        LOG_E("Could not read ASM file!\n");
+        return false;
+    }
+    m_stimulus.machine_code = machineCodeFileReader(machineCodeFilePath);
+    if (m_stimulus.machine_code.empty()) {
+        LOG_E("Could not read machine-code file!\n");
+        return false;
+    }
+    endianFlipper(m_stimulus.machine_code); // Since objdump does output Verilog in big-endian
+    // Read init regfile values (if given)
+    if (!initRegfilePath.empty()) {
+        m_stimulus.init_regfile = initRegfileReader(initRegfilePath);
+        if (m_stimulus.init_regfile.empty()) {
+            LOG_E("Could not read init regfile file!\n");
+            return false;
+        }
     }
     return true;
 }

@@ -19,21 +19,13 @@ TEST(boredcore, simple_loop) {
     if (!sim.create(new Vboredcore(), "obj_dir/waveform.vcd")) {
         FAIL() << "Failed to create waveform.vcd file!";
     }
-    // Read test vector files
-    std::vector<std::string> instructions;
-    std::vector<std::string> machine_code;
-    std::string basedir(BASE_PATH);
-    instructions = asmFileReader(basedir + "/../tests/cpu/programs/cpu_simple_loop.s");
-    if (instructions.empty()) {
-        FAIL() << "Could not read ASM file!";
+    // --- Create test stimuli
+    const char *testAsmPath         = BASE_PATH "/../tests/cpu/programs/cpu_simple_loop.s";
+    const char *testMachCodePath    = BASE_PATH "/cpu_simple_loop.mem";
+    if (!sim.createStimuli(testAsmPath, testMachCodePath)) {
+        FAIL();
     }
-    machine_code = machineCodeFileReader(basedir + "/cpu_simple_loop.mem");
-    if (machine_code.empty()) {
-        FAIL() << "Could not read machine-code file!";
-    }
-    endianFlipper(machine_code); // Since objdump does output Verilog in big-endian
-
-    // Simulation loop
+    // --- Simulation loop
     sim.reset(2); // Hold reset line for 2cc
     bool done = false;
     constexpr int j = 8;
@@ -41,8 +33,10 @@ TEST(boredcore, simple_loop) {
     constexpr int simDoneVal = -1;
     constexpr int expectedResult = 45;
     while (!sim.end() && !done) {
-        std::string instr       = instructions[sim.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)std::strtol(machine_code[sim.m_cpu->o_pcOut >> 2].c_str(), NULL, 16);
+        std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
+        int machine_instr       = (int)std::strtol(
+            sim.m_stimulus.machine_code[sim.m_cpu->o_pcOut >> 2].c_str(), NULL, 16
+        );
         sim.m_cpu->i_instr      = machine_instr;
         sim.m_cpu->i_dataIn     = 0xdeadc0de;
         sim.m_cpu->i_ifValid    = 1;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -21,3 +22,4 @@ void endianFlipper(std::vector<std::string>& machineCode);
 void leftTrimWhitespace(std::string& s);
 std::vector<std::string> machineCodeFileReader(std::string filePath);
 std::vector<std::string> asmFileReader(std::string filePath);
+std::vector<std::string> initRegfileReader(std::string filePath);
