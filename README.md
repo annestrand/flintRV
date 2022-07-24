@@ -1,7 +1,5 @@
 # boredcore
 
-### ⚠ Currently still in early development! ⚠
----
 Another RISC-V cpu core design.
 
 ## Design 🗺
