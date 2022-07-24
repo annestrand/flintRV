@@ -19,8 +19,8 @@ module AluControl_tb;
     reg [31:0]  test_vector         [0:39];
     reg [4:0]   test_gold_vector    [0:39];
     initial begin
-        $readmemh("out/unit_ALU_Control.mem", test_vector);
-        $readmemb("out/unit_ALU_Control_gold.mem", test_gold_vector);
+        $readmemh("out/sub_ALU_Control.mem", test_vector);
+        $readmemb("out/sub_ALU_Control_gold.mem", test_gold_vector);
     end
 
     // Test loop

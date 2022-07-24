@@ -44,8 +44,8 @@ vpath %.v tests
 vpath %.py scripts
 
 HDL_SRCS               := $(shell find hdl -type f -name "*.v")
-TEST_PY_MEM            := $(shell find scripts -type f -name "unit_*.mem.py" -exec basename {} \;)
-TEST_PY_ASM            := $(shell find scripts -type f -name "unit_*.asm.py" -exec basename {} \;)
+TEST_PY_MEM            := $(shell find scripts -type f -name "sub_*.mem.py" -exec basename {} \;)
+TEST_PY_ASM            := $(shell find scripts -type f -name "sub_*.asm.py" -exec basename {} \;)
 
 VERILATOR_SRCS         := $(shell find tests/cpu -type f -name "*.cc")
 VERILATOR_TEST_ASM     := $(shell find tests/cpu/programs -type f -name "*.s" -exec basename {} \;)
@@ -55,38 +55,38 @@ VERILATOR_TEST_ELF     := $(VERILATOR_TEST_SRCS:%.s=%.elf)
 VERILATOR_TEST_MEM     := $(VERILATOR_TEST_ELF:%.elf=%.mem)
 VERILATOR_TEST_ASM_MEM := $(VERILATOR_TEST_ASM:%.s=obj_dir/%.mem)
 
-IVERILOG_ALL_SRCS      := $(shell find tests/units -type f -name "*.v" -exec basename {} \;)
-IVERILOG_MEMH_SRCS     := $(TEST_PY_MEM:unit_%.mem.py=%.v)
+IVERILOG_ALL_SRCS      := $(shell find tests/sub -type f -name "*.v" -exec basename {} \;)
+IVERILOG_MEMH_SRCS     := $(TEST_PY_MEM:sub_%.mem.py=%.v)
 IVERILOG_MEMH_OBJS     := $(IVERILOG_MEMH_SRCS:%.v=out/%.mem.out)
-IVERILOG_ASM_SRCS      := $(TEST_PY_ASM:unit_%.asm.py=%.v)
+IVERILOG_ASM_SRCS      := $(TEST_PY_ASM:sub_%.asm.py=%.v)
 IVERILOG_ASM_OBJS      := $(IVERILOG_ASM_SRCS:%.v=out/%.asm.out)
 IVERILOG_PLAIN_SRCS    := $(filter-out $(IVERILOG_MEMH_SRCS) $(IVERILOG_ASM_SRCS), $(IVERILOG_ALL_SRCS))
 IVERILOG_PLAIN_OBJS    := $(IVERILOG_PLAIN_SRCS:%.v=out/%.out)
 
-out/unit_%.mem: unit_%.mem.py
+out/sub_%.mem: sub_%.mem.py
 	python3 $<
 
-out/unit_%.s: unit_%.asm.py
+out/sub_%.s: sub_%.asm.py
 	python3 $<
 
 obj_dir/cpu_%.s: scripts/cpu_%.asm.py
 	python3 $<
 
 .SECONDARY:
-out/unit_%.elf: out/unit_%.s
+out/sub_%.elf: out/sub_%.s
 	$(DOCKER_CMD) $(AS) -o $@ $<
 
 .SECONDARY:
-out/unit_%.mem: out/unit_%.elf
+out/sub_%.mem: out/sub_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
-out/%.out: tests/units/%.v hdl/%.v
+out/%.out: tests/sub/%.v hdl/%.v
 	iverilog $(IVERILOG_FLAGS) -o $@ $<
 
-out/%.mem.out: tests/units/%.v hdl/%.v out/unit_%.mem
+out/%.mem.out: tests/sub/%.v hdl/%.v out/sub_%.mem
 	iverilog $(IVERILOG_FLAGS) -o $@ $<
 
-out/%.asm.out: tests/units/%.v hdl/%.v out/unit_%.mem
+out/%.asm.out: tests/sub/%.v hdl/%.v out/sub_%.mem
 	iverilog $(IVERILOG_FLAGS) -o $@ $<
 
 obj_dir/%.cpp: $(VERILATOR_SRCS) $(HDL_SRCS)
@@ -103,12 +103,13 @@ obj_dir/%.elf: tests/cpu/programs/%.s
 
 obj_dir/%.mem: obj_dir/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+# =====================================================================================================================
 
 # Main build is simulating CPU with Verilator
 .PHONY: all
 all: build-dir $(VERILATOR_TEST_MEM) $(VERILATOR_TEST_ASM_MEM) obj_dir/Vboredcore.cpp
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
-	@printf "\nAll done building cpu-tests.\n"
+	@printf "\nAll done building cpu tests.\n"
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -119,15 +120,15 @@ ifeq ($(DOCKER_RUNNING),)
 endif
 	@docker start boredcore
 
-# Unit testing (i.e. sub-module testing)
-.PHONY: unit
-unit: build-dir $(IVERILOG_PLAIN_OBJS) $(IVERILOG_ASM_OBJS) $(IVERILOG_MEMH_OBJS)
-	@printf "\nAll done building unit-tests.\n"
+# Sub-module testing
+.PHONY: sub
+sub: build-dir $(IVERILOG_PLAIN_OBJS) $(IVERILOG_ASM_OBJS) $(IVERILOG_MEMH_OBJS)
+	@printf "\nAll done building submodule tests.\n"
 
 .PHONY: build-dir
 build-dir:
-	@mkdir -p out
-	@mkdir -p obj_dir
+	@mkdir -p obj_dir/
+	@mkdir -p out/
 
 .PHONY: clean
 clean:
