@@ -21,6 +21,8 @@ arithRs11           = (abs(arithVal1) % 32)
 arithRs12           = (abs(arithVal2) % 32)
 arithTestProgram    = f'''
     # --- Add/Sub tests ---
+    #     (Fails if x30 is non-zero)
+    addi  x30, x30, 1
     addi  x13, x1, {arithVal2}
     bne   x13, x3, FAIL
     addi  x30, x30, 1
@@ -70,10 +72,15 @@ arithTestProgram    = f'''
     addi  x30, x30, 1
     jal   x29, STALL
 
-    FAIL:   add x0, x0, x0  # NOP
-            add x31, x0, x30
-    STALL:  add x0, x0, x0  # NOP
-            jal x0, STALL
+    FAIL:   addi x13, x0, -1  # DONE
+            add  x31, x0, x30
+    STALL:  addi x13, x0, -1  # DONE
+            jal  x0, STALL
+            # Add some NOP padding
+            add  x0, x0, x0
+            add  x0, x0, x0
+            add  x0, x0, x0
+            add  x0, x0, x0
 '''
 
 if __name__ == "__main__":

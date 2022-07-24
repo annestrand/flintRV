@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 #include <gtest/gtest.h>
 
@@ -40,27 +41,49 @@ bool simulation::create(Vboredcore* cpu, const char* traceFile) {
 bool simulation::createStimuli( std::string asmFilePath,
                                 std::string machineCodeFilePath,
                                 std::string initRegfilePath) {
-    // Read test vector files
+    auto delEmptyStrElems = [](std::vector<std::string>& strList) {
+        strList.erase(std::remove_if(
+            strList.begin(),
+            strList.end(),
+            [](std::string const& s) { return s.empty(); }
+        ), strList.end());
+    };
+
     m_stimulus.instructions = asmFileReader(asmFilePath);
     if (m_stimulus.instructions.empty()) {
-        LOG_E("Could not read ASM file!\n");
         return false;
     }
+    delEmptyStrElems(m_stimulus.instructions);
+
     m_stimulus.machine_code = machineCodeFileReader(machineCodeFilePath);
     if (m_stimulus.machine_code.empty()) {
-        LOG_E("Could not read machine-code file!\n");
         return false;
     }
+    delEmptyStrElems(m_stimulus.machine_code);
     endianFlipper(m_stimulus.machine_code); // Since objdump does output Verilog in big-endian
+
     // Read init regfile values (if given)
     if (!initRegfilePath.empty()) {
         m_stimulus.init_regfile = initRegfileReader(initRegfilePath);
         if (m_stimulus.init_regfile.empty()) {
-            LOG_E("Could not read init regfile file!\n");
             return false;
         }
+        delEmptyStrElems(m_stimulus.init_regfile);
     }
     return true;
+}
+// ====================================================================================================================
+void simulation::writeRegfile(int index, int val) {
+    // Skip if x0 reg
+    if (index == 0) { return; }
+    // Need to write to both ports
+    cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[index] = val;
+    cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS2_PORT__DOT__ram[index] = val;
+}
+// ====================================================================================================================
+int simulation::readRegfile(int index) {
+    // Does not matter which port we read from
+    return (index == 0) ? 0 : cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[index];
 }
 // ====================================================================================================================
 void simulation::reset(int count) {

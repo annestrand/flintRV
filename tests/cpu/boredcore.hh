@@ -6,7 +6,7 @@
 #include <verilated_vcd_c.h>
 
 // Placeholder defines here
-#ifndef BASE_PATH
+#ifndef BASE_PATH // This default dir is "obj_dir/"
 #define BASE_PATH "."
 #endif // BASE_PATH
 #ifndef VERILATOR_VER
@@ -27,6 +27,8 @@ public:
     bool createStimuli( std::string asmFilePath,
                         std::string machineCodeFilePath,
                         std::string initRegfilePath=std::string());
+    void writeRegfile(int index, int val);
+    int readRegfile(int index);
     void reset(int count=1);
     void tick();
     bool end();
@@ -40,7 +42,7 @@ private:
 };
 
 /*
-    NOTE:   Verilator changes its internal module interface scheme from v4.210 and up.
+    NOTE:   Verilator changes its internal-module interface scheme from v4.210 and up.
             Making utility wrapper here to easily handle and access module internals.
             (As well as keep track of any future-version interface changes)
 */

@@ -14,6 +14,8 @@ logicRs4            = logicVal1 | logicVal2
 logicRs5            = logicVal1 ^ logicVal2
 logicTestProgram    = f'''
     # --- Logic tests ---
+    #     (Fails if x30 is non-zero)
+    addi  x30, x30, 1
     andi  x6, x1, {logicVal2}
     bne   x6, x3, FAIL
     addi  x30, x30, 1
@@ -34,10 +36,15 @@ logicTestProgram    = f'''
     addi  x30, x30, 1
     jal   x29, STALL
 
-    FAIL:   add x0, x0, x0  # NOP
-            add x31, x0, x30
-    STALL:  add x0, x0, x0  # NOP
-            jal x0, STALL
+    FAIL:   addi x6, x0, -1  # DONE
+            add  x31, x0, x30
+    STALL:  addi x6, x0, -1  # DONE
+            jal  x0, STALL
+            # Add some NOP padding
+            add  x0, x0, x0
+            add  x0, x0, x0
+            add  x0, x0, x0
+            add  x0, x0, x0
 '''
 
 if __name__ == "__main__":

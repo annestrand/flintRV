@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#define HEX_DECODE_ASCII(in) strtol(in, NULL, 16)
+#define INT_DECODE_ASCII(in) strtol(in, NULL, 10)
+
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define LOG_TAG "boredcore"
 #ifdef VERBOSE
