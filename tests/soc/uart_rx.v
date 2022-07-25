@@ -15,7 +15,7 @@ module uart_reciever_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("./obj_dir/sub/pinacolada/uart_rx.vcd");
+        $dumpfile("obj_dir/soc/uart_rx.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD
