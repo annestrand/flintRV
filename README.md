@@ -11,6 +11,7 @@ Another RISC-V cpu core design.
 - GCC RISC-V compiler/cross-compiler toolchain
 - Icarus Verilog (testing)
 - Verilator (testing)
+- GoogleTest (testing)
 - SymbiYosys (testing)
     - Yosys
     - z3
