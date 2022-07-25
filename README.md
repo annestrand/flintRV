@@ -35,9 +35,13 @@ Formal Verification:
 
 To build tests:
 
-    $ make test
+    $ make tests
 
-CPU testing program outputs to: `obj_dir/Vboredcore` - submodule tests output to: `obj_dir/sub/sub_<module_name>.out`
+CPU tests output to: `obj_dir/Vboredcore`
+
+Submodule tests output to: `obj_dir/sub/<module_name>.out`
+
+SoC (and SoC peripheral) tests output to: `obj_dir/soc/<module_name>.out`
 
 ### Docker 🐳
 RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile
@@ -49,4 +53,4 @@ To build and start the container (need to run at least once to ensure container 
 
 Then to build the tests:
 
-    $ make DOCKER=ON
+    $ make tests DOCKER=ON
