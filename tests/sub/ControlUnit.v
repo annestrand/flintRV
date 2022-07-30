@@ -1,15 +1,15 @@
-`include "Controller.v"
+`include "ControlUnit.v"
 
-module Controller_tb;
+module ControlUnit_tb;
     reg     [6:0]   i_opcode;
     wire    [3:0]   o_aluOp;
     wire            o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp;
 
-    Controller Controller_dut(.*);
+    ControlUnit ControlUnit_dut(.*);
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("obj_dir/sub/Controller.vcd");
+        $dumpfile("obj_dir/sub/ControlUnit.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD
@@ -18,7 +18,7 @@ module Controller_tb;
     reg [31:0]  test_vector         [0:39];
     reg [12:0]  test_gold_vector    [0:39];
     initial begin
-        $readmemh("obj_dir/sub/sub_Controller.mem", test_vector);
+        $readmemh("obj_dir/sub/sub_ControlUnit.mem", test_vector);
     end
     reg [31:0]  instr;
     initial begin
@@ -43,7 +43,7 @@ module Controller_tb;
     reg     [12:0]  ctrlSignals;
     integer i = 0, errs = 0;
     initial begin
-        $display("Running Controller tests...\n");
+        $display("Running ControlUnit tests...\n");
         i_opcode   = 'd0;
         #20;
         for (i=0; i<40; i=i+1) begin

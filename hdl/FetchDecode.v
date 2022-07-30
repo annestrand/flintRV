@@ -10,7 +10,7 @@ module FetchDecode (
         .i_instr    (i_instr),
         .o_imm      (o_imm)
     );
-    Controller CTRL_unit(
+    ControlUnit CTRL_unit(
         .i_opcode   (`OPCODE(i_instr)),
         .o_aluOp    (o_aluOp),
         .o_exec_a   (o_exec_a),

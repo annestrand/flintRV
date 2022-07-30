@@ -1,6 +1,6 @@
 `include "types.vh"
 
-module Controller (
+module ControlUnit (
     input       [6:0]   i_opcode,
     output  reg [3:0]   o_aluOp,
     output  reg         o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp
