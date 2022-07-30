@@ -40,8 +40,6 @@ module boredcore (
     wire        braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
     wire        writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
     wire        pcJump          = braMispredict || p_jmp[EXEC];
-    wire        rs1R0           = `RS1(instrReg) == REG_0;
-    wire        rs2R0           = `RS2(instrReg) == REG_0;
     //          (Forwarding logic)
     wire        RS1_fwd_mem     = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
     wire        RS1_fwd_wb      = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
@@ -135,15 +133,15 @@ module boredcore (
     // Pipeline DATA reg assignments
     always @(posedge i_clk) begin
         // --- Execute ---
-        p_rs1      [EXEC]  <= rs1R0 ? 32'd0 : EXEC_stall ? p_rs1     [EXEC] : rs1Out;
-        p_rs2      [EXEC]  <= rs2R0 ? 32'd0 : EXEC_stall ? p_rs2     [EXEC] : rs2Out;
-        p_IMM      [EXEC]  <=                 EXEC_stall ? p_IMM     [EXEC] : IMM;
-        p_PC       [EXEC]  <=                 EXEC_stall ? p_PC      [EXEC] : PCReg;
-        p_funct7   [EXEC]  <=                 EXEC_stall ? p_funct7  [EXEC] : `FUNCT7(instrReg);
-        p_funct3   [EXEC]  <=                 EXEC_stall ? p_funct3  [EXEC] : `FUNCT3(instrReg);
-        p_rs1Addr  [EXEC]  <=                 EXEC_stall ? p_rs1Addr [EXEC] : `RS1(instrReg);
-        p_rs2Addr  [EXEC]  <=                 EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
-        p_rdAddr   [EXEC]  <=                 EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
+        p_rs1      [EXEC]  <= EXEC_stall ? p_rs1     [EXEC] : rs1Out;
+        p_rs2      [EXEC]  <= EXEC_stall ? p_rs2     [EXEC] : rs2Out;
+        p_IMM      [EXEC]  <= EXEC_stall ? p_IMM     [EXEC] : IMM;
+        p_PC       [EXEC]  <= EXEC_stall ? p_PC      [EXEC] : PCReg;
+        p_funct7   [EXEC]  <= EXEC_stall ? p_funct7  [EXEC] : `FUNCT7(instrReg);
+        p_funct3   [EXEC]  <= EXEC_stall ? p_funct3  [EXEC] : `FUNCT3(instrReg);
+        p_rs1Addr  [EXEC]  <= EXEC_stall ? p_rs1Addr [EXEC] : `RS1(instrReg);
+        p_rs2Addr  [EXEC]  <= EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
+        p_rdAddr   [EXEC]  <= EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
         // --- Memory ---
         p_rs2      [MEM]   <= MEM_stall ? p_rs2    [MEM] : p_rs2     [EXEC];
         p_rdAddr   [MEM]   <= MEM_stall ? p_rdAddr [MEM] : p_rdAddr  [EXEC];
