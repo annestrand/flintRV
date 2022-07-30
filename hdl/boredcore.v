@@ -3,7 +3,7 @@
 module boredcore (
     input           i_clk, i_rst, i_ifValid, i_memValid,
     input   [31:0]  i_instr, i_dataIn,
-    output          o_dataWe,
+    output          o_storeReq, o_loadReq,
     output  [31:0]  o_pcOut, o_dataAddr, o_dataOut
 );
     localparam  [4:0] REG_0 = 5'b00000; // Register x0
@@ -32,17 +32,31 @@ module boredcore (
     reg         p_bra       [EXEC:WB];
     reg         p_jmp       [EXEC:WB];
     // Internal wires/regs
-    reg     [31:0]  PC, PCReg, instrReg;
-    wire    [31:0]  IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out;
-    wire     [3:0]  aluOp;
-    wire     [1:0]  fwdRs1, fwdRs2;
-    wire            exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp, FETCH_stall, EXEC_stall, EXEC_flush, MEM_flush;
-    wire    [31:0]  WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
-    wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
-    wire            writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
-    wire            pcJump          = braMispredict || p_jmp[EXEC];
-    wire            rs1R0           = `RS1(instrReg) == REG_0;
-    wire            rs2R0           = `RS2(instrReg) == REG_0;
+    reg  [31:0] PC, PCReg, instrReg;
+    wire [31:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out;
+    wire  [3:0] aluOp;
+    wire        exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp;
+    wire [31:0] WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
+    wire        braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
+    wire        writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
+    wire        pcJump          = braMispredict || p_jmp[EXEC];
+    wire        rs1R0           = `RS1(instrReg) == REG_0;
+    wire        rs2R0           = `RS2(instrReg) == REG_0;
+    //          (Forwarding logic)
+    wire        RS1_fwd_mem     = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
+    wire        RS1_fwd_wb      = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
+    wire        RS2_fwd_mem     = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
+    wire        RS2_fwd_wb      = ~RS2_fwd_mem && p_reg_w[WB] && (p_rs2Addr[EXEC] == p_rdAddr[WB]);
+    wire  [1:0] fwdRs1          = {RS1_fwd_wb, RS1_fwd_mem},
+                fwdRs2          = {RS2_fwd_wb, RS2_fwd_mem};
+    //          (Stall and flush logic)
+    wire        load_stall      = p_mem2reg[EXEC] && (
+                                    (`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC])
+                                  );
+    wire        EXEC_stall      = ~i_memValid;
+    wire        FETCH_stall     = ~i_ifValid || EXEC_stall || load_stall;
+    wire        EXEC_flush      = ~EXEC_stall && braMispredict || p_jmp[EXEC] || FETCH_stall;
+    wire        MEM_flush       = EXEC_stall;
 
     // Core submodules
     FetchDecode FETCH_DECODE_unit(
@@ -83,30 +97,6 @@ module boredcore (
         .i_funct3             (p_funct3[WB]),
         .i_dataIn             (p_readData[WB]),
         .o_dataOut            (loadData)
-    );
-    Hazard HZD_FWD_unit(
-        // Forwarding
-        .i_MEM_rd_reg_write   (p_reg_w[MEM]),
-        .i_WB_rd_reg_write    (p_reg_w[WB]),
-        .i_EXEC_rs1           (p_rs1Addr[EXEC]),
-        .i_EXEC_rs2           (p_rs2Addr[EXEC]),
-        .i_MEM_rd             (p_rdAddr[MEM]),
-        .i_WB_rd              (p_rdAddr[WB]),
-        .o_FWD_rs1            (fwdRs1),
-        .o_FWD_rs2            (fwdRs2),
-        // Stall and Flush
-        .i_BRA                (braMispredict),
-        .i_JMP                (p_jmp[EXEC]),
-        .i_FETCH_valid        (i_ifValid),
-        .i_MEM_valid          (i_memValid),
-        .i_EXEC_mem2reg       (p_mem2reg[EXEC]),
-        .i_FETCH_rs1          (`RS1(instrReg)),
-        .i_FETCH_rs2          (`RS2(instrReg)),
-        .i_EXEC_rd            (p_rdAddr[EXEC]),
-        .o_FETCH_stall        (FETCH_stall),
-        .o_EXEC_stall         (EXEC_stall),
-        .o_EXEC_flush         (EXEC_flush),
-        .o_MEM_flush          (MEM_flush)
     );
     Regfile #(.DATA_WIDTH(32), .ADDR_WIDTH(5)) REGFILE_unit (
         .i_clk      (i_clk),
@@ -170,8 +160,9 @@ module boredcore (
                         FETCH_stall         ?   instrReg    :
                                                 i_instr;
     end
-    assign o_pcOut    = PC;
-    assign o_dataAddr = p_aluOut[MEM];
-    assign o_dataWe   = p_mem_w[MEM];
+    assign o_pcOut      = PC;
+    assign o_dataAddr   = p_aluOut[MEM];
+    assign o_storeReq   = p_mem_w[MEM];
+    assign o_loadReq    = p_mem2reg[MEM];
 
 endmodule
