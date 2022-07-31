@@ -15,136 +15,136 @@
 
 // ====================================================================================================================
 TEST(simple, loop) { // Basic test loop summation for 10 iterations
-    simulation sim  = simulation(200);
-    if (!sim.create(new Vboredcore(), "obj_dir/simple_loop.vcd")) {
+    boredcore dut  = boredcore(200);
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_simple_loop.mem";
-    if (!sim.createStimuli(testMachCodePath)) {
+    if (!dut.createStimuli(testMachCodePath)) {
         FAIL();
     }
-    sim.reset(2); // Hold reset line for 2cc
+    dut.reset(2); // Hold reset line for 2cc
 
     bool done = false;
     constexpr int j = 8;
     constexpr int doneReg = 1; // x1
     constexpr int simDoneVal = -1;
     constexpr int expectedResult= 45;
-    while (!sim.end() && !done) {
-        std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(sim.m_stimulus.machine_code[sim.m_cpu->o_pcOut >> 2].c_str());
-        sim.m_cpu->i_instr      = machine_instr;
-        sim.m_cpu->i_dataIn     = 0xdeadc0de;
-        sim.m_cpu->i_ifValid    = 1;
-        sim.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", sim.m_cpu->o_pcOut, machine_instr, instr.c_str());
-        done = sim.readRegfile(doneReg) == simDoneVal;
+    while (!dut.end() && !done) {
+        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
+        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
+        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_dataIn     = 0xdeadc0de;
+        dut.m_cpu->i_ifValid    = 1;
+        dut.m_cpu->i_memValid   = 1;
+        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
+        done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
-        sim.tick();
+        dut.tick();
     }
-    EXPECT_EQ(sim.readRegfile(j), expectedResult);
+    EXPECT_EQ(dut.readRegfile(j), expectedResult);
 }
 // ====================================================================================================================
 TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
-    simulation sim  = simulation(200);
-    if (!sim.create(new Vboredcore(), "obj_dir/simple_logic.vcd")) {
+    boredcore dut  = boredcore(200);
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_logic_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_logic_test.regs";
-    if (!sim.createStimuli(testMachCodePath, initRegfileValPath)) {
+    if (!dut.createStimuli(testMachCodePath, initRegfileValPath)) {
         FAIL();
     }
-    sim.reset(2); // Hold reset line for 2cc
+    dut.reset(2); // Hold reset line for 2cc
 
     // Init regfile
-    for (auto it = sim.m_stimulus.init_regfile.begin(); it != sim.m_stimulus.init_regfile.end(); ++it) {
-        int idx = it - sim.m_stimulus.init_regfile.begin();
-        sim.writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
+    for (auto it = dut.m_stimulus.init_regfile.begin(); it != dut.m_stimulus.init_regfile.end(); ++it) {
+        int idx = it - dut.m_stimulus.init_regfile.begin();
+        dut.writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
     }
 
     bool done = false;
     constexpr int doneReg = 6;      // x6
     constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
-    while (!sim.end() && !done) {
-        std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(sim.m_stimulus.machine_code[sim.m_cpu->o_pcOut >> 2].c_str());
-        sim.m_cpu->i_instr      = machine_instr;
-        sim.m_cpu->i_dataIn     = 0xdeadc0de;
-        sim.m_cpu->i_ifValid    = 1;
-        sim.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", sim.m_cpu->o_pcOut, machine_instr, instr.c_str());
-        done = sim.readRegfile(doneReg) == simDoneVal;
+    while (!dut.end() && !done) {
+        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
+        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
+        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_dataIn     = 0xdeadc0de;
+        dut.m_cpu->i_ifValid    = 1;
+        dut.m_cpu->i_memValid   = 1;
+        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
+        done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
-        sim.tick();
+        dut.tick();
     }
-    EXPECT_EQ(sim.readRegfile(resultReg), 0);
+    EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
 TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
-    simulation sim  = simulation(200);
-    if (!sim.create(new Vboredcore(), "obj_dir/simple_arith.vcd")) {
+    boredcore dut  = boredcore(200);
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_arith_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_arith_test.regs";
-    if (!sim.createStimuli(testMachCodePath, initRegfileValPath)) {
+    if (!dut.createStimuli(testMachCodePath, initRegfileValPath)) {
         FAIL();
     }
-    sim.reset(2); // Hold reset line for 2cc
+    dut.reset(2); // Hold reset line for 2cc
 
     // Init regfile
-    for (auto it = sim.m_stimulus.init_regfile.begin(); it != sim.m_stimulus.init_regfile.end(); ++it) {
-        int idx = it - sim.m_stimulus.init_regfile.begin();
-        sim.writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
+    for (auto it = dut.m_stimulus.init_regfile.begin(); it != dut.m_stimulus.init_regfile.end(); ++it) {
+        int idx = it - dut.m_stimulus.init_regfile.begin();
+        dut.writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
     }
 
     bool done = false;
     constexpr int doneReg = 13;     // x13
     constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
-    while (!sim.end() && !done) {
-        std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(sim.m_stimulus.machine_code[sim.m_cpu->o_pcOut >> 2].c_str());
-        sim.m_cpu->i_instr      = machine_instr;
-        sim.m_cpu->i_dataIn     = 0xdeadc0de;
-        sim.m_cpu->i_ifValid    = 1;
-        sim.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", sim.m_cpu->o_pcOut, machine_instr, instr.c_str());
-        done = sim.readRegfile(doneReg) == simDoneVal;
+    while (!dut.end() && !done) {
+        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
+        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
+        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_dataIn     = 0xdeadc0de;
+        dut.m_cpu->i_ifValid    = 1;
+        dut.m_cpu->i_memValid   = 1;
+        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
+        done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
-        sim.tick();
+        dut.tick();
     }
-    EXPECT_EQ(sim.readRegfile(resultReg), 0);
+    EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
 TEST(simple, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
-    simulation sim  = simulation(200);
-    if (!sim.create(new Vboredcore(), "obj_dir/simple_jump.vcd")) {
+    boredcore dut  = boredcore(200);
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_jump_test.mem";
-    if (!sim.createStimuli(testMachCodePath)) {
+    if (!dut.createStimuli(testMachCodePath)) {
         FAIL();
     }
-    sim.reset(2); // Hold reset line for 2cc
+    dut.reset(2); // Hold reset line for 2cc
 
     bool done = false;
     constexpr int doneReg = 13;     // x13
     constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
-    while (!sim.end() && !done) {
-        std::string instr       = sim.m_stimulus.instructions[sim.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(sim.m_stimulus.machine_code[sim.m_cpu->o_pcOut >> 2].c_str());
-        sim.m_cpu->i_instr      = machine_instr;
-        sim.m_cpu->i_dataIn     = 0xdeadc0de;
-        sim.m_cpu->i_ifValid    = 1;
-        sim.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", sim.m_cpu->o_pcOut, machine_instr, instr.c_str());
-        done = sim.readRegfile(doneReg) == simDoneVal;
+    while (!dut.end() && !done) {
+        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
+        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
+        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_dataIn     = 0xdeadc0de;
+        dut.m_cpu->i_ifValid    = 1;
+        dut.m_cpu->i_memValid   = 1;
+        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
+        done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
-        sim.tick();
+        dut.tick();
     }
-    EXPECT_EQ(sim.readRegfile(resultReg), 0);
+    EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }

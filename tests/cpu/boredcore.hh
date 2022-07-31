@@ -19,10 +19,10 @@ struct stimulus {
     std::vector<std::string> init_regfile;
 };
 
-class simulation {
+class boredcore {
 public:
-    simulation(vluint64_t maxSimTime);
-    ~simulation();
+    boredcore(vluint64_t maxSimTime);
+    ~boredcore();
     bool create(Vboredcore* cpu, const char* traceFile);
     bool createStimuli( std::string machineCodeFilePath, std::string initRegfilePath=std::string());
     void writeRegfile(int index, int val);

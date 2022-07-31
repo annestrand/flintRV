@@ -15,11 +15,11 @@
 #include "common.hh"
 
 // ====================================================================================================================
-simulation::simulation(vluint64_t maxSimTime) :
+boredcore::boredcore(vluint64_t maxSimTime) :
     m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_stimulus({}) {}
 // ====================================================================================================================
-bool simulation::create(Vboredcore* cpu, const char* traceFile) {
-    LOG_I("Creating simulation...\n");
+bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
+    LOG_I("Creating DUT...\n");
     if (cpu == nullptr) {
         LOG_E("Failed to create Verilated boredcore module!\n");
         return false;
@@ -38,7 +38,7 @@ bool simulation::create(Vboredcore* cpu, const char* traceFile) {
     return true;
 }
 // ====================================================================================================================
-bool simulation::createStimuli(std::string machineCodeFilePath, std::string initRegfilePath) {
+bool boredcore::createStimuli(std::string machineCodeFilePath, std::string initRegfilePath) {
     auto delEmptyStrElems = [](std::vector<std::string>& strList) {
         strList.erase(std::remove_if(
             strList.begin(),
@@ -66,7 +66,7 @@ bool simulation::createStimuli(std::string machineCodeFilePath, std::string init
     return true;
 }
 // ====================================================================================================================
-void simulation::writeRegfile(int index, int val) {
+void boredcore::writeRegfile(int index, int val) {
     // Skip if x0 reg
     if (index == 0) { return; }
     // Need to write to both ports
@@ -74,12 +74,12 @@ void simulation::writeRegfile(int index, int val) {
     cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS2_PORT__DOT__ram[index] = val;
 }
 // ====================================================================================================================
-int simulation::readRegfile(int index) {
+int boredcore::readRegfile(int index) {
     // Does not matter which port we read from
     return (index == 0) ? 0 : cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[index];
 }
 // ====================================================================================================================
-void simulation::reset(int count) {
+void boredcore::reset(int count) {
     // Some dummy values for now
     m_cpu->i_instr    = 0x0badc0de;
     m_cpu->i_dataIn   = 0x00c0ffee;
@@ -92,7 +92,7 @@ void simulation::reset(int count) {
     m_cpu->i_rst = 0;
 }
 // ====================================================================================================================
-void simulation::tick() {
+void boredcore::tick() {
     m_cpu->i_clk = 0;
     m_cpu->eval();
     if(m_trace) { m_trace->dump(m_cycles++); }
@@ -101,10 +101,10 @@ void simulation::tick() {
     if(m_trace) { m_trace->dump(m_cycles++); m_trace->flush(); }
 }
 // ====================================================================================================================
-bool simulation::end() { return (Verilated::gotFinish() || m_cycles > m_maxSimTime); }
+bool boredcore::end() { return (Verilated::gotFinish() || m_cycles > m_maxSimTime); }
 // ====================================================================================================================
-simulation::~simulation() {
-    LOG_I("Cleaning up simulation...\n");
+boredcore::~boredcore() {
+    LOG_I("Cleaning up DUT...\n");
     m_trace->close();
     delete m_cpu;
     m_cpu = nullptr;
