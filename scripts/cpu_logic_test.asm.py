@@ -41,10 +41,10 @@ logicTestProgram    = f'''
     STALL:  addi x6, x0, -1  # DONE
             jal  x0, STALL
             # Add some NOP padding
-            add  x0, x0, x0
-            add  x0, x0, x0
-            add  x0, x0, x0
-            add  x0, x0, x0
+            nop
+            nop
+            nop
+            nop
 '''
 
 if __name__ == "__main__":

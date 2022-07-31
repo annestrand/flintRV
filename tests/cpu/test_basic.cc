@@ -14,7 +14,7 @@
 #include "common.hh"
 
 // ====================================================================================================================
-TEST(boredcore, simple_loop) { // Basic test loop summation for 10 iterations
+TEST(simple, loop) { // Basic test loop summation for 10 iterations
     simulation sim  = simulation(200);
     if (!sim.create(new Vboredcore(), "obj_dir/simple_loop.vcd")) {
         FAIL() << "Failed to create vcd file!";
@@ -46,7 +46,7 @@ TEST(boredcore, simple_loop) { // Basic test loop summation for 10 iterations
     EXPECT_EQ(sim.readRegfile(j), expectedResult);
 }
 // ====================================================================================================================
-TEST(boredcore, simple_logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
+TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
     simulation sim  = simulation(200);
     if (!sim.create(new Vboredcore(), "obj_dir/simple_logic.vcd")) {
         FAIL() << "Failed to create vcd file!";
@@ -84,7 +84,7 @@ TEST(boredcore, simple_logic) { // Tests all the core logic functions of ALU (e.
     EXPECT_EQ(sim.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(boredcore, simple_arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
+TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
     simulation sim  = simulation(200);
     if (!sim.create(new Vboredcore(), "obj_dir/simple_arith.vcd")) {
         FAIL() << "Failed to create vcd file!";
@@ -122,7 +122,7 @@ TEST(boredcore, simple_arith) { // Tests all the core arithmetic functions of AL
     EXPECT_EQ(sim.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(boredcore, simple_jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
+TEST(simple, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
     simulation sim  = simulation(200);
     if (!sim.create(new Vboredcore(), "obj_dir/simple_jump.vcd")) {
         FAIL() << "Failed to create vcd file!";
