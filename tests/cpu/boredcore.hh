@@ -24,9 +24,7 @@ public:
     simulation(vluint64_t maxSimTime);
     ~simulation();
     bool create(Vboredcore* cpu, const char* traceFile);
-    bool createStimuli( std::string asmFilePath,
-                        std::string machineCodeFilePath,
-                        std::string initRegfilePath=std::string());
+    bool createStimuli( std::string machineCodeFilePath, std::string initRegfilePath=std::string());
     void writeRegfile(int index, int val);
     int readRegfile(int index);
     void reset(int count=1);

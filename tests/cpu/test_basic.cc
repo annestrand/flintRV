@@ -19,9 +19,8 @@ TEST(simple, loop) { // Basic test loop summation for 10 iterations
     if (!sim.create(new Vboredcore(), "obj_dir/simple_loop.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
-    const char *testAsmPath         = BASE_PATH "/../tests/cpu/programs/cpu_simple_loop.s";
     const char *testMachCodePath    = BASE_PATH "/cpu_simple_loop.mem";
-    if (!sim.createStimuli(testAsmPath, testMachCodePath)) {
+    if (!sim.createStimuli(testMachCodePath)) {
         FAIL();
     }
     sim.reset(2); // Hold reset line for 2cc
@@ -51,10 +50,9 @@ TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR
     if (!sim.create(new Vboredcore(), "obj_dir/simple_logic.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
-    const char *testAsmPath         = BASE_PATH "/cpu_logic_test.s";
     const char *testMachCodePath    = BASE_PATH "/cpu_logic_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_logic_test.regs";
-    if (!sim.createStimuli(testAsmPath, testMachCodePath, initRegfileValPath)) {
+    if (!sim.createStimuli(testMachCodePath, initRegfileValPath)) {
         FAIL();
     }
     sim.reset(2); // Hold reset line for 2cc
@@ -89,10 +87,9 @@ TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. AD
     if (!sim.create(new Vboredcore(), "obj_dir/simple_arith.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
-    const char *testAsmPath         = BASE_PATH "/cpu_arith_test.s";
     const char *testMachCodePath    = BASE_PATH "/cpu_arith_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_arith_test.regs";
-    if (!sim.createStimuli(testAsmPath, testMachCodePath, initRegfileValPath)) {
+    if (!sim.createStimuli(testMachCodePath, initRegfileValPath)) {
         FAIL();
     }
     sim.reset(2); // Hold reset line for 2cc
@@ -127,9 +124,8 @@ TEST(simple, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, B
     if (!sim.create(new Vboredcore(), "obj_dir/simple_jump.vcd")) {
         FAIL() << "Failed to create vcd file!";
     }
-    const char *testAsmPath         = BASE_PATH "/cpu_jump_test.s";
     const char *testMachCodePath    = BASE_PATH "/cpu_jump_test.mem";
-    if (!sim.createStimuli(testAsmPath, testMachCodePath)) {
+    if (!sim.createStimuli(testMachCodePath)) {
         FAIL();
     }
     sim.reset(2); // Hold reset line for 2cc

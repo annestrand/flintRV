@@ -42,26 +42,6 @@ std::vector<std::string> machineCodeFileReader(std::string filePath) {
     return contents;
 }
 // ====================================================================================================================
-std::vector<std::string> asmFileReader(std::string filePath) {
-    std::vector<std::string> contents;
-    std::ifstream f(filePath);
-    if (!f) {
-        LOG_E("Failed reading from: [ %s ]", filePath.c_str());
-        return contents;
-    }
-    std::string line;
-    while (std::getline(f, line)) {
-        leftTrimWhitespace(line);
-        // Skip line if it starts off as a code comment
-        if (line.find("#") != std::string::npos && line.find("#") == 0) {
-            continue;
-        }
-        contents.push_back(line);
-    }
-    f.close();
-    return contents;
-}
-// ====================================================================================================================
 std::vector<std::string> initRegfileReader(std::string filePath) {
     std::vector<std::string> contents;
     std::ifstream f(filePath);

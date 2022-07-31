@@ -38,9 +38,7 @@ bool simulation::create(Vboredcore* cpu, const char* traceFile) {
     return true;
 }
 // ====================================================================================================================
-bool simulation::createStimuli( std::string asmFilePath,
-                                std::string machineCodeFilePath,
-                                std::string initRegfilePath) {
+bool simulation::createStimuli(std::string machineCodeFilePath, std::string initRegfilePath) {
     auto delEmptyStrElems = [](std::vector<std::string>& strList) {
         strList.erase(std::remove_if(
             strList.begin(),
@@ -49,18 +47,13 @@ bool simulation::createStimuli( std::string asmFilePath,
         ), strList.end());
     };
 
-    m_stimulus.instructions = asmFileReader(asmFilePath);
-    if (m_stimulus.instructions.empty()) {
-        return false;
-    }
-    delEmptyStrElems(m_stimulus.instructions);
-
     m_stimulus.machine_code = machineCodeFileReader(machineCodeFilePath);
     if (m_stimulus.machine_code.empty()) {
         return false;
     }
     delEmptyStrElems(m_stimulus.machine_code);
     endianFlipper(m_stimulus.machine_code); // Since objdump does output Verilog in big-endian
+    m_stimulus.instructions = disassembleRv32i(m_stimulus.machine_code); // So that we have the readable instructions
 
     // Read init regfile values (if given)
     if (!initRegfilePath.empty()) {
