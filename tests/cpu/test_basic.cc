@@ -17,7 +17,7 @@
 TEST(simple, loop) { // Basic test loop summation for 10 iterations
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd")) {
-        FAIL() << "Failed to create vcd file!";
+        FAIL();
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_simple_loop.mem";
     if (!dut.createStimuli(testMachCodePath)) {
@@ -31,13 +31,10 @@ TEST(simple, loop) { // Basic test loop summation for 10 iterations
     constexpr int simDoneVal = -1;
     constexpr int expectedResult= 45;
     while (!dut.end() && !done) {
-        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
-        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_instr      = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
         dut.m_cpu->i_dataIn     = 0xdeadc0de;
         dut.m_cpu->i_ifValid    = 1;
         dut.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
@@ -48,7 +45,7 @@ TEST(simple, loop) { // Basic test loop summation for 10 iterations
 TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd")) {
-        FAIL() << "Failed to create vcd file!";
+        FAIL();
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_logic_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_logic_test.regs";
@@ -68,13 +65,10 @@ TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR
     constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
     while (!dut.end() && !done) {
-        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
-        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_instr      = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
         dut.m_cpu->i_dataIn     = 0xdeadc0de;
         dut.m_cpu->i_ifValid    = 1;
         dut.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
@@ -85,7 +79,7 @@ TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR
 TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd")) {
-        FAIL() << "Failed to create vcd file!";
+        FAIL();
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_arith_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_arith_test.regs";
@@ -105,13 +99,10 @@ TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. AD
     constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
     while (!dut.end() && !done) {
-        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
-        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_instr      = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
         dut.m_cpu->i_dataIn     = 0xdeadc0de;
         dut.m_cpu->i_ifValid    = 1;
         dut.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
@@ -122,7 +113,7 @@ TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. AD
 TEST(simple, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd")) {
-        FAIL() << "Failed to create vcd file!";
+        FAIL();
     }
     const char *testMachCodePath    = BASE_PATH "/cpu_jump_test.mem";
     if (!dut.createStimuli(testMachCodePath)) {
@@ -135,13 +126,10 @@ TEST(simple, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, B
     constexpr int resultReg = 31;   // x31
     constexpr int simDoneVal = -1;
     while (!dut.end() && !done) {
-        std::string instr       = dut.m_stimulus.instructions[dut.m_cpu->o_pcOut >> 2];
-        int machine_instr       = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
-        dut.m_cpu->i_instr      = machine_instr;
+        dut.m_cpu->i_instr      = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
         dut.m_cpu->i_dataIn     = 0xdeadc0de;
         dut.m_cpu->i_ifValid    = 1;
         dut.m_cpu->i_memValid   = 1;
-        LOG_I("%08x: 0x%08x   %s\n", dut.m_cpu->o_pcOut, machine_instr, instr.c_str());
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();

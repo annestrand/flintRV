@@ -16,10 +16,14 @@
 
 // ====================================================================================================================
 boredcore::boredcore(vluint64_t maxSimTime) :
-    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_stimulus({}) {}
+    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_stimulus({}), m_dump(0) {}
+// ====================================================================================================================
+boredcore::~boredcore() {
+    if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr; }
+    if (m_cpu != nullptr)   { delete m_cpu; m_cpu = nullptr; }
+}
 // ====================================================================================================================
 bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
-    LOG_I("Creating DUT...\n");
     if (cpu == nullptr) {
         LOG_E("Failed to create Verilated boredcore module!\n");
         return false;
@@ -29,11 +33,21 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
     if (m_trace == nullptr) {
         m_trace = new VerilatedVcdC;
         if (m_trace == nullptr) {
-            LOG_W("Failed to create boredcore trace unit!\n");
-            return false;
+            LOG_W("Failed to create boredcore VCD dumper!\n");
+            return true;
         }
         m_cpu->trace(m_trace, 99);
         m_trace->open(traceFile);
+    }
+    // Parse any passed option(s)
+    for (int i=0; i<(*g_argc); ++i) {
+        std::string s(g_argv[i]);
+        if (s.find("-dump") != std::string::npos) {
+            m_dump = m_dump > 0 ? m_dump : 1;
+        }
+        if (s.find("-dump-all") != std::string::npos) {
+            m_dump = m_dump > 1 ? m_dump : 2;
+        }
     }
     return true;
 }
@@ -93,6 +107,7 @@ void boredcore::reset(int count) {
 }
 // ====================================================================================================================
 void boredcore::tick() {
+    dump();
     m_cpu->i_clk = 0;
     m_cpu->eval();
     if(m_trace) { m_trace->dump(m_cycles++); }
@@ -100,14 +115,31 @@ void boredcore::tick() {
     m_cpu->eval();
     if(m_trace) { m_trace->dump(m_cycles++); m_trace->flush(); }
 }
+// =======================================================================  =============================================
+void boredcore::dump() {
+    if (!m_dump) { return; }
+    std::string instr   = m_stimulus.instructions[m_cpu->o_pcOut >> 2];
+    bool fStall         = cpu(this)->boredcore__DOT__FETCH_stall;
+    bool eStall         = cpu(this)->boredcore__DOT__load_wait;
+    bool mStall         = cpu(this)->boredcore__DOT__load_wait;
+    bool fFlush         = cpu(this)->boredcore__DOT__FETCH_flush;
+    bool eFlush         = cpu(this)->boredcore__DOT__EXEC_flush;
+    bool mFlush         = cpu(this)->i_rst;
+    bool wFlush         = cpu(this)->boredcore__DOT__WB_flush;
+    printf("%08x   0x%08x   %s\n", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
+    if (m_dump < 2) { return; }
+    printf("    CYCLE       : %llu\n", m_cycles > 1 ? m_cycles/2 : 0);
+    printf("    RST         : %s\n", cpu(this)->i_rst ? "YES" : "NO");
+    printf("    IF_VALID    : %s\n", cpu(this)->i_ifValid ? "YES" : "NO");
+    printf("    LD_SD_VALID : %s\n", cpu(this)->i_memValid ? "YES" : "NO");
+    printf("    STALL       : %c%c%c%c\n", fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-', '-');
+    printf("    FLUSH       : %c%c%c%c\n", fFlush ? 'x':'-', eFlush ? 'x':'-', mFlush ? 'x':'-', wFlush ? 'x':'-');
+    printf("    BRA         : %s\n", cpu(this)->boredcore__DOT__braMispredict ? "YES" : "NO");
+    printf("    JMP         : %s\n", cpu(this)->boredcore__DOT__p_jmp[0] ? "YES" : "NO");
+    printf("    LD_REQ      : %s\n", cpu(this)->o_loadReq ? "YES" : "NO");
+    printf("    SD_REQ      : %s\n", cpu(this)->o_storeReq ? "YES" : "NO");
+    printf("------------------------------------------------------------\n");
+}
 // ====================================================================================================================
 bool boredcore::end() { return (Verilated::gotFinish() || m_cycles > m_maxSimTime); }
 // ====================================================================================================================
-boredcore::~boredcore() {
-    LOG_I("Cleaning up DUT...\n");
-    m_trace->close();
-    delete m_cpu;
-    m_cpu = nullptr;
-    delete m_trace;
-    m_trace = nullptr;
-}

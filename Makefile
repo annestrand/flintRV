@@ -37,15 +37,12 @@ VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
-ifdef TEST_VERBOSE
-CPU_TEST_CFLAGS        += -DVERBOSE
-endif
 
 CPU_TEST_FLAGS         := -Wall
 CPU_TEST_FLAGS         += -Ihdl
 CPU_TEST_FLAGS         += --trace
 CPU_TEST_FLAGS         += -CFLAGS "$(CPU_TEST_CFLAGS)"
-CPU_TEST_FLAGS         += -LDFLAGS "$(GTEST_BASEDIR)/libgtest_main.a $(GTEST_BASEDIR)/libgtest.a -lpthread"
+CPU_TEST_FLAGS         += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
 CPU_TEST_FLAGS         += --x-assign unique
 CPU_TEST_FLAGS         += --x-initial unique
 

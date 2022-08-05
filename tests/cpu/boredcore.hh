@@ -3,7 +3,10 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-#include <verilated_vcd_c.h>
+#include <gtest/gtest.h>
+
+#include "Vboredcore.h"
+#include "Vboredcore__Syms.h"
 
 // Placeholder defines here
 #ifndef BASE_PATH // This default dir is "obj_dir/"
@@ -12,6 +15,9 @@
 #ifndef VERILATOR_VER
 #define VERILATOR_VER 4028
 #endif // VERILATOR_VER
+
+extern const int* g_argc;
+extern const char** g_argv;
 
 struct stimulus {
     std::vector<std::string> instructions;
@@ -29,6 +35,7 @@ public:
     int readRegfile(int index);
     void reset(int count=1);
     void tick();
+    void dump();
     bool end();
     Vboredcore*             m_cpu;      // Reference to CPU object
     stimulus                m_stimulus; // Test vector data for CPU tests
@@ -37,6 +44,7 @@ private:
     vluint64_t              m_cycles;
     VerilatedVcdC*          m_trace;
     vluint64_t              m_maxSimTime;
+    int                     m_dump;
 };
 
 /*
