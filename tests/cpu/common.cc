@@ -58,7 +58,7 @@ std::vector<std::string> initRegfileReader(std::string filePath) {
     return contents;
 }
 // ====================================================================================================================
-std::vector<std::string> disassembleRv32i(std::vector<std::string> machineCode) {
+std::string disassembleRv32i(unsigned int instr) {
     constexpr unsigned int R       = 0b0110011;
     constexpr unsigned int I_JUMP  = 0b1100111;
     constexpr unsigned int I_LOAD  = 0b0000011;
@@ -130,130 +130,125 @@ std::vector<std::string> disassembleRv32i(std::vector<std::string> machineCode) 
     } BtypeInstructions;
     typedef enum { LUI     = (0x37), AUIPC   = (0x17)   } UtypeInstructions;
     typedef enum { JAL     = (0x6f)                     } JtypeInstructions;
-    std::vector<std::string> disassembly;
     auto getBits = [](unsigned int instr, int pos, int width) {
         return ((instr & ((((1 << width) - 1) << pos))) >> pos);
     };
-    for (const auto& x : machineCode) {
-        std::stringstream ss;
-        auto instr      = (unsigned int)HEX_DECODE_ASCII(x.c_str());
-        auto OPCODE     = getBits(instr, 0, 7);
-        auto RD         = getBits(instr, 7, 5);
-        auto RS1        = getBits(instr, 15, 5);
-        auto RS2        = getBits(instr, 20, 5);
-        auto FUNCT3     = getBits(instr, 12, 3);
-        auto FUNCT7     = getBits(instr, 25, 7);
-        auto IMM_10_5   = getBits(instr, 25, 6);
-        auto IMM_11_B   = getBits(instr, 7, 1);
-        auto IMM_4_1    = getBits(instr, 8, 4);
-        auto IMM_4_0    = getBits(instr, 7, 5);
-        auto IMM_11_5   = getBits(instr, 25, 7);
-        auto IMM_12     = getBits(instr, 31, 1);
-        auto IMM_20     = getBits(instr, 31, 1);
-        auto IMM_11_0   = getBits(instr, 20, 12);
-        auto IMM_11_J   = getBits(instr, 20, 1);
-        auto IMM_19_12  = getBits(instr, 12, 8);
-        auto IMM_10_1   = getBits(instr, 21, 10);
-        auto IMM_31_12  = getBits(instr, 12, 20);
-        auto SUCC       = getBits(instr, 20, 4);
-        auto PRED       = getBits(instr, 24, 4);
-        auto FM         = getBits(instr, 28, 4);
-        switch (OPCODE) {
-            case R       : {
-                switch (FUNCT7 << 10 | FUNCT3 << 7 | OPCODE) {
-                    case ADD : ss << "add "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case SUB : ss << "sub "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case SLL : ss << "sll "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case SLT : ss << "slt "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case SLTU: ss << "sltu " << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case XOR : ss << "xor "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case SRL : ss << "srl "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case SRA : ss << "sra "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case OR  : ss << "or "   << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    case AND : ss << "and "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
-                    default  : ss << "Unknown instruction!"; break;
-                }
-                break;
+    auto OPCODE     = getBits(instr, 0, 7);
+    auto RD         = getBits(instr, 7, 5);
+    auto RS1        = getBits(instr, 15, 5);
+    auto RS2        = getBits(instr, 20, 5);
+    auto FUNCT3     = getBits(instr, 12, 3);
+    auto FUNCT7     = getBits(instr, 25, 7);
+    auto IMM_10_5   = getBits(instr, 25, 6);
+    auto IMM_11_B   = getBits(instr, 7, 1);
+    auto IMM_4_1    = getBits(instr, 8, 4);
+    auto IMM_4_0    = getBits(instr, 7, 5);
+    auto IMM_11_5   = getBits(instr, 25, 7);
+    auto IMM_12     = getBits(instr, 31, 1);
+    auto IMM_20     = getBits(instr, 31, 1);
+    auto IMM_11_0   = getBits(instr, 20, 12);
+    auto IMM_11_J   = getBits(instr, 20, 1);
+    auto IMM_19_12  = getBits(instr, 12, 8);
+    auto IMM_10_1   = getBits(instr, 21, 10);
+    auto IMM_31_12  = getBits(instr, 12, 20);
+    auto SUCC       = getBits(instr, 20, 4);
+    auto PRED       = getBits(instr, 24, 4);
+    auto FM         = getBits(instr, 28, 4);
+    std::stringstream ss;
+    switch (OPCODE) {
+        case R       : {
+            switch (FUNCT7 << 10 | FUNCT3 << 7 | OPCODE) {
+                case ADD : ss << "add "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case SUB : ss << "sub "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case SLL : ss << "sll "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case SLT : ss << "slt "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case SLTU: ss << "sltu " << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case XOR : ss << "xor "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case SRL : ss << "srl "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case SRA : ss << "sra "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case OR  : ss << "or "   << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                case AND : ss << "and "  << regName[RD] << ", " << regName[RS1] << ", " << regName[RS2]; break;
+                default  : ss << "Unknown instruction!"; break;
             }
-            case I_LOAD  : {
-                auto immFinal   = (((int)IMM_11_0 << 20) >> 20);
-                switch (FUNCT3 << 7 | OPCODE) {
-                    case LB  : ss << "lb "  << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    case LH  : ss << "lh "  << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    case LW  : ss << "lw "  << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    case LBU : ss << "lbu " << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    case LHU : ss << "lhu " << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    default  : ss << "Unknown instruction!"; break;
-                }
-                break;
-            }
-            case I_JUMP  :
-            case I_ARITH : {
-                auto immFinal   = (((int)IMM_11_0 << 20) >> 20);
-                switch (FUNCT3 << 7 | OPCODE) {
-                    case SLLI  : ss << "slli "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case SRLI  : ss << "srli "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case SRAI  : ss << "srai "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case JALR  : ss << "jalr "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case ADDI  : ss << "addi "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case SLTI  : ss << "slti "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case SLTIU : ss << "sltiu " << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case XORI  : ss << "xori "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case ORI   : ss << "ori "   << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    case ANDI  : ss << "andi "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
-                    default    : ss << "Unknown instruction!"; break;
-                }
-                break;
-            }
-            case I_SYS   : {
-                switch (IMM_11_0 << 20 | FUNCT3 << 7 | OPCODE) {
-                    case ECALL  : ss << "ecall"; break;
-                    case EBREAK : ss << "ebreak"; break;
-                    default     : ss << "Unknown instruction!"; break;
-                }
-                break;
-            }
-            case I_FENCE : ss << "fence fm:" << FM << ", pred:" << PRED << ", succ:" << SUCC; break;
-            case S       : {
-                auto immFinal = (((int)(IMM_4_0 | IMM_11_5 << 5) << 20) >> 20);
-                switch (FUNCT3 << 7 | OPCODE) {
-                    case SB : ss << "sb " << regName[RS2] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    case SH : ss << "sh " << regName[RS2] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    case SW : ss << "sw " << regName[RS2] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
-                    default : ss << "Unknown instruction!"; break;
-                }
-                break;
-            }
-            case B       : {
-                auto targetAddr = (int)((IMM_4_1 | IMM_10_5 << 4 | IMM_11_B << 10 | IMM_12 << 11) << 20) >> 19;
-                switch (FUNCT3 << 7 | OPCODE) {
-                    case BEQ  : ss << "beq "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
-                    case BNE  : ss << "bne "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
-                    case BLT  : ss << "blt "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
-                    case BGE  : ss << "bge "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
-                    case BLTU : ss << "bltu " << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
-                    case BGEU : ss << "bgeu " << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
-                    default   : ss << "Unknown instruction!"; break;
-                }
-                break;
-            }
-            case U_LUI   :
-            case U_AUIPC : {
-                auto immFinal = IMM_31_12 << 12;
-                switch (OPCODE) {
-                    case LUI   : ss << "lui "   << regName[RD] << ", " << immFinal; break;
-                    case AUIPC : ss << "auipc " << regName[RD] << ", " << immFinal; break;
-                    default    : ss << "Unknown instruction!"; break;
-                }
-                break;
-            }
-            case J       : {
-                auto targetAddr = (int)((IMM_10_1 | IMM_11_J << 10 | IMM_19_12 << 11 | IMM_20 << 19) << 12) >> 11;
-                ss << "jal " << regName[RD] << ", " << targetAddr; break;
-            }
-            default : ss << "Unknown instruction!"; break;
+            break;
         }
-        disassembly.push_back(ss.str());
+        case I_LOAD  : {
+            auto immFinal   = (((int)IMM_11_0 << 20) >> 20);
+            switch (FUNCT3 << 7 | OPCODE) {
+                case LB  : ss << "lb "  << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                case LH  : ss << "lh "  << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                case LW  : ss << "lw "  << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                case LBU : ss << "lbu " << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                case LHU : ss << "lhu " << regName[RD] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                default  : ss << "Unknown instruction!"; break;
+            }
+            break;
+        }
+        case I_JUMP  :
+        case I_ARITH : {
+            auto immFinal   = (((int)IMM_11_0 << 20) >> 20);
+            switch (FUNCT3 << 7 | OPCODE) {
+                case SLLI  : ss << "slli "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case SRLI  : ss << "srli "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case SRAI  : ss << "srai "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case JALR  : ss << "jalr "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case ADDI  : ss << "addi "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case SLTI  : ss << "slti "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case SLTIU : ss << "sltiu " << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case XORI  : ss << "xori "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case ORI   : ss << "ori "   << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                case ANDI  : ss << "andi "  << regName[RD] << ", " << regName[RS1] << ", " << immFinal; break;
+                default    : ss << "Unknown instruction!"; break;
+            }
+            break;
+        }
+        case I_SYS   : {
+            switch (IMM_11_0 << 20 | FUNCT3 << 7 | OPCODE) {
+                case ECALL  : ss << "ecall"; break;
+                case EBREAK : ss << "ebreak"; break;
+                default     : ss << "Unknown instruction!"; break;
+            }
+            break;
+        }
+        case I_FENCE : ss << "fence fm:" << FM << ", pred:" << PRED << ", succ:" << SUCC; break;
+        case S       : {
+            auto immFinal = (((int)(IMM_4_0 | IMM_11_5 << 5) << 20) >> 20);
+            switch (FUNCT3 << 7 | OPCODE) {
+                case SB : ss << "sb " << regName[RS2] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                case SH : ss << "sh " << regName[RS2] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                case SW : ss << "sw " << regName[RS2] << ", " << immFinal << "(" << regName[RS1] << ")"; break;
+                default : ss << "Unknown instruction!"; break;
+            }
+            break;
+        }
+        case B       : {
+            auto targetAddr = (int)((IMM_4_1 | IMM_10_5 << 4 | IMM_11_B << 10 | IMM_12 << 11) << 20) >> 19;
+            switch (FUNCT3 << 7 | OPCODE) {
+                case BEQ  : ss << "beq "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
+                case BNE  : ss << "bne "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
+                case BLT  : ss << "blt "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
+                case BGE  : ss << "bge "  << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
+                case BLTU : ss << "bltu " << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
+                case BGEU : ss << "bgeu " << regName[RS1] << ", " << regName[RS2] << ", " << targetAddr; break;
+                default   : ss << "Unknown instruction!"; break;
+            }
+            break;
+        }
+        case U_LUI   :
+        case U_AUIPC : {
+            auto immFinal = IMM_31_12 << 12;
+            switch (OPCODE) {
+                case LUI   : ss << "lui "   << regName[RD] << ", " << immFinal; break;
+                case AUIPC : ss << "auipc " << regName[RD] << ", " << immFinal; break;
+                default    : ss << "Unknown instruction!"; break;
+            }
+            break;
+        }
+        case J       : {
+            auto targetAddr = (int)((IMM_10_1 | IMM_11_J << 10 | IMM_19_12 << 11 | IMM_20 << 19) << 12) >> 11;
+            ss << "jal " << regName[RD] << ", " << targetAddr; break;
+        }
+        default : ss << "Unknown instruction!"; break;
     }
-    return disassembly;
+    return ss.str();
 }

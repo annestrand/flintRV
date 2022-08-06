@@ -8,6 +8,9 @@ AS                     := $(TOOLCHAIN_PREFIX)-as
 OBJCOPY                := $(TOOLCHAIN_PREFIX)-objcopy
 OBJDUMP                := $(TOOLCHAIN_PREFIX)-objdump
 
+AS_FLAGS               := -march=rv32i
+AS_FLAGS               += -mabi=ilp32
+
 SUB_TEST_FLAGS         := -Wall
 SUB_TEST_FLAGS         += -Ihdl
 SUB_TEST_FLAGS         += -DSIM
@@ -83,7 +86,7 @@ $(CPU_TEST_OUT)/cpu_%.s: scripts/cpu_%.asm.py
 
 .SECONDARY:
 $(SUB_TEST_OUT)/sub_%.elf: $(SUB_TEST_OUT)/sub_%.s
-	$(DOCKER_CMD) $(AS) -o $@ $<
+	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
 .SECONDARY:
 $(SUB_TEST_OUT)/sub_%.mem: $(SUB_TEST_OUT)/sub_%.elf
@@ -105,13 +108,13 @@ $(CPU_TEST_OUT)/%.cpp: $(CPU_TEST_SRCS) $(HDL_SRCS)
 	verilator $(CPU_TEST_FLAGS) --exe tests/cpu/boredcore.cc $(CPU_TEST_SRCS) --top-module boredcore -cc $(HDL_SRCS)
 
 $(CPU_TEST_OUT)/cpu_%.elf: $(CPU_TEST_OUT)/cpu_%.s
-	$(DOCKER_CMD) $(AS) -o $@ $<
+	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
 $(CPU_TEST_OUT)/cpu_%.mem: $(CPU_TEST_OUT)/cpu_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
 $(CPU_TEST_OUT)/%.elf: tests/cpu/programs/%.s
-	$(DOCKER_CMD) $(AS) -o $@ $<
+	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
 $(CPU_TEST_OUT)/%.mem: $(CPU_TEST_OUT)/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@

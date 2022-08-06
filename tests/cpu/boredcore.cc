@@ -67,7 +67,6 @@ bool boredcore::createStimuli(std::string machineCodeFilePath, std::string initR
     }
     delEmptyStrElems(m_stimulus.machine_code);
     endianFlipper(m_stimulus.machine_code); // Since objdump does output Verilog in big-endian
-    m_stimulus.instructions = disassembleRv32i(m_stimulus.machine_code); // So that we have the readable instructions
 
     // Read init regfile values (if given)
     if (!initRegfilePath.empty()) {
@@ -118,7 +117,7 @@ void boredcore::tick() {
 // =======================================================================  =============================================
 void boredcore::dump() {
     if (!m_dump) { return; }
-    std::string instr   = m_stimulus.instructions[m_cpu->o_pcOut >> 2];
+    std::string instr   = disassembleRv32i(m_cpu->i_instr);
     bool fStall         = cpu(this)->boredcore__DOT__FETCH_stall;
     bool eStall         = cpu(this)->boredcore__DOT__load_wait;
     bool mStall         = cpu(this)->boredcore__DOT__load_wait;

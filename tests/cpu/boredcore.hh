@@ -20,7 +20,6 @@ extern const int* g_argc;
 extern const char** g_argv;
 
 struct stimulus {
-    std::vector<std::string> instructions;
     std::vector<std::string> machine_code;
     std::vector<std::string> init_regfile;
 };

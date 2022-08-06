@@ -21,4 +21,4 @@ void leftTrimWhitespace(std::string& s);
 std::vector<std::string> machineCodeFileReader(std::string filePath);
 std::vector<std::string> asmFileReader(std::string filePath);
 std::vector<std::string> initRegfileReader(std::string filePath);
-std::vector<std::string> disassembleRv32i(std::vector<std::string> machineCode);
+std::string disassembleRv32i(unsigned int instr);
