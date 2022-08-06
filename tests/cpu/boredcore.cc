@@ -3,9 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-
 #include <gtest/gtest.h>
-
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
@@ -127,7 +125,7 @@ void boredcore::dump() {
     bool wFlush         = cpu(this)->boredcore__DOT__WB_flush;
     printf("%08x   0x%08x   %s\n", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { return; }
-    printf("    CYCLE       : %llu\n", m_cycles > 1 ? m_cycles/2 : 0);
+    printf("    CYCLE       : %llu\n", m_cycles > 1 ? (unsigned long long)(m_cycles/2) : (unsigned long long)0);
     printf("    RST         : %s\n", cpu(this)->i_rst ? "YES" : "NO");
     printf("    IF_VALID    : %s\n", cpu(this)->i_ifValid ? "YES" : "NO");
     printf("    LD_SD_VALID : %s\n", cpu(this)->i_memValid ? "YES" : "NO");

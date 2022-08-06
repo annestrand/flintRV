@@ -2,9 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-
 #include <gtest/gtest.h>
-
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
@@ -14,7 +12,7 @@
 #include "common.hh"
 
 // ====================================================================================================================
-TEST(simple, loop) { // Basic test loop summation for 10 iterations
+TEST(basic, loop) { // Basic test loop summation for 10 iterations
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd")) {
         FAIL();
@@ -42,7 +40,7 @@ TEST(simple, loop) { // Basic test loop summation for 10 iterations
     EXPECT_EQ(dut.readRegfile(j), expectedResult);
 }
 // ====================================================================================================================
-TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
+TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd")) {
         FAIL();
@@ -76,7 +74,7 @@ TEST(simple, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
+TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd")) {
         FAIL();
@@ -110,7 +108,7 @@ TEST(simple, arith) { // Tests all the core arithmetic functions of ALU (e.g. AD
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(simple, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
+TEST(basic, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
     boredcore dut  = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd")) {
         FAIL();
