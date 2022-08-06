@@ -33,7 +33,7 @@ module boredcore (
     reg         p_jmp       [EXEC:WB];
     // Internal wires/regs
     reg  [31:0] PC, PCReg, instrReg;
-    wire [31:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out;
+    wire [31:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out, rs2FwdOut;
     wire  [3:0] aluOp;
     wire        exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp;
     wire [31:0] WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
@@ -88,7 +88,8 @@ module boredcore (
         .i_PC                 (p_PC[EXEC]),
         .i_IMM                (p_IMM[EXEC]),
         .o_aluOut             (aluOut),
-        .o_addrGenOut         (jumpAddr)
+        .o_addrGenOut         (jumpAddr),
+        .o_rs2FwdOut          (rs2FwdOut)
     );
     Memory MEMORY_unit(
         .i_funct3             (p_funct3[MEM]),
@@ -143,7 +144,7 @@ module boredcore (
         p_rs2Addr  [EXEC]  <= EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
         p_rdAddr   [EXEC]  <= EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
         // --- Memory ---
-        p_rs2      [MEM]   <= MEM_stall ? p_rs2    [MEM] : p_rs2     [EXEC];
+        p_rs2      [MEM]   <= MEM_stall ? p_rs2    [MEM] : rs2FwdOut;
         p_rdAddr   [MEM]   <= MEM_stall ? p_rdAddr [MEM] : p_rdAddr  [EXEC];
         p_funct3   [MEM]   <= MEM_stall ? p_funct3 [MEM] : p_funct3  [EXEC];
         p_aluOut   [MEM]   <= MEM_stall ? p_aluOut [MEM] : aluOut;

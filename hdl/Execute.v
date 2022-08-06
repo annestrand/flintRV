@@ -8,7 +8,7 @@ module Execute (
     input           i_aluSrcA, i_aluSrcB,
     input   [31:0]  i_EXEC_rs1, i_EXEC_rs2, i_MEM_rd, i_WB_rd,
     input   [31:0]  i_PC, i_IMM,
-    output  [31:0]  o_aluOut, o_addrGenOut
+    output  [31:0]  o_aluOut, o_addrGenOut, o_rs2FwdOut
 );
     // Datapath for register forwarding
     reg [31:0] rs1Out, rs2Out;
@@ -46,7 +46,7 @@ module Execute (
         .o_result (o_aluOut)
     );
 
-    // Address generator
     assign o_addrGenOut = i_PC + i_IMM;
+    assign o_rs2FwdOut  = rs2Out;
 
 endmodule

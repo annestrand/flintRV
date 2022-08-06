@@ -123,19 +123,26 @@ void boredcore::dump() {
     bool eFlush         = cpu(this)->boredcore__DOT__EXEC_flush;
     bool mFlush         = cpu(this)->i_rst;
     bool wFlush         = cpu(this)->boredcore__DOT__WB_flush;
+    // Status codes
+    bool BRA            = cpu(this)->boredcore__DOT__braMispredict; // B
+    bool JMP            = cpu(this)->boredcore__DOT__p_jmp[0];      // J
+    bool LD_REQ         = cpu(this)->o_loadReq;                     // L
+    bool SD_REQ         = cpu(this)->o_storeReq;                    // S
+    bool RST            = cpu(this)->i_rst;                         // R
+    bool iValid         = cpu(this)->i_ifValid;                     // I
+    bool mValid         = cpu(this)->i_memValid;                    // M
+    // Dump disassembled instruction:   "-dump"
     printf("%08x   0x%08x   %s\n", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { return; }
-    printf("    CYCLE       : %llu\n", m_cycles > 1 ? (unsigned long long)(m_cycles/2) : (unsigned long long)0);
-    printf("    RST         : %s\n", cpu(this)->i_rst ? "YES" : "NO");
-    printf("    IF_VALID    : %s\n", cpu(this)->i_ifValid ? "YES" : "NO");
-    printf("    LD_SD_VALID : %s\n", cpu(this)->i_memValid ? "YES" : "NO");
-    printf("    STALL       : %c%c%c%c\n", fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-', '-');
-    printf("    FLUSH       : %c%c%c%c\n", fFlush ? 'x':'-', eFlush ? 'x':'-', mFlush ? 'x':'-', wFlush ? 'x':'-');
-    printf("    BRA         : %s\n", cpu(this)->boredcore__DOT__braMispredict ? "YES" : "NO");
-    printf("    JMP         : %s\n", cpu(this)->boredcore__DOT__p_jmp[0] ? "YES" : "NO");
-    printf("    LD_REQ      : %s\n", cpu(this)->o_loadReq ? "YES" : "NO");
-    printf("    SD_REQ      : %s\n", cpu(this)->o_storeReq ? "YES" : "NO");
-    printf("------------------------------------------------------------\n");
+    // Dump more detailed info:         "-dump-all"
+    unsigned long long cycle = m_cycles > 1 ? (unsigned long long)(m_cycles/2) : (unsigned long long)0;
+    printf("    CYCLE:[%llu] STALL:[%c%c%c-] FLUSH:[%c%c%c%c] STATUS:[%c%c%c%c%c%c%c]\n\n",
+        cycle,
+        fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-',
+        fFlush ? 'x':'-', eFlush ? 'x':'-', mFlush ? 'x':'-', wFlush ? 'x':'-',
+        iValid ? 'I':'-', mValid ? 'M':'-', RST    ? 'R':'-', BRA    ? 'B':'-',
+        JMP    ? 'J':'-', LD_REQ ? 'L':'-', SD_REQ ? 'S':'-'
+    );
 }
 // ====================================================================================================================
 bool boredcore::end() { return (Verilated::gotFinish() || m_cycles > m_maxSimTime); }
