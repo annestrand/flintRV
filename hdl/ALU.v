@@ -5,16 +5,16 @@ module ALU (
   input         [ALU_OP_WIDTH-1:0]  i_op,
   output reg    [WIDTH-1:0]         o_result
 );
-    parameter                       WIDTH               = 32;
-    localparam                      ALU_OP_WIDTH        = 5;
+    parameter   WIDTH           = 32;
+    localparam  ALU_OP_WIDTH    = 5;
 
-    wire                            cflag; // Catch unsigned overflow for SLTU/SGTEU cases
-    wire        [WIDTH-1:0]         ALU_ADDER_result;
-    wire        [WIDTH-1:0]         ALU_XOR_result      = i_a ^ i_b;
-    wire        [WIDTH-1:0]         CONST_4             = {{(WIDTH-3){1'b0}}, 3'd4};
-    reg                             ALU_SLT;
-    reg                             SUB;
-    reg         [WIDTH-1:0]         B_in;
+    reg  [WIDTH-1:0]    B_in;
+    reg                 ALU_SLT;
+    reg                 SUB;
+    wire                cflag; // Catch unsigned overflow for SLTU/SGTEU cases
+    wire [WIDTH-1:0]    ALU_ADDER_result;
+    wire [WIDTH-1:0]    ALU_XOR_result  = i_a ^ i_b;
+    wire [WIDTH-1:0]    CONST_4         = {{(WIDTH-3){1'b0}}, 3'd4};
 
     // Add/Sub logic
     assign {cflag, ALU_ADDER_result[WIDTH-1:0]} = i_a + B_in + {{(WIDTH){1'b0}}, SUB};
