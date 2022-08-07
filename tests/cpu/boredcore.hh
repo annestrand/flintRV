@@ -29,7 +29,7 @@ public:
     boredcore(vluint64_t maxSimTime);
     ~boredcore();
     bool create(Vboredcore* cpu, const char* traceFile);
-    bool createStimuli( std::string machineCodeFilePath, std::string initRegfilePath=std::string());
+    bool createStimulus(std::string machineCodeFilePath, std::string initRegfilePath=std::string());
     void writeRegfile(int index, int val);
     int readRegfile(int index);
     void reset(int count=1);

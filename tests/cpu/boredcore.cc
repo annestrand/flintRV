@@ -47,10 +47,11 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
             m_dump = m_dump > 1 ? m_dump : 2;
         }
     }
+    reset(1); // Reset CPU on create for 1cc
     return true;
 }
 // ====================================================================================================================
-bool boredcore::createStimuli(std::string machineCodeFilePath, std::string initRegfilePath) {
+bool boredcore::createStimulus(std::string machineCodeFilePath, std::string initRegfilePath) {
     auto delEmptyStrElems = [](std::vector<std::string>& strList) {
         strList.erase(std::remove_if(
             strList.begin(),
@@ -64,7 +65,7 @@ bool boredcore::createStimuli(std::string machineCodeFilePath, std::string initR
         return false;
     }
     delEmptyStrElems(m_stimulus.machine_code);
-    endianFlipper(m_stimulus.machine_code); // Since objdump does output Verilog in big-endian
+    endianFlipper(m_stimulus.machine_code); // Since objdump outputs Verilog in big-endian
 
     // Read init regfile values (if given)
     if (!initRegfilePath.empty()) {
@@ -73,6 +74,11 @@ bool boredcore::createStimuli(std::string machineCodeFilePath, std::string initR
             return false;
         }
         delEmptyStrElems(m_stimulus.init_regfile);
+        // Update regfile
+        for (auto it = m_stimulus.init_regfile.begin(); it != m_stimulus.init_regfile.end(); ++it) {
+            int idx = it - m_stimulus.init_regfile.begin();
+            writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
+        }
     }
     return true;
 }
@@ -93,10 +99,9 @@ int boredcore::readRegfile(int index) {
 void boredcore::reset(int count) {
     // Some dummy values for now
     m_cpu->i_instr    = 0x0badc0de;
-    m_cpu->i_dataIn   = 0x00c0ffee;
+    m_cpu->i_dataIn   = 0xdecafbad;
     m_cpu->i_ifValid  = 0;
     m_cpu->i_memValid = 0;
-
     // Toggle reset
     m_cpu->i_rst = 1;
     for (int i=0; i<count; ++i) { tick(); }
