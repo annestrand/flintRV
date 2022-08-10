@@ -6,7 +6,7 @@ module Execute (
     input   [3:0]   i_aluOp,
     input   [1:0]   i_fwdRs1, i_fwdRs2,
     input           i_aluSrcA, i_aluSrcB,
-    input   [31:0]  i_EXEC_rs1, i_EXEC_rs2, i_MEM_rd, i_WB_rd,
+    input   [31:0]  i_EXEC_rs1, i_EXEC_rs2, i_MEM_rd, i_WB_rd, i_rdDataSave,
     input   [31:0]  i_PC, i_IMM,
     output  [31:0]  o_aluOut, o_addrGenOut, o_rs2FwdOut
 );
@@ -14,16 +14,18 @@ module Execute (
     reg [31:0] rs1Out, rs2Out;
     always@(*) begin
         case (i_fwdRs1)
-            `NO_FWD     : rs1Out = i_EXEC_rs1;
-            `FWD_MEM    : rs1Out = i_MEM_rd;
-            `FWD_WB     : rs1Out = i_WB_rd;
-            default     : rs1Out = i_EXEC_rs1;
+            `NO_FWD         : rs1Out = i_EXEC_rs1;
+            `FWD_MEM        : rs1Out = i_MEM_rd;
+            `FWD_WB         : rs1Out = i_WB_rd;
+            `FWD_REG_RDW    : rs1Out = i_rdDataSave;
+            default         : rs1Out = i_EXEC_rs1;
         endcase
         case (i_fwdRs2)
-            `NO_FWD     : rs2Out = i_EXEC_rs2;
-            `FWD_MEM    : rs2Out = i_MEM_rd;
-            `FWD_WB     : rs2Out = i_WB_rd;
-            default     : rs2Out = i_EXEC_rs2;
+            `NO_FWD         : rs2Out = i_EXEC_rs2;
+            `FWD_MEM        : rs2Out = i_MEM_rd;
+            `FWD_WB         : rs2Out = i_WB_rd;
+            `FWD_REG_RDW    : rs2Out = i_rdDataSave;
+            default         : rs2Out = i_EXEC_rs2;
         endcase
     end
 

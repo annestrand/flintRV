@@ -33,9 +33,9 @@ module boredcore (
     reg         p_jmp       [EXEC:WB];
     // Internal wires/regs
     reg  [31:0] PC, PCReg, instrReg;
-    wire [31:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out, rs2FwdOut;
+    wire [31:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out, rdDataSave, rs2FwdOut;
     wire  [3:0] aluOp;
-    wire        exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp;
+    wire        exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp, fwdRdwRs1, fwdRdwRs2;
     wire [31:0] WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire        braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
     wire        writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
@@ -43,10 +43,12 @@ module boredcore (
     //          (Forwarding logic)
     wire        RS1_fwd_mem     = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
     wire        RS1_fwd_wb      = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
+    wire        RS1_fwd_reg_rdw = ~RS1_fwd_wb  && fwdRdwRs1;
     wire        RS2_fwd_mem     = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
     wire        RS2_fwd_wb      = ~RS2_fwd_mem && p_reg_w[WB] && (p_rs2Addr[EXEC] == p_rdAddr[WB]);
-    wire  [1:0] fwdRs1          = {RS1_fwd_wb, RS1_fwd_mem},
-                fwdRs2          = {RS2_fwd_wb, RS2_fwd_mem};
+    wire        RS2_fwd_reg_rdw = ~RS2_fwd_wb  && fwdRdwRs2;
+    wire  [1:0] fwdRs1          = RS1_fwd_reg_rdw ? `FWD_REG_RDW : {RS1_fwd_wb, RS1_fwd_mem},
+                fwdRs2          = RS2_fwd_reg_rdw ? `FWD_REG_RDW : {RS2_fwd_wb, RS2_fwd_mem};
     //          (Stall and flush logic)
     wire        load_hazard     = p_mem2reg[EXEC] && (
                                     (`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC])
@@ -85,6 +87,7 @@ module boredcore (
         .i_EXEC_rs2           (p_rs2[EXEC]),
         .i_MEM_rd             (p_aluOut[MEM]),
         .i_WB_rd              (WB_result),
+        .i_rdDataSave         (rdDataSave),
         .i_PC                 (p_PC[EXEC]),
         .i_IMM                (p_IMM[EXEC]),
         .o_aluOut             (aluOut),
@@ -102,14 +105,17 @@ module boredcore (
         .o_dataOut            (loadData)
     );
     Regfile #(.DATA_WIDTH(32), .ADDR_WIDTH(5)) REGFILE_unit (
-        .i_clk      (i_clk),
-        .i_wrEn     (p_reg_w[WB]),
-        .i_rs1Addr  (`RS1(i_instr)),
-        .i_rs2Addr  (`RS2(i_instr)),
-        .i_rdAddr   (p_rdAddr[WB]),
-        .i_rdData   (WB_result),
-        .o_rs1Data  (rs1Out),
-        .o_rs2Data  (rs2Out)
+        .i_clk          (i_clk),
+        .i_wrEn         (p_reg_w[WB]),
+        .i_rs1Addr      (`RS1(i_instr)),
+        .i_rs2Addr      (`RS2(i_instr)),
+        .i_rdAddr       (p_rdAddr[WB]),
+        .i_rdData       (WB_result),
+        .o_rs1Data      (rs1Out),
+        .o_rs2Data      (rs2Out),
+        .o_rdDataSave   (rdDataSave),
+        .o_fwdRdwRs1    (fwdRdwRs1),
+        .o_fwdRdwRs2    (fwdRdwRs2)
     );
 
     // Pipeline CTRL reg assignments

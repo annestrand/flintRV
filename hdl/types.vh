@@ -26,6 +26,7 @@
 `define NO_FWD              2'b00
 `define FWD_MEM             2'b01
 `define FWD_WB              2'b10
+`define FWD_REG_RDW         2'b11   // Back-to-back regfile Read-During-Writes (RDW) hazard
 
 // EXEC operand select
 `define REG                 1'b0

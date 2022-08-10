@@ -103,7 +103,7 @@ TEST(basic, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BN
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(basic, load_store) { // Tests load and store based instructions (TODO: still need to test byte & half & unsigned)
+TEST(basic, load_store) { // Tests load and store based instructions
     boredcore dut                   = boredcore(200);
     const char *testMachCodePath    = BASE_PATH "/cpu_load_store.mem";
     if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd")) { FAIL(); }
@@ -114,7 +114,9 @@ TEST(basic, load_store) { // Tests load and store based instructions (TODO: stil
     constexpr int resultReg     = 31;
     constexpr int simDoneVal    = -1;
     constexpr int testAddress   = 0xcafebabe;
-    constexpr int goldTestValue = 0xdeadbeef << 1;
+    constexpr int sbGold        = 0xffffffef;
+    constexpr int shGold        = 0xffffbeef;
+    constexpr int swGold        = 0xdeadbeef;
 
     // Create a dummy/test memory (and access helpers)
     constexpr int testMemLen    = 16;
@@ -124,7 +126,7 @@ TEST(basic, load_store) { // Tests load and store based instructions (TODO: stil
     };
     auto readMem    = [checkAddr](int addr, int* mem)           { checkAddr(addr); return mem[addr - testAddress];  };
     auto writeMem   = [checkAddr](int addr, int* mem, int val)  { checkAddr(addr); mem[addr - testAddress] = val;   };
-    writeMem(testAddress, testMem, 0xdeadbeef); // Init the memory
+    writeMem(testAddress, testMem, swGold); // Init the memory
 
     while (!dut.end() && !done) {
         dut.m_cpu->i_ifValid    = 1; // We assume combinatorial read/write for memories in this test
@@ -139,5 +141,10 @@ TEST(basic, load_store) { // Tests load and store based instructions (TODO: stil
         // Evaluate
         dut.tick();
     }
-    EXPECT_EQ(dut.readRegfile(resultReg), goldTestValue);
+    // Load instructions
+    EXPECT_EQ(dut.readRegfile(resultReg), 0);
+    // Store instructions
+    EXPECT_EQ(testMem[4] , sbGold);
+    EXPECT_EQ(testMem[8] , shGold);
+    EXPECT_EQ(testMem[12], swGold);
 }
