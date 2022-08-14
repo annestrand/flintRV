@@ -38,6 +38,7 @@ GTEST_BASEDIR          ?= /usr/local/lib
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
 
 CPU_TEST_CFLAGS        := -g
+CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/tests/cpu
 CPU_TEST_CFLAGS        += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
 
@@ -57,12 +58,12 @@ TEST_PY_MEM            := $(shell find scripts -type f -name "sub_*.mem.py" -exe
 TEST_PY_ASM            := $(shell find scripts -type f -name "sub_*.asm.py" -exec basename {} \;)
 
 CPU_TEST_SRCS          := $(shell find tests/cpu -type f -name "*.cc")
-CPU_TEST_TEST_ASM      := $(shell find tests/cpu/programs -type f -name "*.s" -exec basename {} \;)
-CPU_TEST_PY_SRCS       := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
-CPU_TEST_TEST_SRCS     := $(CPU_TEST_PY_SRCS:%.asm.py=$(CPU_TEST_OUT)/%.s)
-CPU_TEST_TEST_ELF      := $(CPU_TEST_TEST_SRCS:%.s=%.elf)
-CPU_TEST_TEST_MEM      := $(CPU_TEST_TEST_ELF:%.elf=%.mem)
-CPU_TEST_TEST_ASM_MEM  := $(CPU_TEST_TEST_ASM:%.s=$(CPU_TEST_OUT)/%.mem)
+CPU_ASM_TESTS          := $(shell find tests/cpu/basic -type f -name "*.s" -exec basename {} \;)
+CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
+CPU_PY_ASM_TESTS       := $(CPU_PY_TESTS:%.asm.py=$(CPU_TEST_OUT)/%.s)
+CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
+CPU_TEST_MEM           := $(CPU_TEST_ELF:%.elf=%.mem)
+CPU_TEST_ASM_MEM       := $(CPU_ASM_TESTS:%.s=$(CPU_TEST_OUT)/%.mem)
 
 SUB_TEST_ALL_SRCS      := $(shell find tests/sub -type f -name "*.v" -exec basename {} \;)
 SUB_TEST_MEMH_SRCS     := $(TEST_PY_MEM:sub_%.mem.py=%.v)
@@ -113,15 +114,16 @@ $(CPU_TEST_OUT)/cpu_%.elf: $(CPU_TEST_OUT)/cpu_%.s
 $(CPU_TEST_OUT)/cpu_%.mem: $(CPU_TEST_OUT)/cpu_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
-$(CPU_TEST_OUT)/%.elf: tests/cpu/programs/%.s
+$(CPU_TEST_OUT)/%.elf: tests/cpu/basic/%.s
 	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
 $(CPU_TEST_OUT)/%.mem: $(CPU_TEST_OUT)/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 # =====================================================================================================================
+
 # Build tests
 .PHONY: tests
-tests: build-dir $(CPU_TEST_TEST_MEM) $(CPU_TEST_TEST_ASM_MEM) $(CPU_TEST_OUT)/Vboredcore.cpp
+tests: build-dir $(CPU_TEST_MEM) $(CPU_TEST_ASM_MEM) $(CPU_TEST_OUT)/Vboredcore.cpp
 tests: $(SUB_TEST_PLAIN_OBJS) $(SUB_TEST_ASM_OBJS) $(SUB_TEST_MEMH_OBJS)
 tests: $(SOC_TEST_OBJS)
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
