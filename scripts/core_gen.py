@@ -137,7 +137,6 @@ if __name__ == "__main__":
 
     # Dump final HDL file to stdout
     hdl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "hdl"))
-    core_header_fp = open(os.path.join(hdl_dir, "types.vh"), 'r')
     hdl_srcs = [x for x in os.listdir(hdl_dir) if x != "types.vh"]
     print_generated_banner()
     with open(os.path.join(hdl_dir, "types.vh"), 'r') as core_header_fp:
