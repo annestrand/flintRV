@@ -108,14 +108,15 @@ def parse_has_err(args, unknown):
 # Helper utility to generate and config CPU top module based on different interface schemes
 # =====================================================================================================================
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser = argparse.ArgumentParser(allow_abbrev=False,
+        description="Helper utility to config CPU top module and generate top module to stdout.")
     parser.add_argument("-if", dest="interface", default="none",
         help="Specify which CPU interface to use [Default: None].")
     parser.add_argument("-isa", dest="ISA", default="rv32i",
         help="Specify which CPU ISA to use [Default: rv32i].")
-    parser.add_argument("-pcStart", dest="pcStart", default="0",
+    parser.add_argument("-pc", dest="pcStart", default="0",
         help="PC start/reset value (Prefix value with '0x' for hex). [Default: 0x0].")
-    parser.add_argument("-topName", dest="topName", default="top",
+    parser.add_argument("-top", dest="topName", default="top",
         help="Generated top module name. [Default: top].")
 
     # Parse and err check
