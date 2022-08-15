@@ -2,16 +2,16 @@
 `include "Regfile.v"
 
 module Regfile_tb;
-    localparam DATA_WIDTH = 32;
+    localparam XLEN = 32;
     localparam ADDR_WIDTH = 5;
-    reg                       i_clk, i_wrEn;
-    reg   [(ADDR_WIDTH-1):0]  i_rs1Addr, i_rs2Addr, i_rdAddr;
-    reg   [(DATA_WIDTH-1):0]  i_rdData;
-    wire  [(DATA_WIDTH-1):0]  o_rs1Data, o_rs2Data, o_rdDataSave;
-    wire                      o_fwdRdwRs1, o_fwdRdwRs2;
+    reg                         i_clk, i_wrEn;
+    reg   [(ADDR_WIDTH-1):0]    i_rs1Addr, i_rs2Addr, i_rdAddr;
+    reg   [(XLEN-1):0]          i_rdData;
+    wire  [(XLEN-1):0]          o_rs1Data, o_rs2Data, o_rdDataSave;
+    wire                        o_fwdRdwRs1, o_fwdRdwRs2;
 
     Regfile Regfile_dut(.*);
-    defparam Regfile_dut.DATA_WIDTH = DATA_WIDTH;
+    defparam Regfile_dut.XLEN = XLEN;
     defparam Regfile_dut.ADDR_WIDTH = ADDR_WIDTH;
 
 `ifdef DUMP_VCD

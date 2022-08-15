@@ -3,17 +3,17 @@
 module Regfile (
     input                       i_clk, i_wrEn,
     input   [(ADDR_WIDTH-1):0]  i_rs1Addr, i_rs2Addr, i_rdAddr,
-    input   [(DATA_WIDTH-1):0]  i_rdData,
-    output  [(DATA_WIDTH-1):0]  o_rs1Data, o_rs2Data, o_rdDataSave,
+    input   [(XLEN-1):0]        i_rdData,
+    output  [(XLEN-1):0]        o_rs1Data, o_rs2Data, o_rdDataSave,
     output                      o_fwdRdwRs1, o_fwdRdwRs2
 );
-    parameter DATA_WIDTH    = 32;
+    parameter XLEN          = 32;
     parameter ADDR_WIDTH    = 5;
 
     // Need to forward when accessing new value as it is being written to in Regfile (Read-During-Write (RDW))
-    reg                     r_fwdRs1En, r_fwdRs2En, r_fwdRs1En2, r_fwdRs2En2;
-    reg  [(DATA_WIDTH-1):0] r_rdDataSave;
-    wire [(DATA_WIDTH-1):0] w_rs1PortOut, w_rs2PortOut;
+    reg                 r_fwdRs1En, r_fwdRs2En, r_fwdRs1En2, r_fwdRs2En2;
+    reg  [(XLEN-1):0]   r_rdDataSave;
+    wire [(XLEN-1):0]   w_rs1PortOut, w_rs2PortOut;
 
     /*
         NOTE:   Infer 2 copied/synced 32x32 (2048 KBits) BRAMs (i.e. one BRAM per read-port)
@@ -23,7 +23,7 @@ module Regfile (
                 (no duplication with this approach but adds some more Tpcq at the output).
     */
     DualPortRam #(
-        .DATA_WIDTH(DATA_WIDTH),
+        .XLEN(XLEN),
         .ADDR_WIDTH(ADDR_WIDTH)
     ) RS1_PORT (
         .i_clk                (i_clk),
@@ -34,7 +34,7 @@ module Regfile (
         .o_q                  (w_rs1PortOut)
     );
     DualPortRam #(
-        .DATA_WIDTH(DATA_WIDTH),
+        .XLEN(XLEN),
         .ADDR_WIDTH(ADDR_WIDTH)
     ) RS2_PORT (
         .i_clk                (i_clk),

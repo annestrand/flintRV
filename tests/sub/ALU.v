@@ -6,7 +6,7 @@ module IAlu_tb;
     wire    [31:0]  o_result;
 
     ALU Alu_dut(.*);
-    defparam Alu_dut.WIDTH = 32;
+    defparam Alu_dut.XLEN = 32;
 
 `ifdef DUMP_VCD
     initial begin

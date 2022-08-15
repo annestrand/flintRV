@@ -10,6 +10,8 @@ module Execute (
     input   [31:0]  i_PC, i_IMM,
     output  [31:0]  o_aluOut, o_addrGenOut, o_rs2FwdOut
 );
+    parameter XLEN = 32;
+
     // Datapath for register forwarding
     reg [31:0] rs1Out, rs2Out;
     always@(*) begin
@@ -41,7 +43,7 @@ module Execute (
         .i_funct3       (i_funct3),
         .o_aluControl   (aluControl)
     );
-    ALU #(.WIDTH(32)) alu_unit (
+    ALU #(.XLEN(XLEN)) alu_unit (
         .i_a      (aluSrcAin),
         .i_b      (aluSrcBin),
         .i_op     (aluControl),

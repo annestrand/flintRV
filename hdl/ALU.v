@@ -1,23 +1,23 @@
 `include "types.vh"
 
 module ALU (
-  input         [WIDTH-1:0]         i_a, i_b,
+  input         [XLEN-1:0]          i_a, i_b,
   input         [ALU_OP_WIDTH-1:0]  i_op,
-  output reg    [WIDTH-1:0]         o_result
+  output reg    [XLEN-1:0]          o_result
 );
-    parameter   WIDTH           = 32;
+    parameter   XLEN            = 32;
     localparam  ALU_OP_WIDTH    = 5;
 
-    reg  [WIDTH-1:0]    B_in;
-    reg                 ALU_SLT;
-    reg                 SUB;
-    wire                cflag; // Catch unsigned overflow for SLTU/SGTEU cases
-    wire [WIDTH-1:0]    ALU_ADDER_result;
-    wire [WIDTH-1:0]    ALU_XOR_result  = i_a ^ i_b;
-    wire [WIDTH-1:0]    CONST_4         = {{(WIDTH-3){1'b0}}, 3'd4};
+    reg  [XLEN-1:0] B_in;
+    reg             ALU_SLT;
+    reg             SUB;
+    wire            cflag; // Catch unsigned overflow for SLTU/SGTEU cases
+    wire [XLEN-1:0] ALU_ADDER_result;
+    wire [XLEN-1:0] ALU_XOR_result  = i_a ^ i_b;
+    wire [XLEN-1:0] CONST_4         = {{(XLEN-3){1'b0}}, 3'd4};
 
     // Add/Sub logic
-    assign {cflag, ALU_ADDER_result[WIDTH-1:0]} = i_a + B_in + {{(WIDTH){1'b0}}, SUB};
+    assign {cflag, ALU_ADDER_result[XLEN-1:0]} = i_a + B_in + {{(XLEN){1'b0}}, SUB};
 
     always @(*) begin
         // --- ALU internal op setup ---
@@ -26,12 +26,12 @@ module ALU (
             `OP_SLT,
             `OP_SLTU,
             `OP_SGTE,
-            `OP_SGTEU   : begin B_in = ~i_b; SUB = 1;         end
+            `OP_SGTEU   : begin B_in = ~i_b; SUB = 1;       end
             `OP_ADD4A   : begin B_in = CONST_4; SUB = 0;    end
-            default     : begin B_in = i_b; SUB = 0;          end
+            default     : begin B_in = i_b; SUB = 0;        end
         endcase
         // --- SLT setup ---
-        case ({i_a[WIDTH-1], i_b[WIDTH-1]})
+        case ({i_a[XLEN-1], i_b[XLEN-1]})
             2'b00       : ALU_SLT = ALU_ADDER_result[31];
             2'b01       : ALU_SLT = 1'b0; // a > b since a is pos.
             2'b10       : ALU_SLT = 1'b1; // a < b since a is neg.

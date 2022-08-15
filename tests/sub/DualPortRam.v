@@ -1,15 +1,15 @@
 `include "DualPortRam.v"
 
 module DualPortRam_tb;
-    localparam DATA_WIDTH = 32;
+    localparam XLEN = 32;
     localparam ADDR_WIDTH = 5;
     reg                         i_clk, i_we;
-    reg     [(DATA_WIDTH-1):0]  i_dataIn;
+    reg     [(XLEN-1):0]        i_dataIn;
     reg     [(ADDR_WIDTH-1):0]  i_rAddr, i_wAddr;
-    wire    [(DATA_WIDTH-1):0]  o_q;
+    wire    [(XLEN-1):0]        o_q;
 
     DualPortRam DualPortRam_dut(.*);
-    defparam DualPortRam_dut.DATA_WIDTH = DATA_WIDTH;
+    defparam DualPortRam_dut.XLEN = XLEN;
     defparam DualPortRam_dut.ADDR_WIDTH = ADDR_WIDTH;
 
 `ifdef DUMP_VCD
