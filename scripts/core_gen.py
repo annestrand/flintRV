@@ -45,6 +45,13 @@ def build_top_module(args):
     # Build top based on interface scheme
     if interface_table[args.interface] == CoreInterfaceSchemes.NONE:
         top_src += f"""
+            // Core Config:
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            //     ISA config           : {args.ISA}
+            //     Interface protocol   : {args.interface}
+            //     PC start value       : 0x{args.pcStart:x}
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
             module {args.topName} (
                 input i_clk,
                 input i_rst,
@@ -116,7 +123,7 @@ if __name__ == "__main__":
         help="Specify which CPU ISA to use [Default: rv32i].")
     parser.add_argument("-pc", dest="pcStart", default="0",
         help="PC start/reset value (Prefix value with '0x' for hex). [Default: 0x0].")
-    parser.add_argument("-top", dest="topName", default="top",
+    parser.add_argument("-name", dest="topName", default="top",
         help="Generated top module name. [Default: top].")
 
     # Parse and err check
