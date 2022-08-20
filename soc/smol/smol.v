@@ -1,9 +1,9 @@
 // Really simple example SoC design
 module smol (
-    input   i_clk, i_rst, i_uartRx,
+    input   i_clk, i_rst,
     output  o_led
 );
-    wire [31:0] pcOut, dataAddr, dataOut, dataIn, bootRomOut, instrMemOut, dataMemOut;
+    wire [31:0] pcOut, dataAddr, dataOut, dataIn, bootRomOut, dataMemOut;
     wire loadReq, storeReq;
 
     reg ifValid     = 1'b0; // Reading/Writing from DualPortRam takes 1cc (we can pipeline the reads after)
@@ -33,7 +33,7 @@ module smol (
         .o_q                    (dataMemOut)
     );
     // CPU
-    core (
+    core cpu_core (
         .i_clk                  (i_clk),
         .i_rst                  (i_rst),
         .i_ifValid              (ifValid),
@@ -45,7 +45,7 @@ module smol (
         .o_pcOut                (pcOut),
         .o_dataAddr             (dataAddr),
         .o_dataOut              (dataOut)
-    )
+    );
 
     // Output MMIO led reg
     reg [31:0] ledReg = 32'd0;
