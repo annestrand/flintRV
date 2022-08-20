@@ -1,9 +1,11 @@
 `include "types.vh"
 
 module ImmGen (
-    input       [31:0]  i_instr,
-    output reg  [31:0]  o_imm
+    input       [31:0]      i_instr,
+    output reg  [XLEN-1:0]  o_imm
 );
+    parameter XLEN = 32;
+
     wire isShiftImm = `IS_SHIFT_IMM(i_instr);
     always @* begin
         case (`OPCODE(i_instr))

@@ -74,7 +74,7 @@ module boredcore (
     wire            WB_flush        = i_rst || load_wait /* bubble */;
 
     // Core submodules
-    FetchDecode FETCH_DECODE_unit(
+    FetchDecode #(.XLEN(XLEN)) FETCH_DECODE_unit(
         .i_instr              (instrReg),
         .o_imm                (IMM),
         .o_aluOp              (aluOp),
@@ -105,12 +105,12 @@ module boredcore (
         .o_addrGenOut         (jumpAddr),
         .o_rs2FwdOut          (rs2FwdOut)
     );
-    Memory MEMORY_unit(
+    Memory #(.XLEN(XLEN)) MEMORY_unit(
         .i_funct3             (p_funct3[MEM]),
         .i_dataIn             (p_rs2[MEM]),
         .o_dataOut            (o_dataOut)
     );
-    Writeback WRITEBACK_unit(
+    Writeback #(.XLEN(XLEN)) WRITEBACK_unit(
         .i_funct3             (p_funct3[WB]),
         .i_dataIn             (p_readData[WB]),
         .o_dataOut            (loadData)

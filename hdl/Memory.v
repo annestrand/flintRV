@@ -1,10 +1,12 @@
 `include "types.vh"
 
 module Memory (
-    input       [2:0]   i_funct3,
-    input       [31:0]  i_dataIn,
-    output reg  [31:0]  o_dataOut
+    input       [2:0]       i_funct3,
+    input       [XLEN-1:0]  i_dataIn,
+    output reg  [XLEN-1:0]  o_dataOut
 );
+    parameter XLEN = 32;
+
     // Just output store-type (w/ - w/o sign-ext) for now
     always @(*) begin
         case (i_funct3)
