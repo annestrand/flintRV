@@ -135,15 +135,15 @@ if __name__ == "__main__":
     # Create top module source based on interface choice
     top_src = build_top_module(args)
 
-    # Dump final HDL file to stdout
-    hdl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "hdl"))
-    hdl_srcs = [x for x in os.listdir(hdl_dir) if x != "types.vh"]
+    # Dump final src file to stdout
+    src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
+    srcs = [x for x in os.listdir(src_dir) if x != "types.vh"]
     print_generated_banner()
-    with open(os.path.join(hdl_dir, "types.vh"), 'r') as core_header_fp:
+    with open(os.path.join(src_dir, "types.vh"), 'r') as core_header_fp:
         print(core_header_fp.read())
         print("// " +"="*116)
-        for src_file in hdl_srcs:
-            with open(os.path.join(hdl_dir, src_file)) as src_file_fp:
+        for src_file in srcs:
+            with open(os.path.join(src_dir, src_file)) as src_file_fp:
                 src_code = src_file_fp.read()
                 # We dont want any includes in final file
                 src_code = re.sub(r"`include .*\n", "", src_code)

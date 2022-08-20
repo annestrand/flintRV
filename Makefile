@@ -12,7 +12,7 @@ AS_FLAGS               := -march=rv32i
 AS_FLAGS               += -mabi=ilp32
 
 SUB_TEST_FLAGS         := -Wall
-SUB_TEST_FLAGS         += -Ihdl
+SUB_TEST_FLAGS         += -Isrc
 SUB_TEST_FLAGS         += -DSIM
 SUB_TEST_FLAGS         += -DDUMP_VCD
 
@@ -43,7 +43,7 @@ CPU_TEST_CFLAGS        += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
 
 CPU_TEST_FLAGS         := -Wall
-CPU_TEST_FLAGS         += -Ihdl
+CPU_TEST_FLAGS         += -Isrc
 CPU_TEST_FLAGS         += --trace
 CPU_TEST_FLAGS         += -CFLAGS "$(CPU_TEST_CFLAGS)"
 CPU_TEST_FLAGS         += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
@@ -53,7 +53,7 @@ CPU_TEST_FLAGS         += --x-initial unique
 vpath %.v tests
 vpath %.py scripts
 
-HDL_SRCS               := $(shell find hdl -type f -name "*.v")
+CPU_SRCS               := $(shell find src -type f -name "*.v")
 TEST_PY_MEM            := $(shell find scripts -type f -name "sub_*.mem.py" -exec basename {} \;)
 TEST_PY_ASM            := $(shell find scripts -type f -name "sub_*.asm.py" -exec basename {} \;)
 
@@ -93,20 +93,20 @@ $(SUB_TEST_OUT)/sub_%.elf: $(SUB_TEST_OUT)/sub_%.s
 $(SUB_TEST_OUT)/sub_%.mem: $(SUB_TEST_OUT)/sub_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
-$(SUB_TEST_OUT)/%.out: tests/sub/%.v hdl/%.v
+$(SUB_TEST_OUT)/%.out: tests/sub/%.v src/%.v
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
 
-$(SUB_TEST_OUT)/%.mem.out: tests/sub/%.v hdl/%.v $(SUB_TEST_OUT)/sub_%.mem
+$(SUB_TEST_OUT)/%.mem.out: tests/sub/%.v src/%.v $(SUB_TEST_OUT)/sub_%.mem
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
 
-$(SUB_TEST_OUT)/%.asm.out: tests/sub/%.v hdl/%.v $(SUB_TEST_OUT)/sub_%.mem
+$(SUB_TEST_OUT)/%.asm.out: tests/sub/%.v src/%.v $(SUB_TEST_OUT)/sub_%.mem
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
 
 $(SOC_TEST_OUT)/%.out: tests/soc/%.v soc/%.v
 	iverilog $(SOC_TEST_FLAGS) -o $@ $<
 
-$(CPU_TEST_OUT)/%.cpp: $(CPU_TEST_SRCS) $(HDL_SRCS)
-	verilator $(CPU_TEST_FLAGS) --exe tests/cpu/boredcore.cc $(CPU_TEST_SRCS) --top-module boredcore -cc $(HDL_SRCS)
+$(CPU_TEST_OUT)/%.cpp: $(CPU_TEST_SRCS) $(CPU_SRCS)
+	verilator $(CPU_TEST_FLAGS) --exe tests/cpu/boredcore.cc $(CPU_TEST_SRCS) --top-module boredcore -cc $(CPU_SRCS)
 
 $(CPU_TEST_OUT)/cpu_%.elf: $(CPU_TEST_OUT)/cpu_%.s
 	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
