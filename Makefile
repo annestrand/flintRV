@@ -17,7 +17,7 @@ SUB_TEST_FLAGS         += -DSIM
 SUB_TEST_FLAGS         += -DDUMP_VCD
 
 SOC_TEST_FLAGS         := -Wall
-SOC_TEST_FLAGS         += -Isoc
+SOC_TEST_FLAGS         += -Isoc/common
 SOC_TEST_FLAGS         += -DSIM
 SOC_TEST_FLAGS         += -DDUMP_VCD
 
@@ -76,6 +76,10 @@ SUB_TEST_PLAIN_OBJS    := $(SUB_TEST_PLAIN_SRCS:%.v=$(SUB_TEST_OUT)/%.out)
 SOC_TEST_SRCS          := $(shell find tests/soc -type f -name "*.v" -exec basename {} \;)
 SOC_TEST_OBJS          := $(SOC_TEST_SRCS:%.v=$(SOC_TEST_OUT)/%.out)
 
+SMOL_SRC               := soc/smol/firmware.s
+SMOL_ELF               := $(SMOL_SRC:%.s=%.elf)
+SMOL_FIRMWARE          := $(SMOL_ELF:%.elf=%.mem)
+
 $(SUB_TEST_OUT)/sub_%.mem: sub_%.mem.py
 	python3 $< -out $(SUB_TEST_OUT)
 
@@ -91,6 +95,14 @@ $(SUB_TEST_OUT)/sub_%.elf: $(SUB_TEST_OUT)/sub_%.s
 
 .SECONDARY:
 $(SUB_TEST_OUT)/sub_%.mem: $(SUB_TEST_OUT)/sub_%.elf
+	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+
+.SECONDARY:
+soc/smol/%.elf: soc/smol/%.s
+	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
+
+.SECONDARY:
+soc/smol/%.mem: soc/smol/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 
 $(SUB_TEST_OUT)/%.out: tests/sub/%.v src/%.v
@@ -120,6 +132,8 @@ $(CPU_TEST_OUT)/%.elf: tests/cpu/basic/%.s
 $(CPU_TEST_OUT)/%.mem: $(CPU_TEST_OUT)/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 # =====================================================================================================================
+.PHONY: all
+all: docker tests smol
 
 # Build tests
 .PHONY: tests
@@ -128,6 +142,11 @@ tests: $(SUB_TEST_PLAIN_OBJS) $(SUB_TEST_ASM_OBJS) $(SUB_TEST_MEMH_OBJS)
 tests: $(SOC_TEST_OBJS)
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
 	@printf "\nAll done building cpu tests.\n"
+
+# Build smol SoC firmware
+.PHONY: smol
+smol: $(SMOL_FIRMWARE)
+	@printf "\nAll done building smol firmware.\n"
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -147,3 +166,5 @@ build-dir:
 .PHONY: clean
 clean:
 	rm -rf obj_dir 2> /dev/null || true
+	rm -rf soc/smol/firmware.mem 2> /dev/null || true
+	rm -rf soc/smol/firmware.elf 2> /dev/null || true

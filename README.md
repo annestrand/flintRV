@@ -2,7 +2,7 @@
 
 Another RISC-V cpu core design.
 
-## Design 🗺
+## Design 🗺️
 - 4-stage in-order pipelined processor
 - Aimed to be implemented as a soft-cpu for use in FPGAs
 
