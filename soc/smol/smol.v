@@ -33,7 +33,7 @@ module smol (
         .o_q                    (dataMemOut)
     );
     // CPU
-    core cpu_core (
+    CPU CPU_unit (
         .i_clk                  (i_clk),
         .i_rst                  (i_rst),
         .i_ifValid              (ifValid),
