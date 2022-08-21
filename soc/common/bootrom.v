@@ -5,7 +5,7 @@ module bootrom (
 );
     parameter DATA_WIDTH = 32;
     parameter ADDR_WIDTH = 5;
-    parameter MEMFILE = "init.mem"
+    parameter MEMFILE = "init.mem";
     reg [DATA_WIDTH-1:0] rom [2**ADDR_WIDTH-1:0];
 
     // Load mem file values into "synchronous ROM" - then read if enabled
