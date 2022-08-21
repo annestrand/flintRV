@@ -10,6 +10,6 @@ module bootrom (
 
     // Load mem file values into "synchronous ROM" - then read if enabled
     initial $readmemh(MEMFILE, rom);
-    always @(posedge i_clk) begin if(i_en) data <= rom[i_addr]; end
+    always @(posedge i_clk) begin if(i_en) o_data <= rom[i_addr]; end
 
 endmodule

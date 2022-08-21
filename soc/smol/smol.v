@@ -3,7 +3,8 @@ module smol (
     input   i_clk, i_rst,
     output  o_led
 );
-    wire [31:0] pcOut, dataAddr, dataOut, dataIn, bootRomOut, dataMemOut;
+    wire [31:0] pcOut, dataAddr, dataOut, bootRomOut, dataMemOut;
+    reg  [31:0] dataIn;
     wire loadReq, storeReq;
 
     reg ifValid     = 1'b0; // Reading/Writing from DualPortRam takes 1cc (we can pipeline the reads after)
@@ -17,7 +18,7 @@ module smol (
     ) IMEM (
         .i_clk                  (i_clk),
         .i_en                   (1'b1),
-        .i_addr                 (pcOut),
+        .i_addr                 (pcOut[10:0]),
         .o_data                 (bootRomOut)
     );
     // Data memory (this module is included in "g_core.v")
@@ -28,8 +29,8 @@ module smol (
         .i_clk                  (i_clk),
         .i_we                   (dmem_data_sel && storeReq),
         .i_dataIn               (dataOut),
-        .i_rAddr                (dataAddr),
-        .i_wAddr                (dataAddr),
+        .i_rAddr                (dataAddr[10:0]),
+        .i_wAddr                (dataAddr[10:0]),
         .o_q                    (dataMemOut)
     );
     // CPU
