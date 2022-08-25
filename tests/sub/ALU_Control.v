@@ -34,7 +34,7 @@ module AluControl_tb;
         i_funct7  = 'd0;
         #20;
         for (i=0; i<40; i=i+1) begin
-            instr = `ENDIAN_SWP_32(test_vector[i]);
+            instr = test_vector[i];
             if      (`OPCODE(instr) == `R      ) i_aluOp = `ALU_OP_R;
             else if (`OPCODE(instr) == `I_JUMP ) i_aluOp = `ALU_OP_I_JUMP;
             else if (`OPCODE(instr) == `I_LOAD ) i_aluOp = `ALU_OP_I_LOAD;

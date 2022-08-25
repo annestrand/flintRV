@@ -65,7 +65,6 @@ bool boredcore::createStimulus(std::string machineCodeFilePath, std::string init
         return false;
     }
     delEmptyStrElems(m_stimulus.machine_code);
-    endianFlipper(m_stimulus.machine_code); // Since objdump outputs Verilog in big-endian
 
     // Read init regfile values (if given)
     if (!initRegfilePath.empty()) {

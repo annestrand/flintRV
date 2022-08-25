@@ -23,7 +23,7 @@ module ControlUnit_tb;
     reg [31:0]  instr;
     initial begin
         for (i=0; i<40; i=i+1) begin
-            instr = `ENDIAN_SWP_32(test_vector[i]);
+            instr = test_vector[i];
             if      (`OPCODE(instr) == `R      ) test_gold_vector[i] = {`R_CTRL         };
             else if (`OPCODE(instr) == `I_JUMP ) test_gold_vector[i] = {`I_JUMP_CTRL    };
             else if (`OPCODE(instr) == `I_LOAD ) test_gold_vector[i] = {`I_LOAD_CTRL    };
@@ -47,10 +47,8 @@ module ControlUnit_tb;
         i_opcode   = 'd0;
         #20;
         for (i=0; i<40; i=i+1) begin
-            // Note: RISC-V Verilog Objcopy seems to output big-endian for some reason, swap to little here
-            instr  = `ENDIAN_SWP_32(test_vector[i]);
-
-            i_opcode = `OPCODE(instr);
+            instr       = test_vector[i];
+            i_opcode    = `OPCODE(instr);
             #20;
             ctrlSignals = {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp};
             if (ctrlSignals != test_gold_vector[i]) resultStr = "ERROR";

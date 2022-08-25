@@ -96,6 +96,7 @@ $(SUB_TEST_OUT)/sub_%.elf: $(SUB_TEST_OUT)/sub_%.s
 .SECONDARY:
 $(SUB_TEST_OUT)/sub_%.mem: $(SUB_TEST_OUT)/sub_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+	python3 ./scripts/byteswap_memfile.py $@
 
 .SECONDARY:
 soc/smol/%.elf: soc/smol/%.s
@@ -104,6 +105,7 @@ soc/smol/%.elf: soc/smol/%.s
 .SECONDARY:
 soc/smol/%.mem: soc/smol/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+	python3 ./scripts/byteswap_memfile.py $@
 
 $(SUB_TEST_OUT)/%.out: tests/sub/%.v src/%.v
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
@@ -125,12 +127,15 @@ $(CPU_TEST_OUT)/cpu_%.elf: $(CPU_TEST_OUT)/cpu_%.s
 
 $(CPU_TEST_OUT)/cpu_%.mem: $(CPU_TEST_OUT)/cpu_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+	python3 ./scripts/byteswap_memfile.py $@
 
 $(CPU_TEST_OUT)/%.elf: tests/cpu/basic/%.s
 	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
 $(CPU_TEST_OUT)/%.mem: $(CPU_TEST_OUT)/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+	python3 ./scripts/byteswap_memfile.py $@
+
 # =====================================================================================================================
 .PHONY: all
 all: docker tests smol

@@ -6,14 +6,6 @@
 #include "common.hh"
 
 // ====================================================================================================================
-void endianFlipper(std::vector<std::string>& machineCode) {
-    for (auto it = machineCode.begin(); it != machineCode.end(); ++it) {
-        std::string item = *it;
-        item = item.substr(6,2) + item.substr(4,2) + item.substr(2,2) + item.substr(0,2);
-        machineCode[it-machineCode.begin()] = item;
-    }
-}
-// ====================================================================================================================
 void leftTrimWhitespace(std::string& s) {
     s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
 }

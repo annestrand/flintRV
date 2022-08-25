@@ -29,10 +29,7 @@ module ImmGen_tb;
         i_instr   = 'd0;
         #20;
         for (i=0; i<27; i=i+1) begin
-            // Note: RISC-V Verilog Objcopy seems to output big-endian for some reason, swap to little here
-            i_instr = `ENDIAN_SWP_32(test_vector[i]);
-
-            #20;
+            i_instr = test_vector[i]; #20;
             if ($signed(o_imm) != $signed(test_gold_vector[i])) resultStr = "ERROR";
             else                                                resultStr = "PASS ";
             $display("Test[ %2d ]: i_instr = 0x%8h || o_imm = %b ... %s",

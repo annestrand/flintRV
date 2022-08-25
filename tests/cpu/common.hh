@@ -16,7 +16,6 @@
 #define LOG_E(msg, ...) \
     printf("[ERROR]:[%s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
 
-void endianFlipper(std::vector<std::string>& machineCode);
 void leftTrimWhitespace(std::string& s);
 std::vector<std::string> machineCodeFileReader(std::string filePath);
 std::vector<std::string> asmFileReader(std::string filePath);
