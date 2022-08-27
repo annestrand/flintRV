@@ -44,9 +44,9 @@ module boredcore (
     reg             p_jmp       [EXEC:WB];
     // Internal wires/regs
     reg  [XLEN-1:0] PC, PCReg, instrReg;
-    wire [XLEN-1:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out, rdDataSave, rs2FwdOut;
+    wire [XLEN-1:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out, rs2FwdOut;
     wire      [3:0] aluOp;
-    wire            exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp, fwdRdwRs1, fwdRdwRs2;
+    wire            exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp;
     wire [XLEN-1:0] WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
     wire            writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
@@ -54,12 +54,12 @@ module boredcore (
     //          (Forwarding logic)
     wire            RS1_fwd_mem     = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
     wire            RS1_fwd_wb      = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
-    wire            RS1_fwd_reg_rdw = ~RS1_fwd_wb  && fwdRdwRs1;
     wire            RS2_fwd_mem     = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
     wire            RS2_fwd_wb      = ~RS2_fwd_mem && p_reg_w[WB] && (p_rs2Addr[EXEC] == p_rdAddr[WB]);
-    wire            RS2_fwd_reg_rdw = ~RS2_fwd_wb  && fwdRdwRs2;
-    wire      [1:0] fwdRs1          = RS1_fwd_reg_rdw ? `FWD_REG_RDW : {RS1_fwd_wb, RS1_fwd_mem},
-                    fwdRs2          = RS2_fwd_reg_rdw ? `FWD_REG_RDW : {RS2_fwd_wb, RS2_fwd_mem};
+    wire      [1:0] fwdRs1          = {RS1_fwd_wb, RS1_fwd_mem},
+                    fwdRs2          = {RS2_fwd_wb, RS2_fwd_mem};
+    wire            rdFwdRs1En      = p_reg_w[WB] && (`RS1(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
+    wire            rdFwdRs2En      = p_reg_w[WB] && (`RS2(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
     //          (Stall and flush logic)
     wire            load_hazard     = p_mem2reg[EXEC] && (
                                         (`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC])
@@ -98,7 +98,6 @@ module boredcore (
         .i_EXEC_rs2           (p_rs2[EXEC]),
         .i_MEM_rd             (p_aluOut[MEM]),
         .i_WB_rd              (WB_result),
-        .i_rdDataSave         (rdDataSave),
         .i_PC                 (p_PC[EXEC]),
         .i_IMM                (p_IMM[EXEC]),
         .o_aluOut             (aluOut),
@@ -123,10 +122,7 @@ module boredcore (
         .i_rdAddr       (p_rdAddr[WB]),
         .i_rdData       (WB_result),
         .o_rs1Data      (rs1Out),
-        .o_rs2Data      (rs2Out),
-        .o_rdDataSave   (rdDataSave),
-        .o_fwdRdwRs1    (fwdRdwRs1),
-        .o_fwdRdwRs2    (fwdRdwRs2)
+        .o_rs2Data      (rs2Out)
     );
 
     // Pipeline CTRL reg assignments
@@ -151,8 +147,8 @@ module boredcore (
     // Pipeline DATA reg assignments
     always @(posedge i_clk) begin
         // --- Execute ---
-        p_rs1      [EXEC]  <= EXEC_stall ? p_rs1     [EXEC] : rs1Out;
-        p_rs2      [EXEC]  <= EXEC_stall ? p_rs2     [EXEC] : rs2Out;
+        p_rs1      [EXEC]  <= EXEC_stall ? p_rs1     [EXEC] : rdFwdRs1En ? WB_result : rs1Out;
+        p_rs2      [EXEC]  <= EXEC_stall ? p_rs2     [EXEC] : rdFwdRs2En ? WB_result : rs2Out;
         p_IMM      [EXEC]  <= EXEC_stall ? p_IMM     [EXEC] : IMM;
         p_PC       [EXEC]  <= EXEC_stall ? p_PC      [EXEC] : PCReg;
         p_funct7   [EXEC]  <= EXEC_stall ? p_funct7  [EXEC] : `FUNCT7(instrReg);

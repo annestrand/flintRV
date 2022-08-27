@@ -7,8 +7,7 @@ module Regfile_tb;
     reg                         i_clk, i_wrEn;
     reg   [(ADDR_WIDTH-1):0]    i_rs1Addr, i_rs2Addr, i_rdAddr;
     reg   [(XLEN-1):0]          i_rdData;
-    wire  [(XLEN-1):0]          o_rs1Data, o_rs2Data, o_rdDataSave;
-    wire                        o_fwdRdwRs1, o_fwdRdwRs2;
+    wire  [(XLEN-1):0]          o_rs1Data, o_rs2Data;
 
     Regfile Regfile_dut(.*);
     defparam Regfile_dut.XLEN = XLEN;
