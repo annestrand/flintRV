@@ -1,6 +1,6 @@
 # firmware.s:
 # -------------------------
-# Test program to blink an LED on smol SoC
+# Test program to blink an LED on boredsoc SoC
 
 .equ LED_BASE, 0x00003000
 

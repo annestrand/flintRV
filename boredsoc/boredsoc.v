@@ -1,5 +1,5 @@
 // Really simple example SoC design
-module smol (
+module boredsoc (
     input   i_clk, i_rst,
     output  o_led
 );
@@ -10,7 +10,10 @@ module smol (
     reg ifValid     = 1'b0; // Reading/Writing from DualPortRam takes 1cc (we can pipeline the reads after)
     reg memValid    = 1'b0; // Reading/Writing from DualPortRam takes 1cc
 
-    // IMEM ROM (from "common/")
+    // TODO: Add UART module
+    // ...
+
+    // IMEM ROM (bootrom.v)
     bootrom #(
         .DATA_WIDTH(32),
         .ADDR_WIDTH(11), // 2KB
@@ -21,7 +24,7 @@ module smol (
         .i_addr                 (pcOut[10:0]),
         .o_data                 (bootRomOut)
     );
-    // Data memory (this module is included in "g_core.v")
+    // Data memory (g_core.v)
     DualPortRam #(
         .XLEN(32),
         .ADDR_WIDTH(11) // 2KB
@@ -33,7 +36,7 @@ module smol (
         .i_wAddr                (dataAddr[10:0]),
         .o_q                    (dataMemOut)
     );
-    // CPU
+    // CPU (g_core.v)
     CPU CPU_unit (
         .i_clk                  (i_clk),
         .i_rst                  (i_rst),

@@ -23,7 +23,6 @@ SOC_TEST_FLAGS         += -DDUMP_VCD
 
 CPU_TEST_OUT           := obj_dir
 SUB_TEST_OUT           := obj_dir/sub
-SOC_TEST_OUT           := obj_dir/soc
 
 ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
@@ -73,12 +72,9 @@ SUB_TEST_ASM_OBJS      := $(SUB_TEST_ASM_SRCS:%.v=$(SUB_TEST_OUT)/%.asm.out)
 SUB_TEST_PLAIN_SRCS    := $(filter-out $(SUB_TEST_MEMH_SRCS) $(SUB_TEST_ASM_SRCS), $(SUB_TEST_ALL_SRCS))
 SUB_TEST_PLAIN_OBJS    := $(SUB_TEST_PLAIN_SRCS:%.v=$(SUB_TEST_OUT)/%.out)
 
-SOC_TEST_SRCS          := $(shell find tests/soc -type f -name "*.v" -exec basename {} \;)
-SOC_TEST_OBJS          := $(SOC_TEST_SRCS:%.v=$(SOC_TEST_OUT)/%.out)
-
-SMOL_SRC               := soc/smol/firmware.s
-SMOL_ELF               := $(SMOL_SRC:%.s=%.elf)
-SMOL_FIRMWARE          := $(SMOL_ELF:%.elf=%.mem)
+BOREDSOC_SRC           := boredsoc/firmware.s
+BOREDSOC_ELF           := $(BOREDSOC_SRC:%.s=%.elf)
+BOREDSOC_FIRMWARE      := $(BOREDSOC_ELF:%.elf=%.mem)
 
 $(SUB_TEST_OUT)/sub_%.mem: sub_%.mem.py
 	python3 $< -out $(SUB_TEST_OUT)
@@ -99,11 +95,11 @@ $(SUB_TEST_OUT)/sub_%.mem: $(SUB_TEST_OUT)/sub_%.elf
 	python3 ./scripts/byteswap_memfile.py $@
 
 .SECONDARY:
-soc/smol/%.elf: soc/smol/%.s
+boredsoc/%.elf: boredsoc/%.s
 	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
 .SECONDARY:
-soc/smol/%.mem: soc/smol/%.elf
+boredsoc/%.mem: boredsoc/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	python3 ./scripts/byteswap_memfile.py $@
 
@@ -115,9 +111,6 @@ $(SUB_TEST_OUT)/%.mem.out: tests/sub/%.v rtl/%.v $(SUB_TEST_OUT)/sub_%.mem
 
 $(SUB_TEST_OUT)/%.asm.out: tests/sub/%.v rtl/%.v $(SUB_TEST_OUT)/sub_%.mem
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
-
-$(SOC_TEST_OUT)/%.out: tests/soc/%.v soc/%.v
-	iverilog $(SOC_TEST_FLAGS) -o $@ $<
 
 $(CPU_TEST_OUT)/%.cpp: $(CPU_TEST_SRCS) $(CPU_SRCS)
 	verilator $(CPU_TEST_FLAGS) --exe tests/cpu/boredcore.cc $(CPU_TEST_SRCS) --top-module boredcore -cc $(CPU_SRCS)
@@ -138,7 +131,7 @@ $(CPU_TEST_OUT)/%.mem: $(CPU_TEST_OUT)/%.elf
 
 # =====================================================================================================================
 .PHONY: all
-all: docker tests smol
+all: docker tests soc
 
 # Build tests
 .PHONY: tests
@@ -148,10 +141,10 @@ tests: $(SOC_TEST_OBJS)
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
 	@printf "\nAll done building cpu tests.\n"
 
-# Build smol SoC firmware
-.PHONY: smol
-smol: $(SMOL_FIRMWARE)
-	@printf "\nAll done building smol firmware.\n"
+# Build boredsoc firmware
+.PHONY: soc
+soc: $(BOREDSOC_FIRMWARE)
+	@printf "\nAll done building boredsoc firmware.\n"
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -166,10 +159,9 @@ endif
 build-dir:
 	@mkdir -p $(CPU_TEST_OUT)/
 	@mkdir -p $(SUB_TEST_OUT)/
-	@mkdir -p $(SOC_TEST_OUT)/
 
 .PHONY: clean
 clean:
 	rm -rf obj_dir 2> /dev/null || true
-	rm -rf soc/smol/firmware.mem 2> /dev/null || true
-	rm -rf soc/smol/firmware.elf 2> /dev/null || true
+	rm -rf boredsoc/firmware.mem 2> /dev/null || true
+	rm -rf boredsoc/firmware.elf 2> /dev/null || true
