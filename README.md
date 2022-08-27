@@ -37,11 +37,9 @@ To build tests:
 
     $ make tests
 
-CPU tests output to: `obj_dir/Vboredcore`
+CPU test runner: `obj_dir/Vboredcore`
 
-Submodule tests output to: `obj_dir/sub/<module_name>.out`
-
-SoC (and SoC peripheral) tests output to: `obj_dir/soc/<module_name>.out`
+Submodule test runners output to: `obj_dir/sub/<module_name>.out`
 
 ### Docker 🐳
 RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile
