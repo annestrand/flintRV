@@ -12,7 +12,7 @@ AS_FLAGS               := -march=rv32i
 AS_FLAGS               += -mabi=ilp32
 
 SUB_TEST_FLAGS         := -Wall
-SUB_TEST_FLAGS         += -Isrc
+SUB_TEST_FLAGS         += -Irtl
 SUB_TEST_FLAGS         += -DSIM
 SUB_TEST_FLAGS         += -DDUMP_VCD
 
@@ -43,7 +43,7 @@ CPU_TEST_CFLAGS        += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
 
 CPU_TEST_FLAGS         := -Wall
-CPU_TEST_FLAGS         += -Isrc
+CPU_TEST_FLAGS         += -Irtl
 CPU_TEST_FLAGS         += --trace
 CPU_TEST_FLAGS         += -CFLAGS "$(CPU_TEST_CFLAGS)"
 CPU_TEST_FLAGS         += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
@@ -53,7 +53,7 @@ CPU_TEST_FLAGS         += --x-initial unique
 vpath %.v tests
 vpath %.py scripts
 
-CPU_SRCS               := $(shell find src -type f -name "*.v")
+CPU_SRCS               := $(shell find rtl -type f -name "*.v")
 TEST_PY_MEM            := $(shell find scripts -type f -name "sub_*.mem.py" -exec basename {} \;)
 TEST_PY_ASM            := $(shell find scripts -type f -name "sub_*.asm.py" -exec basename {} \;)
 
@@ -107,13 +107,13 @@ soc/smol/%.mem: soc/smol/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	python3 ./scripts/byteswap_memfile.py $@
 
-$(SUB_TEST_OUT)/%.out: tests/sub/%.v src/%.v
+$(SUB_TEST_OUT)/%.out: tests/sub/%.v rtl/%.v
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
 
-$(SUB_TEST_OUT)/%.mem.out: tests/sub/%.v src/%.v $(SUB_TEST_OUT)/sub_%.mem
+$(SUB_TEST_OUT)/%.mem.out: tests/sub/%.v rtl/%.v $(SUB_TEST_OUT)/sub_%.mem
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
 
-$(SUB_TEST_OUT)/%.asm.out: tests/sub/%.v src/%.v $(SUB_TEST_OUT)/sub_%.mem
+$(SUB_TEST_OUT)/%.asm.out: tests/sub/%.v rtl/%.v $(SUB_TEST_OUT)/sub_%.mem
 	iverilog $(SUB_TEST_FLAGS) -o $@ $<
 
 $(SOC_TEST_OUT)/%.out: tests/soc/%.v soc/%.v

@@ -138,7 +138,7 @@ if __name__ == "__main__":
     top_src = build_top_module(args)
 
     # Dump final src file to stdout
-    src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
+    src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "rtl"))
     srcs = [x for x in os.listdir(src_dir) if x != "types.vh"]
     print_generated_banner()
     with open(os.path.join(src_dir, "types.vh"), 'r') as core_header_fp:
