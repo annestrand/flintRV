@@ -12,7 +12,7 @@
 #include "common.hh"
 
 // ====================================================================================================================
-TEST(basic, loop) { // Basic test loop summation for 10 iterations
+TEST(functional, loop) { // Basic test loop summation for 10 iterations
     boredcore dut                   = boredcore(200);
     const char *testMachCodePath    = BASE_PATH "/cpu_simple_loop.mem";
     if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))   { FAIL(); }
@@ -35,7 +35,7 @@ TEST(basic, loop) { // Basic test loop summation for 10 iterations
     EXPECT_EQ(dut.readRegfile(j), expectedVal);
 }
 // ====================================================================================================================
-TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
+TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
     boredcore dut                   = boredcore(200);
     const char *testMachCodePath    = BASE_PATH "/cpu_logic_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_logic_test.regs";
@@ -58,7 +58,7 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
+TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
     boredcore dut                   = boredcore(200);
     const char *testMachCodePath    = BASE_PATH "/cpu_arith_test.mem";
     const char *initRegfileValPath  = BASE_PATH "/cpu_arith_test.regs";
@@ -81,7 +81,7 @@ TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(basic, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
+TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
     boredcore dut                   = boredcore(200);
     const char *testMachCodePath    = BASE_PATH "/cpu_jump_test.mem";
     if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))   { FAIL(); }
@@ -103,7 +103,7 @@ TEST(basic, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BN
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
-TEST(basic, load_store) { // Tests load and store based instructions
+TEST(functional, load_store) { // Tests load and store based instructions
     boredcore dut                   = boredcore(200);
     const char *testMachCodePath    = BASE_PATH "/cpu_load_store.mem";
     if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd")) { FAIL(); }

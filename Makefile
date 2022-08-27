@@ -57,7 +57,7 @@ TEST_PY_MEM            := $(shell find scripts -type f -name "sub_*.mem.py" -exe
 TEST_PY_ASM            := $(shell find scripts -type f -name "sub_*.asm.py" -exec basename {} \;)
 
 CPU_TEST_SRCS          := $(shell find tests/cpu -type f -name "*.cc")
-CPU_ASM_TESTS          := $(shell find tests/cpu/basic -type f -name "*.s" -exec basename {} \;)
+CPU_ASM_TESTS          := $(shell find tests/cpu/functional -type f -name "*.s" -exec basename {} \;)
 CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
 CPU_PY_ASM_TESTS       := $(CPU_PY_TESTS:%.asm.py=$(CPU_TEST_OUT)/%.s)
 CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
@@ -122,7 +122,7 @@ $(CPU_TEST_OUT)/cpu_%.mem: $(CPU_TEST_OUT)/cpu_%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	python3 ./scripts/byteswap_memfile.py $@
 
-$(CPU_TEST_OUT)/%.elf: tests/cpu/basic/%.s
+$(CPU_TEST_OUT)/%.elf: tests/cpu/functional/%.s
 	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
 $(CPU_TEST_OUT)/%.mem: $(CPU_TEST_OUT)/%.elf
