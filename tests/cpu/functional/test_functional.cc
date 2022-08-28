@@ -13,10 +13,9 @@
 
 // ====================================================================================================================
 TEST(functional, loop) { // Basic test loop summation for 10 iterations
-    boredcore dut                   = boredcore(200);
-    const char *testMachCodePath    = BASE_PATH "/cpu_simple_loop.mem";
+    boredcore dut = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))   { FAIL(); }
-    if (!dut.createStimulus(testMachCodePath))                      { FAIL(); }
+    if (!dut.createStimulus(BASE_PATH "/cpu_simple_loop.mem"))      { FAIL(); }
 
     bool done                   = false;
     constexpr int j             = 8;
@@ -36,11 +35,9 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
 }
 // ====================================================================================================================
 TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
-    boredcore dut                   = boredcore(200);
-    const char *testMachCodePath    = BASE_PATH "/cpu_logic_test.mem";
-    const char *initRegfileValPath  = BASE_PATH "/cpu_logic_test.regs";
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd")) { FAIL(); }
-    if (!dut.createStimulus(testMachCodePath, initRegfileValPath)) { FAIL(); }
+    boredcore dut = boredcore(200);
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd"))                              { FAIL(); }
+    if (!dut.createStimulus(BASE_PATH "/cpu_logic_test.mem", BASE_PATH "/cpu_logic_test.regs")) { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = 6;
@@ -59,11 +56,9 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
 }
 // ====================================================================================================================
 TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
-    boredcore dut                   = boredcore(200);
-    const char *testMachCodePath    = BASE_PATH "/cpu_arith_test.mem";
-    const char *initRegfileValPath  = BASE_PATH "/cpu_arith_test.regs";
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd")) { FAIL(); }
-    if (!dut.createStimulus(testMachCodePath, initRegfileValPath)) { FAIL(); }
+    boredcore dut = boredcore(200);
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd"))                              { FAIL(); }
+    if (!dut.createStimulus(BASE_PATH "/cpu_arith_test.mem", BASE_PATH "/cpu_arith_test.regs")) { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = 13;
@@ -82,10 +77,9 @@ TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g
 }
 // ====================================================================================================================
 TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
-    boredcore dut                   = boredcore(200);
-    const char *testMachCodePath    = BASE_PATH "/cpu_jump_test.mem";
+    boredcore dut = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))   { FAIL(); }
-    if (!dut.createStimulus(testMachCodePath))                      { FAIL(); }
+    if (!dut.createStimulus(BASE_PATH "/cpu_jump_test.mem"))        { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = 13;
@@ -104,10 +98,9 @@ TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JA
 }
 // ====================================================================================================================
 TEST(functional, load_store) { // Tests load and store based instructions
-    boredcore dut                   = boredcore(200);
-    const char *testMachCodePath    = BASE_PATH "/cpu_load_store.mem";
+    boredcore dut = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd")) { FAIL(); }
-    if (!dut.createStimulus(testMachCodePath))                          { FAIL(); }
+    if (!dut.createStimulus(BASE_PATH "/cpu_load_store.mem"))           { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = 1;

@@ -14,10 +14,9 @@
 
 // ====================================================================================================================
 TEST(algorithms, fibonacci) {
-    boredcore dut                   = boredcore(100000);
-    const char *testMachCodePath    = BASE_PATH "/fibonacci.mem";
+    boredcore dut = boredcore(100000);
     if (!dut.create(new Vboredcore(), "obj_dir/fibonacci.vcd")) { FAIL(); }
-    if (!dut.createStimulus(testMachCodePath))                      { FAIL(); }
+    if (!dut.createStimulus(BASE_PATH "/fibonacci.mem"))        { FAIL(); }
 
     // Create a dummy/test memory (and access helpers)
     constexpr unsigned int testMemLen   = 0x2000;
@@ -26,7 +25,7 @@ TEST(algorithms, fibonacci) {
     auto readMem    = [checkAddr](int addr, int* mem)           { checkAddr(addr); return mem[addr >> 2];   };
     auto writeMem   = [checkAddr](int addr, int* mem, int val)  { checkAddr(addr); mem[addr >> 2] = val;    };
     // Init dummy memory
-    auto dummyMemInit = machineCodeFileReader(testMachCodePath);
+    auto dummyMemInit = machineCodeFileReader(BASE_PATH "/fibonacci.mem");
     for (int i=0; i<dummyMemInit.size(); ++i) { testMem[i] = (int)HEX_DECODE_ASCII(dummyMemInit[i].c_str()); }
     // Test checker function
     std::function<int(int)> fibonacci = [&](int x) {
