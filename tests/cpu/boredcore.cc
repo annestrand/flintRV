@@ -136,16 +136,16 @@ void boredcore::dump() {
     bool iValid         = cpu(this)->i_ifValid;                     // I
     bool mValid         = cpu(this)->i_memValid;                    // M
     // Dump disassembled instruction:   "-dump"
-    printf("%08x   0x%08x   %s\n", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
-    if (m_dump < 2) { return; }
+    printf("%08x   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
+    if (m_dump < 2) { printf("\n"); return; }
     // Dump more detailed info:         "-dump-all"
     unsigned long long cycle = m_cycles > 1 ? (unsigned long long)(m_cycles/2) : (unsigned long long)0;
-    printf("    CYCLE:[%llu] STALL:[%c%c%c-] FLUSH:[%c%c%c%c] STATUS:[%c%c%c%c%c%c%c]\n\n",
-        cycle,
+    printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  CYCLE:[%llu]\n",
         fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-',
         fFlush ? 'x':'-', eFlush ? 'x':'-', mFlush ? 'x':'-', wFlush ? 'x':'-',
         iValid ? 'I':'-', mValid ? 'M':'-', RST    ? 'R':'-', BRA    ? 'B':'-',
-        JMP    ? 'J':'-', LD_REQ ? 'L':'-', SD_REQ ? 'S':'-'
+        JMP    ? 'J':'-', LD_REQ ? 'L':'-', SD_REQ ? 'S':'-',
+        cycle
     );
 }
 // ====================================================================================================================

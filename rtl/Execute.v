@@ -48,7 +48,11 @@ module Execute (
         .o_result (o_aluOut)
     );
 
-    assign o_addrGenOut = i_PC + i_IMM;
+    wire indirJump = `ALU_OP_I_JUMP == i_aluOp; // (i.e. JALR)
+    wire [XLEN-1:0] ctrlTransSrcA = indirJump ? rs1Out : i_PC;
+    wire [XLEN-1:0] jmpResult = ctrlTransSrcA + i_IMM;
+
+    assign o_addrGenOut = indirJump ? {jmpResult[XLEN-1:1],1'b0} : jmpResult;
     assign o_rs2FwdOut  = rs2Out;
 
 endmodule

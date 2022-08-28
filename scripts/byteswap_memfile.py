@@ -21,7 +21,7 @@ if __name__ == "__main__":
             exit(1)
         for word in machine_words:
             if word.startswith('@'):
-                swapped_machine_words += word + os.linesep
+                swapped_machine_words += (word + os.linesep) if count == 0 else (os.linesep + word + os.linesep)
             else:
                 swapped_machine_words += word[6:8] + word[4:6] + word[2:4] + word[0:2] + " "
                 count += 1

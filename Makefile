@@ -8,6 +8,12 @@ AS                     := $(TOOLCHAIN_PREFIX)-as
 OBJCOPY                := $(TOOLCHAIN_PREFIX)-objcopy
 OBJDUMP                := $(TOOLCHAIN_PREFIX)-objdump
 
+CC_FLAGS               := -march=rv32i
+CC_FLAGS               += -mabi=ilp32
+CC_FLAGS               += -nostdlib
+CC_FLAGS               += -ffunction-sections
+CC_FLAGS               += -fomit-frame-pointer
+
 AS_FLAGS               := -march=rv32i
 AS_FLAGS               += -mabi=ilp32
 
@@ -58,11 +64,13 @@ TEST_PY_ASM            := $(shell find scripts -type f -name "sub_*.asm.py" -exe
 
 CPU_TEST_SRCS          := $(shell find tests/cpu -type f -name "*.cc")
 CPU_ASM_TESTS          := $(shell find tests/cpu/functional -type f -name "*.s" -exec basename {} \;)
+CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" -exec basename {} \;)
 CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
 CPU_PY_ASM_TESTS       := $(CPU_PY_TESTS:%.asm.py=$(CPU_TEST_OUT)/%.s)
 CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
 CPU_TEST_MEM           := $(CPU_TEST_ELF:%.elf=%.mem)
 CPU_TEST_ASM_MEM       := $(CPU_ASM_TESTS:%.s=$(CPU_TEST_OUT)/%.mem)
+CPU_TEST_C_MEM         := $(CPU_C_TESTS:%.c=$(CPU_TEST_OUT)/%.mem)
 
 SUB_TEST_ALL_SRCS      := $(shell find tests/sub -type f -name "*.v" -exec basename {} \;)
 SUB_TEST_MEMH_SRCS     := $(TEST_PY_MEM:sub_%.mem.py=%.v)
@@ -118,12 +126,11 @@ $(CPU_TEST_OUT)/%.cpp: $(CPU_TEST_SRCS) $(CPU_SRCS)
 $(CPU_TEST_OUT)/cpu_%.elf: $(CPU_TEST_OUT)/cpu_%.s
 	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
 
-$(CPU_TEST_OUT)/cpu_%.mem: $(CPU_TEST_OUT)/cpu_%.elf
-	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
-	python3 ./scripts/byteswap_memfile.py $@
-
 $(CPU_TEST_OUT)/%.elf: tests/cpu/functional/%.s
 	$(DOCKER_CMD) $(AS) $(AS_FLAGS) -o $@ $<
+
+$(CPU_TEST_OUT)/%.elf: tests/cpu/algorithms/%.c
+	$(DOCKER_CMD) $(CC) $(CC_FLAGS) -Wl,-Tscripts/custom_sections.ld,-Map=$@.map -o $@ $<
 
 $(CPU_TEST_OUT)/%.mem: $(CPU_TEST_OUT)/%.elf
 	$(DOCKER_CMD) $(OBJCOPY) -O verilog --verilog-data-width=4 $< $@
@@ -135,7 +142,7 @@ all: docker tests soc
 
 # Build tests
 .PHONY: tests
-tests: build-dir $(CPU_TEST_MEM) $(CPU_TEST_ASM_MEM) $(CPU_TEST_OUT)/Vboredcore.cpp
+tests: build-dir $(CPU_TEST_MEM) $(CPU_TEST_ASM_MEM) $(CPU_TEST_C_MEM) $(CPU_TEST_OUT)/Vboredcore.cpp
 tests: $(SUB_TEST_PLAIN_OBJS) $(SUB_TEST_ASM_OBJS) $(SUB_TEST_MEMH_OBJS)
 tests: $(SOC_TEST_OBJS)
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
