@@ -16,7 +16,6 @@
 #define LOG_E(msg, ...) \
     printf("[ERROR]:[%s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
 
-void leftTrimWhitespace(std::string& s);
 std::vector<std::string> machineCodeFileReader(std::string filePath);
 std::vector<std::string> asmFileReader(std::string filePath);
 std::vector<std::string> initRegfileReader(std::string filePath);

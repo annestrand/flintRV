@@ -6,10 +6,6 @@
 #include "common.hh"
 
 // ====================================================================================================================
-void leftTrimWhitespace(std::string& s) {
-    s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
-}
-// ====================================================================================================================
 std::vector<std::string> machineCodeFileReader(std::string filePath) {
     std::vector<std::string> contents;
     std::ifstream f(filePath);
@@ -43,7 +39,7 @@ std::vector<std::string> initRegfileReader(std::string filePath) {
     }
     std::string line;
     while (std::getline(f, line)) {
-        leftTrimWhitespace(line);
+        line.erase(0, line.find_first_not_of(" \t\n\r\f\v"));
         contents.push_back(line);
     }
     f.close();

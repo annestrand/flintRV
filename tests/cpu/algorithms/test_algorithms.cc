@@ -34,7 +34,7 @@ TEST(algorithms, fibonacci) {
     };
 
     bool done                   = false;
-    constexpr int doneReg       = 27; // s11
+    constexpr int doneReg       = S11;
     constexpr int simDoneVal    = -1;
     while (!dut.end() && !done) {
         dut.m_cpu->i_instr      = (int)HEX_DECODE_ASCII(dut.m_stimulus.machine_code[dut.m_cpu->o_pcOut >> 2].c_str());
@@ -48,9 +48,9 @@ TEST(algorithms, fibonacci) {
     }
 
     // Check results
-    EXPECT_EQ(dut.readRegfile(22 /*s6*/ ), fibonacci(6));
-    EXPECT_EQ(dut.readRegfile(23 /*s7*/ ), fibonacci(7));
-    EXPECT_EQ(dut.readRegfile(24 /*s8*/ ), fibonacci(8));
-    EXPECT_EQ(dut.readRegfile(25 /*s9*/ ), fibonacci(9));
-    EXPECT_EQ(dut.readRegfile(26 /*s10*/), fibonacci(10));
+    EXPECT_EQ(dut.readRegfile(S6), fibonacci(6));
+    EXPECT_EQ(dut.readRegfile(S7), fibonacci(7));
+    EXPECT_EQ(dut.readRegfile(S8), fibonacci(8));
+    EXPECT_EQ(dut.readRegfile(S9), fibonacci(9));
+    EXPECT_EQ(dut.readRegfile(S10), fibonacci(10));
 }
