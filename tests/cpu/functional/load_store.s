@@ -1,4 +1,4 @@
-# cpu_load_store.s:
+# load_store.s:
 # -------------------------
 # Testing load/store instructions
 

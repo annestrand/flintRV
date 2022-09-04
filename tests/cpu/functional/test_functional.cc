@@ -15,7 +15,7 @@
 TEST(functional, loop) { // Basic test loop summation for 10 iterations
     boredcore dut = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))       { FAIL(); }
-    if (!dut.registerMemory(0x2000, BASE_PATH "/cpu_simple_loop.mem"))  { FAIL(); }
+    if (!dut.registerMemory(0x2000, BASE_PATH "/simple_loop.mem"))  { FAIL(); }
 
     bool done                   = false;
     constexpr int j             = 8;
@@ -112,7 +112,7 @@ TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JA
 TEST(functional, load_store) { // Tests load and store based instructions
     boredcore dut = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd")) { FAIL(); }
-    if (!dut.registerMemory(0x2000, BASE_PATH "/cpu_load_store.mem"))   { FAIL(); }
+    if (!dut.registerMemory(0x2000, BASE_PATH "/load_store.mem"))   { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = 1;
