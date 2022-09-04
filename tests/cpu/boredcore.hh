@@ -34,8 +34,12 @@ class boredcore {
 public:
     boredcore(vluint64_t maxSimTime);
     ~boredcore();
-    bool create(Vboredcore* cpu, const char* traceFile);
+    bool create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath=std::string());
     bool createStimulus(std::string machineCodeFilePath, std::string initRegfilePath=std::string());
+    bool registerMemory(size_t memSize, std::string memfile=std::string());
+    bool instructionUpdate();
+    bool loadMemUpdate();
+    bool storeMemUpdate();
     void writeRegfile(int index, int val);
     int readRegfile(int index);
     void reset(int count=1);
@@ -50,6 +54,8 @@ private:
     VerilatedVcdC*          m_trace;
     vluint64_t              m_maxSimTime;
     int                     m_dump;
+    char*                   m_mem;      // Test memory
+    size_t                  m_memSize;  // Sizeof Test memory in bytes
 };
 
 /*

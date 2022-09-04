@@ -14,14 +14,16 @@
 
 // ====================================================================================================================
 boredcore::boredcore(vluint64_t maxSimTime) :
-    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_stimulus({}), m_dump(0) {}
+    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_stimulus({}), m_dump(0),
+        m_mem(nullptr), m_memSize(0) {}
 // ====================================================================================================================
 boredcore::~boredcore() {
-    if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr; }
-    if (m_cpu != nullptr)   { delete m_cpu; m_cpu = nullptr; }
+    if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr;  }
+    if (m_cpu != nullptr)   { delete m_cpu; m_cpu = nullptr;                        }
+    if (m_mem != nullptr)   { delete[] m_mem; m_mem = nullptr;                      }
 }
 // ====================================================================================================================
-bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
+bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath) {
     if (cpu == nullptr) {
         LOG_E("Failed to create Verilated boredcore module!\n");
         return false;
@@ -47,6 +49,27 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
             m_dump = m_dump > 1 ? m_dump : 2;
         }
     }
+    // Init the register file (if given)
+    if (!initRegfilePath.empty()) {
+        auto delEmptyStrElems = [](std::vector<std::string>& strList) {
+            strList.erase(std::remove_if(
+                strList.begin(),
+                strList.end(),
+                [](std::string const& s) { return s.empty(); }
+            ), strList.end());
+        };
+        m_stimulus.init_regfile = initRegfileReader(initRegfilePath);
+        if (m_stimulus.init_regfile.empty()) {
+            return false;
+        }
+        delEmptyStrElems(m_stimulus.init_regfile);
+        // Update regfile
+        for (auto it = m_stimulus.init_regfile.begin(); it != m_stimulus.init_regfile.end(); ++it) {
+            int idx = it - m_stimulus.init_regfile.begin();
+            writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
+        }
+    }
+
     reset(1); // Reset CPU on create for 1cc
     return true;
 }
@@ -79,6 +102,64 @@ bool boredcore::createStimulus(std::string machineCodeFilePath, std::string init
             writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
         }
     }
+    return true;
+}
+// ====================================================================================================================
+bool boredcore::registerMemory(size_t memSize, std::string memfile) {
+    if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
+    m_memSize   = memSize;
+    m_mem       = new char[memSize];
+    if (m_mem == nullptr) { LOG_E("Failed to allocate %ld bytes!\n", m_memSize); return false; }
+    // Init mem from memfile (if given)
+    if (!memfile.empty()) {
+        auto memfileList = machineCodeFileReader(memfile);
+        size_t memfileListSize = memfileList.size() * 4;
+        if (memfileListSize >= m_memSize) {
+            LOG_E("Cannot fit memfile in m_mem! %ld >= %ld\n", memfileListSize, m_memSize);
+            return false;
+        }
+        for (size_t i=0; i<memfileList.size(); ++i) {
+            ((int*)m_mem)[i] = (int)HEX_DECODE_ASCII(memfileList[i].c_str());
+        }
+    }
+    return true;
+}
+// ====================================================================================================================
+bool boredcore::instructionUpdate() {
+    // Error check
+    if (m_mem == nullptr) { LOG_E("Cannot fetch instruction from NULL memory!\n"); return false; }
+    if (cpu(this)->o_pcOut >= m_memSize) {
+        LOG_E("PC address [ %d ] is out-of-bounds from memory [ %ld ]!\n", cpu(this)->o_pcOut, m_memSize);
+        return false;
+    }
+    // Fetch the next instruction
+    cpu(this)->i_instr = *(int*)&m_mem[cpu(this)->o_pcOut];
+    return true;
+}
+// ====================================================================================================================
+bool boredcore::loadMemUpdate() {
+    if (!cpu(this)->o_loadReq) { return true; } // Skip if there was no load request
+    // Error check
+    if (m_mem == nullptr) { LOG_E("Cannot load data from NULL memory!\n"); return false; }
+    if (cpu(this)->o_dataAddr >= m_memSize) {
+        LOG_E("Load data address [ %d ] is out-of-bounds from memory [ %ld ]!\n", cpu(this)->o_dataAddr, m_memSize);
+        return false;
+    }
+    // Fetch the data
+    cpu(this)->i_dataIn = *(int*)&m_mem[cpu(this)->o_dataAddr];
+    return true;
+}
+// ====================================================================================================================
+bool boredcore::storeMemUpdate() {
+    if (!cpu(this)->o_storeReq) { return true; } // Skip if there was no store request
+    // Error check
+    if (m_mem == nullptr) { LOG_E("Cannot store data to NULL memory!\n"); return false; }
+    if (cpu(this)->o_dataAddr >= m_memSize) {
+        LOG_E("Store data address [ %d ] is out-of-bounds from memory [ %ld ]!\n", cpu(this)->o_dataAddr, m_memSize);
+        return false;
+    }
+    // Store the data
+    *(int*)&m_mem[cpu(this)->o_dataAddr] = cpu(this)->o_dataOut;
     return true;
 }
 // ====================================================================================================================
