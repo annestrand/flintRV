@@ -14,8 +14,7 @@
 
 // ====================================================================================================================
 boredcore::boredcore(vluint64_t maxSimTime) :
-    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_stimulus({}), m_dump(0),
-        m_mem(nullptr), m_memSize(0) {}
+    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_dump(0), m_mem(nullptr), m_memSize(0) {}
 // ====================================================================================================================
 boredcore::~boredcore() {
     if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr;  }
@@ -49,7 +48,9 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initR
             m_dump = m_dump > 1 ? m_dump : 2;
         }
     }
-    // Init the register file (if given)
+    reset(1); // Reset CPU on create for 1cc
+
+    // Init the register file (if given) - needs to happen after reset
     if (!initRegfilePath.empty()) {
         auto delEmptyStrElems = [](std::vector<std::string>& strList) {
             strList.erase(std::remove_if(
@@ -58,47 +59,14 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initR
                 [](std::string const& s) { return s.empty(); }
             ), strList.end());
         };
-        m_stimulus.init_regfile = initRegfileReader(initRegfilePath);
-        if (m_stimulus.init_regfile.empty()) {
+        auto init_regfile = initRegfileReader(initRegfilePath);
+        if (init_regfile.empty()) {
             return false;
         }
-        delEmptyStrElems(m_stimulus.init_regfile);
+        delEmptyStrElems(init_regfile);
         // Update regfile
-        for (auto it = m_stimulus.init_regfile.begin(); it != m_stimulus.init_regfile.end(); ++it) {
-            int idx = it - m_stimulus.init_regfile.begin();
-            writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
-        }
-    }
-
-    reset(1); // Reset CPU on create for 1cc
-    return true;
-}
-// ====================================================================================================================
-bool boredcore::createStimulus(std::string machineCodeFilePath, std::string initRegfilePath) {
-    auto delEmptyStrElems = [](std::vector<std::string>& strList) {
-        strList.erase(std::remove_if(
-            strList.begin(),
-            strList.end(),
-            [](std::string const& s) { return s.empty(); }
-        ), strList.end());
-    };
-
-    m_stimulus.machine_code = machineCodeFileReader(machineCodeFilePath);
-    if (m_stimulus.machine_code.empty()) {
-        return false;
-    }
-    delEmptyStrElems(m_stimulus.machine_code);
-
-    // Read init regfile values (if given)
-    if (!initRegfilePath.empty()) {
-        m_stimulus.init_regfile = initRegfileReader(initRegfilePath);
-        if (m_stimulus.init_regfile.empty()) {
-            return false;
-        }
-        delEmptyStrElems(m_stimulus.init_regfile);
-        // Update regfile
-        for (auto it = m_stimulus.init_regfile.begin(); it != m_stimulus.init_regfile.end(); ++it) {
-            int idx = it - m_stimulus.init_regfile.begin();
+        for (auto it = init_regfile.begin(); it != init_regfile.end(); ++it) {
+            int idx = it - init_regfile.begin();
             writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
         }
     }
@@ -160,6 +128,28 @@ bool boredcore::storeMemUpdate() {
     }
     // Store the data
     *(int*)&m_mem[cpu(this)->o_dataAddr] = cpu(this)->o_dataOut;
+    return true;
+}
+// ====================================================================================================================
+bool boredcore::peekMem(int addr, int& val) {
+    // Error check
+    if (m_mem == nullptr) { LOG_E("Cannot 'peek' in NULL memory!\n"); return false; }
+    if (addr >= m_memSize) {
+        LOG_E("'Peek' address [ %d ] is out-of-bounds from memory [ %ld ]!\n", addr, m_memSize);
+        return false;
+    }
+    val = *(int*)&m_mem[addr];
+    return true;
+}
+// ====================================================================================================================
+bool boredcore::pokeMem(int addr, int val) {
+    // Error check
+    if (m_mem == nullptr) { LOG_E("Cannot 'poke' at NULL memory!\n"); return false; }
+    if (addr >= m_memSize) {
+        LOG_E("'Poke' address [ %d ] is out-of-bounds from memory [ %ld ]!\n", addr, m_memSize);
+        return false;
+    }
+    *(int*)&m_mem[addr] = val;
     return true;
 }
 // ====================================================================================================================

@@ -19,11 +19,6 @@
 extern const int* g_argc;
 extern const char** g_argv;
 
-struct stimulus {
-    std::vector<std::string> machine_code;
-    std::vector<std::string> init_regfile;
-};
-
 // Regfile aliases
 typedef enum {
     ZERO=0, RA, SP, GP, TP, T0, T1, T2, S0, FP=S0, S1, A0, A1, A2, A3, A4, A5, A6, A7,
@@ -35,11 +30,12 @@ public:
     boredcore(vluint64_t maxSimTime);
     ~boredcore();
     bool create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath=std::string());
-    bool createStimulus(std::string machineCodeFilePath, std::string initRegfilePath=std::string());
     bool registerMemory(size_t memSize, std::string memfile=std::string());
     bool instructionUpdate();
     bool loadMemUpdate();
     bool storeMemUpdate();
+    bool peekMem(int addr, int& val);
+    bool pokeMem(int addr, int val);
     void writeRegfile(int index, int val);
     int readRegfile(int index);
     void reset(int count=1);
@@ -47,7 +43,6 @@ public:
     void dump();
     bool end();
     Vboredcore*             m_cpu;      // Reference to CPU object
-    stimulus                m_stimulus; // Test vector data for CPU tests
 
 private:
     vluint64_t              m_cycles;
