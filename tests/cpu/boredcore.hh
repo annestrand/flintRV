@@ -30,7 +30,7 @@ public:
     boredcore(vluint64_t maxSimTime);
     ~boredcore();
     bool create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath=std::string());
-    bool registerMemory(size_t memSize, std::string memfile=std::string());
+    bool createMemory(size_t memSize, std::string memfile=std::string());
     bool instructionUpdate();
     bool loadMemUpdate();
     bool storeMemUpdate();

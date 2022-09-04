@@ -73,7 +73,7 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initR
     return true;
 }
 // ====================================================================================================================
-bool boredcore::registerMemory(size_t memSize, std::string memfile) {
+bool boredcore::createMemory(size_t memSize, std::string memfile) {
     if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
     m_memSize   = memSize;
     m_mem       = new char[memSize];

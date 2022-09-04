@@ -15,8 +15,8 @@
 // ====================================================================================================================
 TEST(algorithms, fibonacci) {
     boredcore dut = boredcore(100000);
-    if (!dut.create(new Vboredcore(), "obj_dir/fibonacci.vcd"))     { FAIL(); }
-    if (!dut.registerMemory(0x2000, BASE_PATH "/fibonacci.mem"))    { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/fibonacci.vcd")) { FAIL(); }
+    if (!dut.createMemory(0x2000, BASE_PATH "/fibonacci.mem"))  { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S11;
