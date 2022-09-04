@@ -3,7 +3,7 @@
 # Testing load/store instructions
 
 # Test immediates (used by unit test)
-.equ TEST_ADDR, 0x1000
+.equ TEST_ADDR, 0x100
 .equ TEST_DATA, 0xdeadbeef
 .equ LB_GOLD,   0xffffffef
 .equ LH_GOLD,   0xffffbeef
