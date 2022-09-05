@@ -97,7 +97,7 @@ bool boredcore::instructionUpdate() {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot fetch instruction from NULL memory!\n"); return false; }
     if (cpu(this)->o_pcOut >= m_memSize) {
-        LOG_E("PC address [ %d ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", cpu(this)->o_pcOut, m_memSize);
+        LOG_E("PC address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", cpu(this)->o_pcOut, m_memSize);
         return false;
     }
     // Fetch the next instruction
@@ -110,7 +110,7 @@ bool boredcore::loadMemUpdate() {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot load data from NULL memory!\n"); return false; }
     if (cpu(this)->o_dataAddr >= m_memSize) {
-        LOG_E("Load data address [ %d ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
+        LOG_E("Load data address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
             cpu(this)->o_dataAddr, m_memSize);
         return false;
     }
@@ -124,7 +124,7 @@ bool boredcore::storeMemUpdate() {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot store data to NULL memory!\n"); return false; }
     if (cpu(this)->o_dataAddr >= m_memSize) {
-        LOG_E("Store data address [ %d ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
+        LOG_E("Store data address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
             cpu(this)->o_dataAddr, m_memSize);
         return false;
     }

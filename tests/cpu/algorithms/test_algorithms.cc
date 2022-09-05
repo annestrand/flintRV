@@ -16,7 +16,7 @@
 TEST(algorithms, fibonacci) {
     boredcore dut = boredcore(100000);
     if (!dut.create(new Vboredcore(), "obj_dir/fibonacci.vcd")) { FAIL(); }
-    if (!dut.createMemory(0x2000, BASE_PATH "/fibonacci.mem"))  { FAIL(); }
+    if (!dut.createMemory(0x4000, BASE_PATH "/fibonacci.mem"))  { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S11;
@@ -48,7 +48,7 @@ TEST(algorithms, fibonacci) {
 TEST(algorithms, binsearch) {
     boredcore dut = boredcore(100000);
     if (!dut.create(new Vboredcore(), "obj_dir/binsearch.vcd")) { FAIL(); }
-    if (!dut.createMemory(0x2000, BASE_PATH "/binsearch.mem"))  { FAIL(); }
+    if (!dut.createMemory(0x4000, BASE_PATH "/binsearch.mem"))  { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S11;

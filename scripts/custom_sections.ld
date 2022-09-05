@@ -1,5 +1,5 @@
-_RamSize    = 0x2000; /* RAM section - 4KB */
-_StackSize  = 0x1000; /* Reserve half of RAM for the stack - 2KB */
+_RamSize    = 0x4000; /* RAM section - 16KB */
+_StackSize  = 0x2000; /* Reserve half of RAM for the stack - 8KB */
 _RamStart   = 0x0;
 
 MEMORY {

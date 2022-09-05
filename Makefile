@@ -23,7 +23,7 @@ RISCV_OBJCOPY          := $(TOOLCHAIN_PREFIX)-objcopy
 
 RISCV_CC_FLAGS         := -march=rv32i
 RISCV_CC_FLAGS         += -mabi=ilp32
-RISCV_CC_FLAGS         += -nostdlib
+RISCV_CC_FLAGS         += -nostartfiles
 RISCV_CC_FLAGS         += -ffunction-sections
 RISCV_CC_FLAGS         += -fomit-frame-pointer
 
