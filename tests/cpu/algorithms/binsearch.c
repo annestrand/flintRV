@@ -3,6 +3,7 @@
 int main (void);
 void _start(void) {
     asm (
+        "la gp, __global_pointer$\n\t"
         "la sp, __stack_top\n\t"
         "add s0, sp, zero\n\t"
         "jal main\n\t"

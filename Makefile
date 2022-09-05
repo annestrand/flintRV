@@ -129,7 +129,7 @@ $(VERILATOR_OUT)/%.elf: tests/cpu/functional/%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 $(VERILATOR_OUT)/%.elf: tests/cpu/algorithms/%.c
-	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/custom_sections.ld,-Map=$@.map -o $@ $<
+	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
 $(VERILATOR_OUT)/%.mem: $(VERILATOR_OUT)/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
