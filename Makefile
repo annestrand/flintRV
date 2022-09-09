@@ -81,6 +81,7 @@ SUB_TEST_PLAIN_OBJS    := $(SUB_TEST_PLAIN_SRCS:%.v=$(ICARUS_OUT)/%.out)
 BOREDSOC_SRC           := boredsoc/firmware.s
 BOREDSOC_ELF           := $(BOREDSOC_SRC:%.s=%.elf)
 BOREDSOC_FIRMWARE      := $(BOREDSOC_ELF:%.elf=%.mem)
+BOREDSOC_COREGEN       := boredsoc/core_generated.v
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
 $(ICARUS_OUT)/sub_%.mem: sub_%.mem.py
@@ -91,6 +92,9 @@ $(ICARUS_OUT)/sub_%.s: sub_%.asm.py
 
 $(VERILATOR_OUT)/cpu_%.s: scripts/cpu_%.asm.py
 	python3 $< -out obj_dir
+
+boredsoc/%_generated.v:
+	python3 scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
 
 .SECONDARY:
 $(ICARUS_OUT)/sub_%.elf: $(ICARUS_OUT)/sub_%.s
@@ -149,8 +153,8 @@ tests: $(SOC_TEST_OBJS)
 
 # Build boredsoc firmware
 .PHONY: soc
-soc: $(BOREDSOC_FIRMWARE)
-	@printf "\nAll done building boredsoc firmware.\n"
+soc: $(BOREDSOC_FIRMWARE) $(BOREDSOC_COREGEN)
+	@printf "\nAll done building boredsoc.\n"
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -171,3 +175,4 @@ clean:
 	rm -rf obj_dir 2> /dev/null || true
 	rm -rf boredsoc/firmware.mem 2> /dev/null || true
 	rm -rf boredsoc/firmware.elf 2> /dev/null || true
+	rm -rf boredsoc/*_generated.v 2> /dev/null || true

@@ -24,7 +24,7 @@ module boredsoc (
         .i_addr                 (pcOut[10:0]),
         .o_data                 (bootRomOut)
     );
-    // Data memory (g_core.v)
+    // Data memory (core_generated.v)
     DualPortRam #(
         .XLEN(32),
         .ADDR_WIDTH(11) // 2KB
@@ -36,7 +36,7 @@ module boredsoc (
         .i_wAddr                (dataAddr[10:0]),
         .o_q                    (dataMemOut)
     );
-    // CPU (g_core.v)
+    // CPU (core_generated.v)
     CPU CPU_unit (
         .i_clk                  (i_clk),
         .i_rst                  (i_rst),

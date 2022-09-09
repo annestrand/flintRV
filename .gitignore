@@ -5,3 +5,4 @@ __pycache__/
 *.mem
 *.elf
 *.map
+*_generated.v

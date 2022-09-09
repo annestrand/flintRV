@@ -56,7 +56,7 @@ Then to build the tests:
 ## boredsoc
 `boredsoc/` directory provides a very basic example SoC using the boredcore soft-cpu.
 
-The CPU `g_core.v` is pre-generated using the `scripts/core_gen.py` utility.
+The CPU is generated using the `scripts/core_gen.py` utility by the `soc` Make recipe (see below).
 
 ### Design 🗺️
 - CPU specs
@@ -69,5 +69,5 @@ The CPU `g_core.v` is pre-generated using the `scripts/core_gen.py` utility.
     - 2KB Data RAM
     - 1 Output pin (e.g. hello-world LED blink)
 
-### Build Firmware 🛠️
+### Build Firmware and Generate CPU core for SoC 🛠️
     $ make soc
