@@ -73,23 +73,13 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initR
     return true;
 }
 // ====================================================================================================================
-bool boredcore::createMemory(size_t memSize, std::string memfile) {
+bool boredcore::createMemory(size_t memSize, std::string hexfile) {
     if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
     m_memSize   = memSize;
     m_mem       = new char[memSize];
     if (m_mem == nullptr) { LOG_E("Failed to allocate %ld bytes!\n", m_memSize); return false; }
-    // Init mem from memfile (if given)
-    if (!memfile.empty()) {
-        auto memfileList = machineCodeFileReader(memfile);
-        size_t memfileListSize = memfileList.size() * 4;
-        if (memfileListSize >= m_memSize) {
-            LOG_E("Cannot fit memfile in m_mem! %ld >= %ld\n", memfileListSize, m_memSize);
-            return false;
-        }
-        for (size_t i=0; i<memfileList.size(); ++i) {
-            ((int*)m_mem)[i] = (int)HEX_DECODE_ASCII(memfileList[i].c_str());
-        }
-    }
+    // Init mem from hexfile (if given)
+    if (!hexfile.empty()) { return loadMem(hexfile, m_mem, m_memSize); }
     return true;
 }
 // ====================================================================================================================

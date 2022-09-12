@@ -66,9 +66,9 @@ CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" 
 CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
 CPU_ASM_TESTS          += $(CPU_PY_TESTS:%.asm.py=%.s)
 CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
-CPU_TEST_MEM           := $(CPU_TEST_ELF:%.elf=%.mem)
-CPU_TEST_MEM           += $(CPU_ASM_TESTS:%.s=$(VERILATOR_OUT)/%.mem)
-CPU_TEST_MEM           += $(CPU_C_TESTS:%.c=$(VERILATOR_OUT)/%.mem)
+CPU_TEST_MEM           := $(CPU_TEST_ELF:%.elf=%.hex)
+CPU_TEST_MEM           += $(CPU_ASM_TESTS:%.s=$(VERILATOR_OUT)/%.hex)
+CPU_TEST_MEM           += $(CPU_C_TESTS:%.c=$(VERILATOR_OUT)/%.hex)
 
 SUB_TEST_ALL_SRCS      := $(shell find tests/sub -type f -name "*.v" -exec basename {} \;)
 SUB_TEST_MEMH_SRCS     := $(TEST_PY_MEM:sub_%.mem.py=%.v)
@@ -135,9 +135,8 @@ $(VERILATOR_OUT)/%.elf: tests/cpu/functional/%.s
 $(VERILATOR_OUT)/%.elf: tests/cpu/algorithms/%.c
 	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
-$(VERILATOR_OUT)/%.mem: $(VERILATOR_OUT)/%.elf
-	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
-	python3 ./scripts/byteswap_memfile.py $@
+$(VERILATOR_OUT)/%.hex: $(VERILATOR_OUT)/%.elf
+	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O binary $< $@
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
