@@ -21,7 +21,7 @@ TEST(algorithms, fibonacci) {
 
     bool done                   = false;
     constexpr int doneReg       = S11;
-    constexpr int simDoneVal    = -1;
+    constexpr int simDoneVal    = 0xcafebabe;
     dut.m_cpu->i_ifValid        = 1;    // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1;    // Always valid since we assume combinatorial read/write for test memory
     // Init stack and frame pointers
@@ -37,7 +37,7 @@ TEST(algorithms, fibonacci) {
     }
 
     // Check results
-    EXPECT_EQ(dut.readRegfile(doneReg), -1) << "Simulation timeout!";
+    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     std::function<int(int)> fibonacci = [&](int x) {
         if (x <= 1) { return x; }
         return fibonacci(x - 1) + fibonacci(x - 2);
@@ -57,7 +57,7 @@ TEST(algorithms, binsearch) {
 
     bool done                   = false;
     constexpr int doneReg       = S11;
-    constexpr int simDoneVal    = -1;
+    constexpr int simDoneVal    = 0xcafebabe;
     dut.m_cpu->i_ifValid        = 1;    // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1;    // Always valid since we assume combinatorial read/write for test memory
     // Init stack and frame pointers
@@ -73,11 +73,11 @@ TEST(algorithms, binsearch) {
     }
 
     // Check results
-    EXPECT_EQ(dut.readRegfile(doneReg), -1) << "Simulation timeout!";
-    EXPECT_EQ(dut.readRegfile(S1),   1);        // Testing valid binsearch result
-    EXPECT_EQ(dut.readRegfile(S2),   1);        // Testing valid binsearch result
-    EXPECT_EQ(dut.readRegfile(S3),   1);        // Testing valid binsearch result
-    EXPECT_EQ(dut.readRegfile(S4),   0);        // Testing invalid binsearch result
+    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
+    EXPECT_EQ(dut.readRegfile(S1),   1); // Testing valid binsearch result
+    EXPECT_EQ(dut.readRegfile(S2),   1); // Testing valid binsearch result
+    EXPECT_EQ(dut.readRegfile(S3),   1); // Testing valid binsearch result
+    EXPECT_EQ(dut.readRegfile(S4),   0); // Testing invalid binsearch result
 }
 // ====================================================================================================================
 TEST(algorithms, mergesort) {

@@ -34,6 +34,7 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
         dut.tick();
     }
 
+    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(j), expectedVal);
 }
 // ====================================================================================================================
@@ -58,6 +59,7 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
         dut.tick();
     }
 
+    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
@@ -82,6 +84,7 @@ TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g
         dut.tick();
     }
 
+    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
@@ -106,6 +109,7 @@ TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JA
         dut.tick();
     }
 
+    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
@@ -136,6 +140,7 @@ TEST(functional, load_store) { // Tests load and store based instructions
         dut.tick();
     }
 
+    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     // Load instructions
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
     // Store instructions

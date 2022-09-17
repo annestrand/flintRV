@@ -24,6 +24,6 @@ int main(void) {
     register long s8  asm("s8")     = test_8;
     register long s9  asm("s9")     = test_9;
     register long s10 asm("s10")    = test_10;
-    register long s11 asm("s11")    = -1; // Done.
+    register long s11 asm("s11")    = 0xcafebabe; // Done.
     return 0;
 }

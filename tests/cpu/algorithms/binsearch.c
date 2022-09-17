@@ -38,10 +38,10 @@ int main(void) {
     int exists3                     = binsearch(313, testArr, testArrLen) >= 0 ? 1 : 0;
     int notExist                    = binsearch(670, testArr, testArrLen) >= 0 ? 1 : 0;
     // Write results directly to CPU regs and signal to Simulation that we are done
-    register long s1 asm("s1")      = exists1;  // Should be (1)
-    register long s2 asm("s2")      = exists2;  // Should be (1)
-    register long s3 asm("s3")      = exists3;  // Should be (1)
-    register long s4 asm("s4")      = notExist; // Should be (0)
-    register long s11 asm("s11")    = -1;       // Done.
+    register long s1 asm("s1")      = exists1;      // Should be (1)
+    register long s2 asm("s2")      = exists2;      // Should be (1)
+    register long s3 asm("s3")      = exists3;      // Should be (1)
+    register long s4 asm("s4")      = notExist;     // Should be (0)
+    register long s11 asm("s11")    = 0xcafebabe;   // Done.
     return 0;
 }
