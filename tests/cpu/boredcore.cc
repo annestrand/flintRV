@@ -78,6 +78,7 @@ bool boredcore::createMemory(size_t memSize, std::string hexfile) {
     m_memSize   = memSize;
     m_mem       = new char[memSize];
     if (m_mem == nullptr) { LOG_E("Failed to allocate %ld bytes!\n", m_memSize); return false; }
+    memset(m_mem, 0, m_memSize);
     // Init mem from hexfile (if given)
     if (!hexfile.empty()) { return loadMem(hexfile, m_mem, m_memSize); }
     return true;
@@ -199,7 +200,7 @@ void boredcore::dump() {
     bool iValid         = cpu(this)->i_ifValid;                     // I
     bool mValid         = cpu(this)->i_memValid;                    // M
     // Dump disassembled instruction:   "-dump"
-    printf("%08x   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
+    printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { printf("\n"); return; }
     // Dump more detailed info:         "-dump-all"
     unsigned long long cycle = m_cycles > 1 ? (unsigned long long)(m_cycles/2) : (unsigned long long)0;

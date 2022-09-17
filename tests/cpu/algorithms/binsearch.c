@@ -1,18 +1,8 @@
 #include <stddef.h>
 
-int main (void);
-void _start(void) {
-    asm (
-        "la gp, __global_pointer$\n\t"
-        "la sp, __stack_top\n\t"
-        "add s0, sp, zero\n\t"
-        "jal main\n\t"
-        "STALL: j STALL\n\t"
-        "nop\n\t"
-        "nop\n\t"
-        "nop\n\t"
-        "nop\n\t"
-    );
+void _start(void);
+void _boredcore_start(void) {
+    _start();
     for(;;);
 }
 

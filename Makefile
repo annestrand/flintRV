@@ -20,12 +20,12 @@ endif
 RISCV_CC               := $(TOOLCHAIN_PREFIX)-gcc
 RISCV_AS               := $(TOOLCHAIN_PREFIX)-as
 RISCV_OBJCOPY          := $(TOOLCHAIN_PREFIX)-objcopy
+RISCV_OBJDUMP          := $(TOOLCHAIN_PREFIX)-objdump
 
 RISCV_CC_FLAGS         := -march=rv32i
 RISCV_CC_FLAGS         += -mabi=ilp32
-RISCV_CC_FLAGS         += -nostartfiles
 RISCV_CC_FLAGS         += -ffunction-sections
-RISCV_CC_FLAGS         += -fomit-frame-pointer
+RISCV_CC_FLAGS         += -Wl,--section-start=.text=0x0
 
 RISCV_AS_FLAGS         := -march=rv32i
 RISCV_AS_FLAGS         += -mabi=ilp32
@@ -168,6 +168,10 @@ endif
 build-dir:
 	@mkdir -p $(VERILATOR_OUT)/
 	@mkdir -p $(ICARUS_OUT)/
+
+.PHONY: objdump
+objdump:
+	@$(DOCKER_CMD) $(RISCV_OBJDUMP) -D obj_dir/$(DUMP).elf
 
 .PHONY: clean
 clean:

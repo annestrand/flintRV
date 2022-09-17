@@ -1,5 +1,5 @@
 /* Script for -z combreloc */
-/* Copyright (C) 2014-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2020 Free Software Foundation, Inc.
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
    notice and this notice are preserved.  */
@@ -7,20 +7,12 @@ OUTPUT_FORMAT("elf32-littleriscv", "elf32-littleriscv",
 	      "elf32-littleriscv")
 OUTPUT_ARCH(riscv)
 
-/* boredcore: ADDED - 16KB default */
-RAM_LEN = DEFINED(RAM_LEN) ? RAM_LEN : 0x4000;
-MEMORY
-{
-  RAM (rwx) : ORIGIN = 0x0, LENGTH = RAM_LEN
-}
-
 ENTRY(_start)
-SEARCH_DIR("/usr/local/riscv64-unknown-elf/lib");
+SEARCH_DIR("=/Host/home/ilg/Work/riscv-none-embed-gcc-10.2.0-1.2/linux-x64/install/riscv-none-embed-gcc/riscv-none-embed/lib"); SEARCH_DIR("=/usr/local/lib"); SEARCH_DIR("=/lib"); SEARCH_DIR("=/usr/lib");
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
   PROVIDE (__executable_start = SEGMENT_START("text-segment", 0x10000)); . = SEGMENT_START("text-segment", 0x10000) + SIZEOF_HEADERS;
-  PROVIDE(__stack_top = ORIGIN(RAM) + LENGTH(RAM)); /* boredcore: ADDED */
   .interp         : { *(.interp) }
   .note.gnu.build-id  : { *(.note.gnu.build-id) }
   .hash           : { *(.hash) }
@@ -47,23 +39,23 @@ SECTIONS
       *(.rela.sdata2 .rela.sdata2.* .rela.gnu.linkonce.s2.*)
       *(.rela.sbss2 .rela.sbss2.* .rela.gnu.linkonce.sb2.*)
       *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
-      *(.rela.ifunc)
+      PROVIDE_HIDDEN (__rela_iplt_start = .);
+      *(.rela.iplt)
+      PROVIDE_HIDDEN (__rela_iplt_end = .);
     }
   .rela.plt       :
     {
       *(.rela.plt)
-      PROVIDE_HIDDEN (__rela_iplt_start = .);
-      *(.rela.iplt)
-      PROVIDE_HIDDEN (__rela_iplt_end = .);
     }
   .init           :
   {
     KEEP (*(SORT_NONE(.init)))
   }
-  .plt            : { *(.plt) *(.iplt) }
+  .plt            : { *(.plt) }
+  .iplt           : { *(.iplt) }
   .text           :
   {
-    *(.text._start) /* boredcore: ADDED */
+    *(.text._boredcore_start) /* boredcore: ADDED */
     *(.text.unlikely .text.*_unlikely .text.unlikely.*)
     *(.text.exit .text.exit.*)
     *(.text.startup .text.startup.*)
@@ -163,6 +155,7 @@ SECTIONS
   . = DATA_SEGMENT_RELRO_END (0, .);
   .data           :
   {
+    . = ALIGN(16);
     __DATA_BEGIN__ = .;
     *(.data .data.* .gnu.linkonce.d.*)
     SORT(CONSTRUCTORS)
@@ -174,6 +167,7 @@ SECTIONS
      we can shorten the on-disk segment size.  */
   .sdata          :
   {
+    . = ALIGN(16);
     __SDATA_BEGIN__ = .;
     *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata .srodata.*)
     *(.sdata .sdata.* .gnu.linkonce.s.*)
@@ -197,14 +191,15 @@ SECTIONS
       .bss section disappears because there are no input sections.
       FIXME: Why do we need it? When there is no .bss section, we do not
       pad the .data section.  */
-   . = ALIGN(. != 0 ? 64 / 8 : 1);
+   . = ALIGN(. != 0 ? 32 / 8 : 1);
   }
-  . = ALIGN(64 / 8);
+  . = ALIGN(32 / 8);
   . = SEGMENT_START("ldata-segment", .);
-  . = ALIGN(64 / 8);
+  . = ALIGN(32 / 8);
+  . = ALIGN(16);
   __BSS_END__ = .;
-    __global_pointer$ = MIN(__SDATA_BEGIN__ + 0x800,
-		            MAX(__DATA_BEGIN__ + 0x800, __BSS_END__ - 0x800));
+  __global_pointer$ = MIN(__SDATA_BEGIN__ + 0x800,
+		         MAX(__DATA_BEGIN__ + 0x800, __BSS_END__ - 0x800));
   _end = .; PROVIDE (end = .);
   . = DATA_SEGMENT_END (.);
   /* Stabs debugging sections.  */
@@ -219,16 +214,16 @@ SECTIONS
   /* DWARF debug sections.
      Symbols in the DWARF debugging sections are relative to the beginning
      of the section so we begin them at 0.  */
-  /* DWARF 1.  */
+  /* DWARF 1 */
   .debug          0 : { *(.debug) }
   .line           0 : { *(.line) }
-  /* GNU DWARF 1 extensions.  */
+  /* GNU DWARF 1 extensions */
   .debug_srcinfo  0 : { *(.debug_srcinfo) }
   .debug_sfnames  0 : { *(.debug_sfnames) }
-  /* DWARF 1.1 and DWARF 2.  */
+  /* DWARF 1.1 and DWARF 2 */
   .debug_aranges  0 : { *(.debug_aranges) }
   .debug_pubnames 0 : { *(.debug_pubnames) }
-  /* DWARF 2.  */
+  /* DWARF 2 */
   .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
   .debug_abbrev   0 : { *(.debug_abbrev) }
   .debug_line     0 : { *(.debug_line .debug_line.* .debug_line_end) }
@@ -236,23 +231,17 @@ SECTIONS
   .debug_str      0 : { *(.debug_str) }
   .debug_loc      0 : { *(.debug_loc) }
   .debug_macinfo  0 : { *(.debug_macinfo) }
-  /* SGI/MIPS DWARF 2 extensions.  */
+  /* SGI/MIPS DWARF 2 extensions */
   .debug_weaknames 0 : { *(.debug_weaknames) }
   .debug_funcnames 0 : { *(.debug_funcnames) }
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
-  /* DWARF 3.  */
+  /* DWARF 3 */
   .debug_pubtypes 0 : { *(.debug_pubtypes) }
   .debug_ranges   0 : { *(.debug_ranges) }
-  /* DWARF 5.  */
-  .debug_addr     0 : { *(.debug_addr) }
-  .debug_line_str 0 : { *(.debug_line_str) }
-  .debug_loclists 0 : { *(.debug_loclists) }
+  /* DWARF Extension.  */
   .debug_macro    0 : { *(.debug_macro) }
-  .debug_names    0 : { *(.debug_names) }
-  .debug_rnglists 0 : { *(.debug_rnglists) }
-  .debug_str_offsets 0 : { *(.debug_str_offsets) }
-  .debug_sup      0 : { *(.debug_sup) }
+  .debug_addr     0 : { *(.debug_addr) }
   .gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }
   /DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.gnu.lto_*) }
 }
