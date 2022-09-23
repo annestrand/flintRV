@@ -3,10 +3,16 @@ ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST
 ifdef DOCKER
 DOCKER_CMD             := docker exec -u user -w /src boredcore
 DOCKER_RUNNING         := $(shell docker ps -a -q -f name=boredcore)
+RISCV_TESTS_PREFIX     := /src/obj_dir/riscv-tests
 else
 DOCKER_CMD             :=
+RISCV_TESTS_PREFIX     := $(ROOT_DIR)/obj_dir/riscv-tests
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
+
+# Green (G) and Reset (RR) ANSI escape sequences
+G                      :=\033[0;32m
+RR                     :=\033[00m
 
 vpath %.v tests
 vpath %.py scripts
@@ -140,7 +146,7 @@ $(VERILATOR_OUT)/%.hex: $(VERILATOR_OUT)/%.elf
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
-all: docker tests soc
+all: submodules tests soc
 
 # Build tests
 .PHONY: tests
@@ -148,12 +154,12 @@ tests: build-dir $(CPU_TEST_MEM) $(VERILATOR_OUT)/Vboredcore.cpp
 tests: $(SUB_TEST_PLAIN_OBJS) $(SUB_TEST_ASM_OBJS) $(SUB_TEST_MEMH_OBJS)
 tests: $(SOC_TEST_OBJS)
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
-	@printf "\nAll done building cpu tests.\n"
+	@printf "$(G)[SUCCESS]:$(RR) All done building tests.\n"
 
 # Build boredsoc firmware
 .PHONY: soc
 soc: $(BOREDSOC_FIRMWARE) $(BOREDSOC_COREGEN)
-	@printf "\nAll done building boredsoc.\n"
+	@printf "$(G)[SUCCESS]$(RR): All done building boredsoc.\n"
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -166,12 +172,29 @@ endif
 
 .PHONY: build-dir
 build-dir:
+	@mkdir -p obj_dir/riscv-tests/
 	@mkdir -p $(VERILATOR_OUT)/
 	@mkdir -p $(ICARUS_OUT)/
 
 .PHONY: objdump
 objdump:
 	@$(DOCKER_CMD) $(RISCV_OBJDUMP) -D obj_dir/$(DUMP).elf
+
+.PHONY: submodules
+submodules:
+	git submodule update --init --recursive
+
+.PHONY: riscv-tests
+riscv-tests: submodules
+	@printf "Building external/riscv-tests...\n\n"
+	$(DOCKER_CMD) sh -c "cd external/riscv-tests && ./configure --prefix=$(RISCV_TESTS_PREFIX)"
+	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests $(MAKEFLAGS)
+	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests install
+	@printf "$(G)[SUCCESS]:$(RR) All done building external/riscv-tests.\n"
+
+.PHONY: clean-riscv-tests
+clean-riscv-tests: submodules
+	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests clean
 
 .PHONY: clean
 clean:
