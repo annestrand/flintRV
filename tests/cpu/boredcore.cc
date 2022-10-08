@@ -96,31 +96,17 @@ bool boredcore::instructionUpdate() {
     return true;
 }
 // ====================================================================================================================
-bool boredcore::loadMemUpdate() {
-    if (!cpu(this)->o_loadReq) { return true; } // Skip if there was no load request
-    // Error check
-    if (m_mem == nullptr) { LOG_E("Cannot load data from NULL memory!\n"); return false; }
+bool boredcore::loadStoreUpdate() {
+    // Request and error checking
+    if (!cpu(this)->o_loadReq && !cpu(this)->o_storeReq) { return true; } // Skip if there was no load/store request
+    if (m_mem == nullptr) { LOG_E("Cannot loadStoreUpdate on NULL memory!\n"); return false; }
     if (cpu(this)->o_dataAddr >= m_memSize) {
-        LOG_E("Load data address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
-            cpu(this)->o_dataAddr, m_memSize);
+        LOG_E("Address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", cpu(this)->o_dataAddr, m_memSize);
         return false;
     }
-    // Fetch the data
-    cpu(this)->i_dataIn = *(int*)&m_mem[cpu(this)->o_dataAddr];
-    return true;
-}
-// ====================================================================================================================
-bool boredcore::storeMemUpdate() {
-    if (!cpu(this)->o_storeReq) { return true; } // Skip if there was no store request
-    // Error check
-    if (m_mem == nullptr) { LOG_E("Cannot store data to NULL memory!\n"); return false; }
-    if (cpu(this)->o_dataAddr >= m_memSize) {
-        LOG_E("Store data address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
-            cpu(this)->o_dataAddr, m_memSize);
-        return false;
-    }
-    // Store the data
-    *(int*)&m_mem[cpu(this)->o_dataAddr] = cpu(this)->o_dataOut;
+
+    if (cpu(this)->o_loadReq)   { cpu(this)->i_dataIn = *(int*)&m_mem[cpu(this)->o_dataAddr];   } // load
+    else                        { *(int*)&m_mem[cpu(this)->o_dataAddr] = cpu(this)->o_dataOut;  } // store
     return true;
 }
 // ====================================================================================================================

@@ -27,8 +27,7 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
@@ -52,8 +51,7 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
@@ -77,8 +75,7 @@ TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
@@ -102,8 +99,7 @@ TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JA
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
@@ -133,8 +129,7 @@ TEST(functional, load_store) { // Tests load and store based instructions
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();

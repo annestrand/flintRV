@@ -30,8 +30,7 @@ TEST(algorithms, fibonacci) {
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         dut.tick(); // Evaluate
     }
@@ -66,8 +65,7 @@ TEST(algorithms, binsearch) {
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         dut.tick(); // Evaluate
     }
@@ -97,8 +95,7 @@ TEST(algorithms, mergesort) {
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
-        if (!dut.loadMemUpdate())        { FAIL(); }
-        if (!dut.storeMemUpdate())       { FAIL(); }
+        if (!dut.loadStoreUpdate())      { FAIL(); }
         done = dut.readRegfile(doneReg) == simDoneVal;
         dut.tick(); // Evaluate
     }

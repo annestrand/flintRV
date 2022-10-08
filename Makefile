@@ -10,10 +10,6 @@ RISCV_TESTS_PREFIX     := $(ROOT_DIR)/obj_dir/riscv-tests
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
 
-# Green (G) and Reset (RR) ANSI escape sequences
-G                      :=\033[0;32m
-RR                     :=\033[00m
-
 vpath %.v tests
 vpath %.py scripts
 
@@ -154,12 +150,10 @@ tests: build-dir $(CPU_TEST_MEM) $(VERILATOR_OUT)/Vboredcore.cpp
 tests: $(SUB_TEST_PLAIN_OBJS) $(SUB_TEST_ASM_OBJS) $(SUB_TEST_MEMH_OBJS)
 tests: $(SOC_TEST_OBJS)
 	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
-	@printf "$(G)[SUCCESS]:$(RR) All done building tests.\n"
 
 # Build boredsoc firmware
 .PHONY: soc
 soc: $(BOREDSOC_FIRMWARE) $(BOREDSOC_COREGEN)
-	@printf "$(G)[SUCCESS]$(RR): All done building boredsoc.\n"
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -186,11 +180,9 @@ submodules:
 
 .PHONY: riscv-tests
 riscv-tests: submodules
-	@printf "Building external/riscv-tests...\n\n"
 	$(DOCKER_CMD) sh -c "cd external/riscv-tests && ./configure --prefix=$(RISCV_TESTS_PREFIX)"
 	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests $(MAKEFLAGS)
 	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests install
-	@printf "$(G)[SUCCESS]:$(RR) All done building external/riscv-tests.\n"
 
 .PHONY: clean-riscv-tests
 clean-riscv-tests: submodules

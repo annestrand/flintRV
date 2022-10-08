@@ -32,8 +32,7 @@ public:
     bool create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath=std::string());
     bool createMemory(size_t memSize, std::string hexfile=std::string());
     bool instructionUpdate();
-    bool loadMemUpdate();
-    bool storeMemUpdate();
+    bool loadStoreUpdate();
     bool peekMem(int addr, int& val);
     bool pokeMem(int addr, int val);
     void writeRegfile(int index, int val);
