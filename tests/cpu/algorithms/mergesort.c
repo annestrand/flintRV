@@ -18,22 +18,34 @@ void _boredcore_start(void) {
     for(;;);
 }
 
+// Need to define our own implementation for this system call since we use Newlib for libc
+void* _sbrk(int incr) {
+  extern char _end; // From linker script
+  static char *heap = NULL;
+
+  if (heap == NULL) { heap = (char*)&_end; }
+  char* prev_heap = heap;
+
+  // Collision check
+  register long sp asm("sp");
+  if ((heap + incr) > (char*)sp) { return NULL; }
+
+  heap += incr;
+  return (void*)prev_heap;
+}
+
 void mergeHalves(int* arr, int* tmpArr, int l, int m, int r) {
     int len     = (r-l)+1;
     int tmpM    = m;
     int start   = l;
     if (len == 2) {
-        int leftVal     = arr[l];
-        int rightVal    = arr[tmpM];
-        if (leftVal < rightVal) { tmpArr[start] = arr[l]; tmpArr[start+1] = arr[r]; }
+        if (arr[l] < arr[tmpM]) { tmpArr[start] = arr[l]; tmpArr[start+1] = arr[r]; }
         else                    { tmpArr[start] = arr[r]; tmpArr[start+1] = arr[l]; }
     } else {
         for (int i=0; i<len; ++i) {
-            int leftVal     = arr[l];
-            int rightVal    = arr[tmpM];
             if      (l >= m)                { tmpArr[start+i] = arr[tmpM++];    }
             else if (tmpM > r)              { tmpArr[start+i] = arr[l++];       }
-            else if (leftVal < rightVal)    { tmpArr[start+i] = arr[l++];       }
+            else if (arr[l] < arr[tmpM])    { tmpArr[start+i] = arr[l++];       }
             else                            { tmpArr[start+i] = arr[tmpM++];    }
         }
     }

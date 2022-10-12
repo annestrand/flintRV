@@ -117,8 +117,8 @@ module boredcore (
     Regfile #(.XLEN(XLEN), .ADDR_WIDTH(REGFILE_ADDR_WIDTH)) REGFILE_unit (
         .i_clk          (i_clk),
         .i_wrEn         (p_reg_w[WB]),
-        .i_rs1Addr      (`RS1(i_instr)),
-        .i_rs2Addr      (`RS2(i_instr)),
+        .i_rs1Addr      (FETCH_stall ? `RS1(instrReg) : `RS1(i_instr)),
+        .i_rs2Addr      (FETCH_stall ? `RS2(instrReg) : `RS2(i_instr)),
         .i_rdAddr       (p_rdAddr[WB]),
         .i_rdData       (WB_result),
         .o_rs1Data      (rs1Out),
