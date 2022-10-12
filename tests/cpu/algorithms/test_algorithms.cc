@@ -79,7 +79,7 @@ TEST(algorithms, binsearch) {
 }
 // ====================================================================================================================
 TEST(algorithms, mergesort) {
-    constexpr int memSize = 0x8000;
+    constexpr int memSize = 0x4000;
     boredcore dut = boredcore(1000000);
     if (!dut.create(new Vboredcore(), "obj_dir/mergesort.vcd")) { FAIL(); }
     if (!dut.createMemory(memSize, BASE_PATH "/mergesort.hex")) { FAIL(); }
