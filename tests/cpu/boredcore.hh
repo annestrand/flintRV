@@ -16,6 +16,8 @@
 #define VERILATOR_VER 4028
 #endif // VERILATOR_VER
 
+#define SIM_DONE_VAL 0xcafebabe
+
 extern const int* g_argc;
 extern const char** g_argv;
 

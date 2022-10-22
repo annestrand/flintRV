@@ -6,14 +6,14 @@
 #  }
 #  // Expected result: j == 45
 #
-        li  x4, 0           # i = 0
-        li  x8, 0           # j = 0
-        li  x5, 10          # loop-range
-LOOP:   add  x8, x4, x8     # j += i
-        addi x4, x4, 1      # ++i
-        bne  x4, x5, LOOP   # i<10
-        addi x1, x0, -1     # Done signal for simulation
-STALL:  jal  x2, STALL
+        li  s3, 0           # i = 0
+        li  s2, 0           # j = 0
+        li  s4, 10          # loop-range
+LOOP:   add  s2, s3, s2     # j += i
+        addi s3, s3, 1      # ++i
+        bne  s3, s4, LOOP   # i<10
+        li s1, 0xcafebabe   # Done signal for simulation
+STALL:  j  STALL
         # Add some nop padding
         nop
         nop

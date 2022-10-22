@@ -9,42 +9,43 @@
 .equ LH_GOLD,   0xffffbeef
 .equ LBU_GOLD,  0x000000ef
 .equ LHU_GOLD,  0x0000beef
+.equ TEST_DONE, 0xcafebabe
 
         # Setup
-        li   x20, TEST_DATA
-        li   x21, LB_GOLD
-        li   x22, LH_GOLD
-        li   x23, LBU_GOLD
-        li   x24, LHU_GOLD
-        li   x30, 1
-        li   x31, 0
+        li   s1, TEST_DATA
+        li   s2, LB_GOLD
+        li   s3, LH_GOLD
+        li   s4, LBU_GOLD
+        li   s5, LHU_GOLD
+        li   s6, 1
+        li   s7, 0
 
         # Load tests
-        li   x10, TEST_ADDR
-        lb   x11, 0(x10)
-        lh   x12, 0(x10)
-        lw   x13, 0(x10)
-        lbu  x14, 0(x10)
-        lhu  x15, 0(x10)
-        bne  x11, x21, FAIL
-        addi x30, x30, 1
-        bne  x12, x22, FAIL
-        addi x30, x30, 1
-        bne  x13, x20, FAIL
-        addi x30, x30, 1
-        bne  x14, x23, FAIL
-        addi x30, x30, 1
-        bne  x15, x24, FAIL
+        li   a0, TEST_ADDR
+        lb   a1, 0(a0)
+        lh   a2, 0(a0)
+        lw   a3, 0(a0)
+        lbu  a4, 0(a0)
+        lhu  a5, 0(a0)
+        bne  a1, s2, FAIL
+        addi s6, s6, 1
+        bne  a2, s3, FAIL
+        addi s6, s6, 1
+        bne  a3, s1, FAIL
+        addi s6, s6, 1
+        bne  a4, s4, FAIL
+        addi s6, s6, 1
+        bne  a5, s5, FAIL
         # Store tests (Evaluate on simulated memory)
-        sb   x20,  4(x10)
-        sh   x20,  8(x10)
-        sw   x20, 12(x10)
+        sb   s1,  4(a0)
+        sh   s1,  8(a0)
+        sw   s1, 12(a0)
         j    STALL
 
-FAIL:   addi x1, x0, -1 # Done signal for simulation
-        add  x31, x0, x30
-STALL:  addi x1, x0, -1 # Done signal for simulation
-        jal  x2, STALL
+FAIL:   li   s8, TEST_DONE # Done signal for simulation
+        add  s7, x0, s6
+STALL:  li   s8, TEST_DONE # Done signal for simulation
+        j    STALL
         # Add some nop padding
         nop
         nop

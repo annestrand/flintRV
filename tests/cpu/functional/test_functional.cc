@@ -18,9 +18,8 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
     if (!dut.createMemory(0x200, BASE_PATH "/simple_loop.hex"))     { FAIL(); }
 
     bool done                   = false;
-    constexpr int j             = 8;
-    constexpr int doneReg       = 1;
-    constexpr int simDoneVal    = -1;
+    constexpr int doneReg       = S1;
+    constexpr int resultReg     = S2;
     constexpr int expectedVal   = 45;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
@@ -28,13 +27,13 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == simDoneVal;
+        done = dut.readRegfile(doneReg) == SIM_DONE_VAL;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
-    EXPECT_EQ(dut.readRegfile(j), expectedVal);
+    EXPECT_EQ(done, true) << "Simulation timeout!";
+    EXPECT_EQ(dut.readRegfile(resultReg), expectedVal);
 }
 // ====================================================================================================================
 TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
@@ -115,9 +114,8 @@ TEST(functional, load_store) { // Tests load and store based instructions
     if (!dut.createMemory(0x200, BASE_PATH "/load_store.hex"))          { FAIL(); }
 
     bool done                   = false;
-    constexpr int doneReg       = 1;
-    constexpr int resultReg     = 31;
-    constexpr int simDoneVal    = -1;
+    constexpr int doneReg       = S8;
+    constexpr int resultReg     = S7;
     constexpr int testAddress   = 0x100; // Lower half of test memory for data
     constexpr int sbGold        = 0xffffffef;
     constexpr int shGold        = 0xffffbeef;
@@ -130,12 +128,12 @@ TEST(functional, load_store) { // Tests load and store based instructions
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == simDoneVal;
+        done = dut.readRegfile(doneReg) == SIM_DONE_VAL;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
+    EXPECT_EQ(done, true) << "Simulation timeout!";
     // Load instructions
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
     // Store instructions
