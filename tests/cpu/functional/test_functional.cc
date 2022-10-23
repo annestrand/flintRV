@@ -87,24 +87,23 @@ TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g
 TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
     boredcore dut = boredcore(200);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))   { FAIL(); }
-    if (!dut.createMemory(0x200, BASE_PATH "/cpu_jump_test.hex"))   { FAIL(); }
+    if (!dut.createMemory(0x200, BASE_PATH "/jump_branch.hex"))     { FAIL(); }
 
     bool done                   = false;
-    constexpr int doneReg       = 13;
-    constexpr int resultReg     = 31;
-    constexpr int simDoneVal    = -1;
+    constexpr int resultReg     = S1;
+    constexpr int doneReg       = S2;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
 
     while (!dut.end() && !done) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == simDoneVal;
+        done = dut.readRegfile(doneReg) == SIM_DONE_VAL;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
+    EXPECT_EQ(done, true) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
