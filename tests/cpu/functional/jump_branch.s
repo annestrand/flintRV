@@ -2,9 +2,10 @@
 #   (Fails if s1 is non-zero)
 
     li    s3, 1
+    li    s1, 0
     j     L0
     addi  s1, s1, 1
-L0: jalr  zero, zero, 20    # Jump to "beq" below
+L0: jalr  zero, zero, 24    # Jump to "beq" below
     addi  s1, s1, 1
     beq   zero, zero, L1
     addi  s1, s1, 1
