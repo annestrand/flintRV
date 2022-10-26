@@ -25,6 +25,13 @@ Below are a table of Make config variables:
 |GTEST_BASEDIR |GoogleTest install dir      |$ make GTEST_BASEDIR=/opt/gtest/lib ...  | /usr/local/lib      |
 |DOCKER        |Use Docker GCC toolchain    |$ make DOCKER=1 ...                      | 0 (OFF)             |
 
+## Simulator 🖥
+
+To build Verilator simulator:
+
+    $ make sim
+
+
 ## Testing 🧪
 Functional Verification:
 - `iverilog`    : Unit testing CPU sub-modules
@@ -37,12 +44,11 @@ To build tests:
 
     $ make tests
 
-CPU test runner: `obj_dir/Vboredcore`
+CPU test runner:          `build/cpu/Vboredcore`
+Submodule test runner(s): `build/sub/<module_name>.out`
 
-Submodule test runners output to: `obj_dir/sub/<module_name>.out`
-
-### Docker 🐳
-RISC-V GCC cross-compiler is needed for running tests and building example firmware. There is a Dockerfile
+## Docker 🐳
+RISC-V GCC cross-compiler is needed for building tests and building example firmware. There is a Dockerfile
 here to take care of this (easy-mode).
 
 To build and start the container (need to run at least once to ensure container is running):

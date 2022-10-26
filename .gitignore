@@ -1,5 +1,6 @@
 .vscode/
 obj_dir/
+build/
 __pycache__/
 *.gtkw
 *.mem

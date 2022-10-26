@@ -8,6 +8,9 @@ DOCKER_CMD             :=
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
 
+OUT_BASE               := build
+RTL_SRCS               := $(shell find rtl -type f -name "*.v")
+
 vpath %.v tests
 vpath %.py scripts
 
@@ -31,7 +34,7 @@ RISCV_AS_FLAGS         := -march=rv32i
 RISCV_AS_FLAGS         += -mabi=ilp32
 
 # --- IVERILOG --------------------------------------------------------------------------------------------------------
-ICARUS_OUT             := obj_dir/sub
+ICARUS_OUT             := $(OUT_BASE)/sub
 
 ICARUS_FLAGS           := -Wall
 ICARUS_FLAGS           += -Irtl
@@ -40,11 +43,10 @@ ICARUS_FLAGS           += -DDUMP_VCD
 
 # --- VERILATOR -------------------------------------------------------------------------------------------------------
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
-VERILATOR_OUT          := obj_dir
 
 VERILATOR_CFLAGS       := -g
-VERILATOR_CFLAGS       += -I$(ROOT_DIR)/tests/cpu
-VERILATOR_CFLAGS       += -DBASE_PATH='\"$(ROOT_DIR)/obj_dir\"'
+VERILATOR_CFLAGS       += -I$(ROOT_DIR)/sim/verilator
+VERILATOR_CFLAGS       += -DBASE_PATH='\"$(OUT_BASE)/cpu\"'
 VERILATOR_CFLAGS       += -DVERILATOR_VER=$(VERILATOR_VER)
 
 VERILATOR_FLAGS        := -Wall
@@ -54,21 +56,24 @@ VERILATOR_FLAGS        += -CFLAGS "$(VERILATOR_CFLAGS)"
 VERILATOR_FLAGS        += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
 VERILATOR_FLAGS        += --x-assign unique
 VERILATOR_FLAGS        += --x-initial unique
+VERILATOR_FLAGS        += --top-module boredcore
+VERILATOR_FLAGS        += --exe
+
+VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/verilator -type f -name "*.cc" ! -name "main.cc")
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
-CPU_SRCS               := $(shell find rtl -type f -name "*.v")
 TEST_PY_MEM            := $(shell find scripts -type f -name "sub_*.mem.py" -exec basename {} \;)
 TEST_PY_ASM            := $(shell find scripts -type f -name "sub_*.asm.py" -exec basename {} \;)
 
-CPU_TEST_SRCS          := $(shell find tests/cpu -type f -name "*.cc")
+CPU_TEST_SRCS          := $(shell find $(ROOT_DIR)/tests/cpu -type f -name "*.cc")
 CPU_ASM_TESTS          := $(shell find tests/cpu/functional -type f -name "*.s" -exec basename {} \;)
 CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" -exec basename {} \;)
 CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
 CPU_ASM_TESTS          += $(CPU_PY_TESTS:%.asm.py=%.s)
 CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
 CPU_TEST_MEM           := $(CPU_TEST_ELF:%.elf=%.hex)
-CPU_TEST_MEM           += $(CPU_ASM_TESTS:%.s=$(VERILATOR_OUT)/%.hex)
-CPU_TEST_MEM           += $(CPU_C_TESTS:%.c=$(VERILATOR_OUT)/%.hex)
+CPU_TEST_MEM           += $(CPU_ASM_TESTS:%.s=build/cpu/%.hex)
+CPU_TEST_MEM           += $(CPU_C_TESTS:%.c=build/cpu/%.hex)
 
 SUB_TEST_ALL_SRCS      := $(shell find tests/sub -type f -name "*.v" -exec basename {} \;)
 SUB_TEST_MEMH_SRCS     := $(TEST_PY_MEM:sub_%.mem.py=%.v)
@@ -90,8 +95,8 @@ $(ICARUS_OUT)/sub_%.mem: sub_%.mem.py
 $(ICARUS_OUT)/sub_%.s: sub_%.asm.py
 	python3 $< -out $(ICARUS_OUT)
 
-$(VERILATOR_OUT)/cpu_%.s: scripts/cpu_%.asm.py
-	python3 $< -out obj_dir
+build/cpu/cpu_%.s: scripts/cpu_%.asm.py
+	python3 $< -out build/cpu
 
 boredsoc/%_generated.v:
 	python3 scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
@@ -123,31 +128,43 @@ $(ICARUS_OUT)/%.mem.out: tests/sub/%.v rtl/%.v $(ICARUS_OUT)/sub_%.mem
 $(ICARUS_OUT)/%.asm.out: tests/sub/%.v rtl/%.v $(ICARUS_OUT)/sub_%.mem
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
-$(VERILATOR_OUT)/%.cpp: $(CPU_TEST_SRCS) $(CPU_SRCS)
-	verilator $(VERILATOR_FLAGS) --exe tests/cpu/boredcore.cc $(CPU_TEST_SRCS) --top-module boredcore -cc $(CPU_SRCS)
+# Sim target
+build/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
+	verilator $(VERILATOR_FLAGS) --Mdir build/sim $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
-$(VERILATOR_OUT)/cpu_%.elf: $(VERILATOR_OUT)/cpu_%.s
+# CPU test target
+build/cpu/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
+	verilator $(VERILATOR_FLAGS) --Mdir build/cpu $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+
+build/cpu/cpu_%.elf: build/cpu/cpu_%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
-$(VERILATOR_OUT)/%.elf: tests/cpu/functional/%.s
+build/cpu/%.elf: tests/cpu/functional/%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
-$(VERILATOR_OUT)/%.elf: tests/cpu/algorithms/%.c
+build/cpu/%.elf: tests/cpu/algorithms/%.c
 	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
-$(VERILATOR_OUT)/%.hex: $(VERILATOR_OUT)/%.elf
+build/cpu/%.hex: build/cpu/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O binary $< $@
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
-all: submodules tests soc
+all: submodules sim tests soc
 
 # Build tests
 .PHONY: tests
-tests: build-dir $(CPU_TEST_MEM) $(VERILATOR_OUT)/Vboredcore.cpp
+tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
+tests: build-test-dirs $(CPU_TEST_MEM) $(OUT_BASE)/cpu/Vboredcore.cpp
 tests: $(SUB_TEST_PLAIN_OBJS) $(SUB_TEST_ASM_OBJS) $(SUB_TEST_MEMH_OBJS)
-tests: $(SOC_TEST_OBJS)
-	@$(MAKE) -C obj_dir -f Vboredcore.mk Vboredcore
+	$(MAKE) -C build/cpu -f Vboredcore.mk
+
+# Build Verilated simulator
+.PHONY: sim
+sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/verilator/main.cc
+sim: build-sim-dir $(OUT_BASE)/sim/Vboredcore.cpp
+sim:
+	$(MAKE) -C build/sim -f Vboredcore.mk
 
 # Build boredsoc firmware
 .PHONY: soc
@@ -162,10 +179,14 @@ ifeq ($(DOCKER_RUNNING),)
 endif
 	@docker start boredcore
 
-.PHONY: build-dir
-build-dir:
-	@mkdir -p $(VERILATOR_OUT)/
-	@mkdir -p $(ICARUS_OUT)/
+.PHONY: build-sim-dir
+build-sim-dir:
+	@mkdir -p $(OUT_BASE)/sim
+
+.PHONY: build-test-dirs
+build-test-dirs:
+	@mkdir -p $(OUT_BASE)/cpu
+	@mkdir -p $(ICARUS_OUT)
 
 .PHONY: objdump
 objdump:
@@ -177,7 +198,7 @@ submodules:
 
 .PHONY: clean
 clean:
-	rm -rf obj_dir 2> /dev/null || true
+	rm -rf $(OUT_BASE) 2> /dev/null || true
 	rm -rf boredsoc/firmware.mem 2> /dev/null || true
 	rm -rf boredsoc/firmware.elf 2> /dev/null || true
 	rm -rf boredsoc/*_generated.v 2> /dev/null || true
