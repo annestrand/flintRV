@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
 
     // Instantiate CPU
     boredcore dut = boredcore(simTimeVal, atoi(dumpLvl.value));
+    LOG_I("Create and Reset CPU object...\n");
     if (!dut.create(new Vboredcore(), NULL))        { LOG_E("Failed to create Vboredcore.\n");  return 1; }
     if (!dut.createMemory(memSize, programFile))    { LOG_E("Failed to create memory.\n");      return 1; }
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory

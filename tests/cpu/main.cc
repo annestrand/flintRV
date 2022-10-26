@@ -5,6 +5,8 @@ int g_dumpLevel = 0;
 
 int main(int argc, char *argv[]) {
     // Parse any passed option(s)
+    // | -dump      : Prints disassembled instruction
+    // | -dump-all  : Prints disassembled instruction + CPU state
     for (int i=0; i<argc; ++i) {
         std::string s(argv[i]);
         if (s.find("-dump") != std::string::npos) {

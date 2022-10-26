@@ -31,6 +31,7 @@ To build Verilator simulator:
 
     $ make sim
 
+Simulator output dir: `build/sim/Vboredcore`
 
 ## Testing 🧪
 Functional Verification:
@@ -44,8 +45,8 @@ To build tests:
 
     $ make tests
 
-CPU test runner:          `build/cpu/Vboredcore`
-Submodule test runner(s): `build/sub/<module_name>.out`
+CPU test runner:          `build/tests/Vboredcore`
+Submodule test runner(s): `build/tests/sub/<module_name>.out`
 
 ## Docker 🐳
 RISC-V GCC cross-compiler is needed for building tests and building example firmware. There is a Dockerfile

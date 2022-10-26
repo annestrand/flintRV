@@ -143,7 +143,6 @@ void boredcore::reset(int count) {
     m_cpu->i_ifValid  = 0;
     m_cpu->i_memValid = 0;
     // Toggle reset
-    LOG_I("Resetting CPU...\n");
     m_cpu->i_rst = 1;
     for (int i=0; i<count; ++i) { tick(); }
     m_cpu->i_rst = 0;
@@ -177,10 +176,10 @@ void boredcore::dump() {
     bool RST            = cpu(this)->i_rst;                         // R
     bool iValid         = cpu(this)->i_ifValid;                     // I
     bool mValid         = cpu(this)->i_memValid;                    // M
-    // Dump disassembled instruction:   "-dump"
+    // Dump disassembled instruction
     printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { printf("\n"); return; }
-    // Dump more detailed info:         "-dump-all"
+    // Dump more detailed info
     unsigned long long cycle = m_cycles > 1 ? (unsigned long long)(m_cycles/2) : (unsigned long long)0;
     printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  CYCLE:[%llu]\n",
         fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-',
