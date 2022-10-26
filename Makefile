@@ -39,12 +39,13 @@ ICARUS_FLAGS           += -Irtl
 ICARUS_FLAGS           += -DSIM
 ICARUS_FLAGS           += -DDUMP_VCD
 
-# --- VERILATOR -------------------------------------------------------------------------------------------------------
+# --- SIMULATOR (VERILATOR) -------------------------------------------------------------------------------------------
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
 
 SIM_CFLAGS             := -g
 SIM_CFLAGS             += -I$(ROOT_DIR)/sim/verilator
-SIM_CFLAGS             := -DVERILATOR_VER=$(VERILATOR_VER)
+SIM_CFLAGS             += -I$(ROOT_DIR)/external/miniargparse
+SIM_CFLAGS             += -DVERILATOR_VER=$(VERILATOR_VER)
 
 SIM_FLAGS              := -Wall
 SIM_FLAGS              += -Irtl
@@ -146,7 +147,7 @@ $(OUT_BASE)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
 
 # CPU test target
 $(OUT_BASE)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
-	verilator $(CPU_TEST_FLAGS) --bin Vboredcore_tests --Mdir $(OUT_BASE)/tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_BASE)/tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 $(OUT_BASE)/tests/cpu_%.elf: $(OUT_BASE)/tests/cpu_%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<

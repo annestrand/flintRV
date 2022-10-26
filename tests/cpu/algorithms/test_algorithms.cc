@@ -12,10 +12,12 @@
 #include "boredcore.hh"
 #include "common.hh"
 
+extern int g_dumpLevel;
+
 // ====================================================================================================================
 TEST(algorithms, fibonacci) {
     constexpr int memSize = 0x4000;
-    boredcore dut = boredcore(1000000);
+    boredcore dut = boredcore(1000000, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/fibonacci.vcd")) { FAIL(); }
     if (!dut.createMemory(memSize, BASE_PATH "/fibonacci.hex")) { FAIL(); }
 
@@ -50,7 +52,7 @@ TEST(algorithms, fibonacci) {
 // ====================================================================================================================
 TEST(algorithms, binsearch) {
     constexpr int memSize = 0x4000;
-    boredcore dut = boredcore(1000000);
+    boredcore dut = boredcore(1000000, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/binsearch.vcd")) { FAIL(); }
     if (!dut.createMemory(memSize, BASE_PATH "/binsearch.hex")) { FAIL(); }
 
@@ -80,7 +82,7 @@ TEST(algorithms, binsearch) {
 // ====================================================================================================================
 TEST(algorithms, mergesort) {
     constexpr int memSize = 0x4000;
-    boredcore dut = boredcore(1000000);
+    boredcore dut = boredcore(1000000, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/mergesort.vcd")) { FAIL(); }
     if (!dut.createMemory(memSize, BASE_PATH "/mergesort.hex")) { FAIL(); }
 

@@ -11,9 +11,11 @@
 #include "boredcore.hh"
 #include "common.hh"
 
+extern int g_dumpLevel;
+
 // ====================================================================================================================
 TEST(functional, loop) { // Basic test loop summation for 10 iterations
-    boredcore dut = boredcore(200);
+    boredcore dut = boredcore(200, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))   { FAIL(); }
     if (!dut.createMemory(0x200, BASE_PATH "/simple_loop.hex"))     { FAIL(); }
 
@@ -37,7 +39,7 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
 }
 // ====================================================================================================================
 TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
-    boredcore dut = boredcore(200);
+    boredcore dut = boredcore(200, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd", BASE_PATH "/cpu_logic_test.regs"))    { FAIL(); }
     if (!dut.createMemory(0x200, BASE_PATH "/cpu_logic_test.hex"))                                      { FAIL(); }
 
@@ -61,7 +63,7 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
 }
 // ====================================================================================================================
 TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
-    boredcore dut = boredcore(200);
+    boredcore dut = boredcore(200, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd", BASE_PATH "/cpu_arith_test.regs"))    { FAIL(); }
     if (!dut.createMemory(0x200, BASE_PATH "/cpu_arith_test.hex"))                                      { FAIL(); }
 
@@ -85,7 +87,7 @@ TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g
 }
 // ====================================================================================================================
 TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
-    boredcore dut = boredcore(200);
+    boredcore dut = boredcore(200, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))   { FAIL(); }
     if (!dut.createMemory(0x200, BASE_PATH "/jump_branch.hex"))     { FAIL(); }
 
@@ -108,7 +110,7 @@ TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JA
 }
 // ====================================================================================================================
 TEST(functional, load_store) { // Tests load and store based instructions
-    boredcore dut = boredcore(200);
+    boredcore dut = boredcore(200, g_dumpLevel);
     if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd")) { FAIL(); }
     if (!dut.createMemory(0x200, BASE_PATH "/load_store.hex"))          { FAIL(); }
 

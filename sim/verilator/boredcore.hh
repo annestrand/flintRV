@@ -18,9 +18,6 @@
 
 #define SIM_DONE_VAL 0xcafebabe
 
-extern const int* g_argc;
-extern const char** g_argv;
-
 // Regfile aliases
 typedef enum {
     ZERO=0, RA, SP, GP, TP, T0, T1, T2, S0, FP=S0, S1, A0, A1, A2, A3, A4, A5, A6, A7,
@@ -29,7 +26,7 @@ typedef enum {
 
 class boredcore {
 public:
-    boredcore(vluint64_t maxSimTime);
+    boredcore(vluint64_t maxSimTime, int dumpLevel=0);
     ~boredcore();
     bool create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath=std::string());
     bool createMemory(size_t memSize, std::string hexfile=std::string());

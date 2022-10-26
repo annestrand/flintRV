@@ -1,12 +1,19 @@
 #include <gtest/gtest.h>
 #include "boredcore.hh"
 
-const int* g_argc;
-const char** g_argv;
+int g_dumpLevel = 0;
 
 int main(int argc, char *argv[]) {
-  g_argc = &argc;
-  g_argv = (const char**)argv;
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    // Parse any passed option(s)
+    for (int i=0; i<argc; ++i) {
+        std::string s(argv[i]);
+        if (s.find("-dump") != std::string::npos) {
+            g_dumpLevel = g_dumpLevel > 0 ? g_dumpLevel : 1;
+        }
+        if (s.find("-dump-all") != std::string::npos) {
+            g_dumpLevel = g_dumpLevel > 1 ? g_dumpLevel : 2;
+        }
+    }
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

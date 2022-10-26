@@ -1,0 +1,3 @@
+[submodule "external/miniargparse"]
+	path = external/miniargparse
+	url = git@github.com:devbored/miniargparse.git

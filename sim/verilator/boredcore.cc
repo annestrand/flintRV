@@ -13,8 +13,9 @@
 #include "common.hh"
 
 // ====================================================================================================================
-boredcore::boredcore(vluint64_t maxSimTime) :
-    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_dump(0), m_mem(nullptr), m_memSize(0) {}
+boredcore::boredcore(vluint64_t maxSimTime, int dumpLevel) :
+    m_trace(nullptr), m_cycles(0), m_maxSimTime(maxSimTime), m_cpu(nullptr), m_dump(dumpLevel), m_mem(nullptr),
+        m_memSize(0) {}
 // ====================================================================================================================
 boredcore::~boredcore() {
     if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr;  }
@@ -33,19 +34,9 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initR
         m_trace = new VerilatedVcdC;
         if (m_trace == nullptr) {
             LOG_W("Failed to create boredcore VCD dumper!\n");
-            return true;
-        }
-        m_cpu->trace(m_trace, 99);
-        m_trace->open(traceFile);
-    }
-    // Parse any passed option(s)
-    for (int i=0; i<(*g_argc); ++i) {
-        std::string s(g_argv[i]);
-        if (s.find("-dump") != std::string::npos) {
-            m_dump = m_dump > 0 ? m_dump : 1;
-        }
-        if (s.find("-dump-all") != std::string::npos) {
-            m_dump = m_dump > 1 ? m_dump : 2;
+        } else if (traceFile != nullptr) {
+            m_cpu->trace(m_trace, 99);
+            m_trace->open(traceFile);
         }
     }
     reset(1); // Reset CPU on create for 1cc
@@ -152,6 +143,7 @@ void boredcore::reset(int count) {
     m_cpu->i_ifValid  = 0;
     m_cpu->i_memValid = 0;
     // Toggle reset
+    LOG_I("Resetting CPU...\n");
     m_cpu->i_rst = 1;
     for (int i=0; i<count; ++i) { tick(); }
     m_cpu->i_rst = 0;
