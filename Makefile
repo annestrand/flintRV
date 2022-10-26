@@ -3,10 +3,8 @@ ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST
 ifdef DOCKER
 DOCKER_CMD             := docker exec -u user -w /src boredcore
 DOCKER_RUNNING         := $(shell docker ps -a -q -f name=boredcore)
-RISCV_TESTS_PREFIX     := /src/obj_dir/riscv-tests
 else
 DOCKER_CMD             :=
-RISCV_TESTS_PREFIX     := $(ROOT_DIR)/obj_dir/riscv-tests
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
 
@@ -166,7 +164,6 @@ endif
 
 .PHONY: build-dir
 build-dir:
-	@mkdir -p obj_dir/riscv-tests/
 	@mkdir -p $(VERILATOR_OUT)/
 	@mkdir -p $(ICARUS_OUT)/
 
@@ -177,16 +174,6 @@ objdump:
 .PHONY: submodules
 submodules:
 	git submodule update --init --recursive
-
-.PHONY: riscv-tests
-riscv-tests: submodules
-	$(DOCKER_CMD) sh -c "cd external/riscv-tests && ./configure --prefix=$(RISCV_TESTS_PREFIX)"
-	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests $(MAKEFLAGS)
-	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests install
-
-.PHONY: clean-riscv-tests
-clean-riscv-tests: submodules
-	$(DOCKER_CMD) $(MAKE) -C ./external/riscv-tests clean
 
 .PHONY: clean
 clean:
