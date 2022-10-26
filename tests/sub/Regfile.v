@@ -15,7 +15,7 @@ module Regfile_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("obj_dir/sub/Regfile.vcd");
+        $dumpfile("build/tests/sub/Regfile.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD

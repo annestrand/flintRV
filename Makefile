@@ -34,8 +34,6 @@ RISCV_AS_FLAGS         := -march=rv32i
 RISCV_AS_FLAGS         += -mabi=ilp32
 
 # --- IVERILOG --------------------------------------------------------------------------------------------------------
-ICARUS_OUT             := $(OUT_BASE)/sub
-
 ICARUS_FLAGS           := -Wall
 ICARUS_FLAGS           += -Irtl
 ICARUS_FLAGS           += -DSIM
@@ -44,20 +42,18 @@ ICARUS_FLAGS           += -DDUMP_VCD
 # --- VERILATOR -------------------------------------------------------------------------------------------------------
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
 
-VERILATOR_CFLAGS       := -g
-VERILATOR_CFLAGS       += -I$(ROOT_DIR)/sim/verilator
-VERILATOR_CFLAGS       += -DBASE_PATH='\"$(OUT_BASE)/cpu\"'
-VERILATOR_CFLAGS       += -DVERILATOR_VER=$(VERILATOR_VER)
+SIM_CFLAGS             := -g
+SIM_CFLAGS             += -I$(ROOT_DIR)/sim/verilator
+SIM_CFLAGS             := -DVERILATOR_VER=$(VERILATOR_VER)
 
-VERILATOR_FLAGS        := -Wall
-VERILATOR_FLAGS        += -Irtl
-VERILATOR_FLAGS        += --trace
-VERILATOR_FLAGS        += -CFLAGS "$(VERILATOR_CFLAGS)"
-VERILATOR_FLAGS        += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
-VERILATOR_FLAGS        += --x-assign unique
-VERILATOR_FLAGS        += --x-initial unique
-VERILATOR_FLAGS        += --top-module boredcore
-VERILATOR_FLAGS        += --exe
+SIM_FLAGS              := -Wall
+SIM_FLAGS              += -Irtl
+SIM_FLAGS              += --trace
+SIM_FLAGS              += -CFLAGS "$(SIM_CFLAGS)"
+SIM_FLAGS              += --x-assign unique
+SIM_FLAGS              += --x-initial unique
+SIM_FLAGS              += --top-module boredcore
+SIM_FLAGS              += --exe
 
 VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/verilator -type f -name "*.cc" ! -name "main.cc")
 
@@ -72,41 +68,57 @@ CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exe
 CPU_ASM_TESTS          += $(CPU_PY_TESTS:%.asm.py=%.s)
 CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
 CPU_TEST_MEM           := $(CPU_TEST_ELF:%.elf=%.hex)
-CPU_TEST_MEM           += $(CPU_ASM_TESTS:%.s=build/cpu/%.hex)
-CPU_TEST_MEM           += $(CPU_C_TESTS:%.c=build/cpu/%.hex)
+CPU_TEST_MEM           += $(CPU_ASM_TESTS:%.s=$(OUT_BASE)/tests/%.hex)
+CPU_TEST_MEM           += $(CPU_C_TESTS:%.c=$(OUT_BASE)/tests/%.hex)
+
+CPU_TEST_CFLAGS        := -g
+CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
+CPU_TEST_CFLAGS        += -DBASE_PATH='\"$(OUT_BASE)/tests\"'
+CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
+
+CPU_TEST_FLAGS         := -Wall
+CPU_TEST_FLAGS         += -Irtl
+CPU_TEST_FLAGS         += --trace
+CPU_TEST_FLAGS         += -CFLAGS "$(CPU_TEST_CFLAGS)"
+CPU_TEST_FLAGS         += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
+CPU_TEST_FLAGS         += --x-assign unique
+CPU_TEST_FLAGS         += --x-initial unique
+CPU_TEST_FLAGS         += --top-module boredcore
+CPU_TEST_FLAGS         += --exe
 
 SUB_TEST_ALL_SRCS      := $(shell find tests/sub -type f -name "*.v" -exec basename {} \;)
 SUB_TEST_MEMH_SRCS     := $(TEST_PY_MEM:sub_%.mem.py=%.v)
-SUB_TEST_MEMH_OBJS     := $(SUB_TEST_MEMH_SRCS:%.v=$(ICARUS_OUT)/%.mem.out)
+SUB_TEST_MEMH_OBJS     := $(SUB_TEST_MEMH_SRCS:%.v=$(OUT_BASE)/tests/sub/%.mem.out)
 SUB_TEST_ASM_SRCS      := $(TEST_PY_ASM:sub_%.asm.py=%.v)
-SUB_TEST_ASM_OBJS      := $(SUB_TEST_ASM_SRCS:%.v=$(ICARUS_OUT)/%.asm.out)
+SUB_TEST_ASM_OBJS      := $(SUB_TEST_ASM_SRCS:%.v=$(OUT_BASE)/tests/sub/%.asm.out)
 SUB_TEST_PLAIN_SRCS    := $(filter-out $(SUB_TEST_MEMH_SRCS) $(SUB_TEST_ASM_SRCS), $(SUB_TEST_ALL_SRCS))
-SUB_TEST_PLAIN_OBJS    := $(SUB_TEST_PLAIN_SRCS:%.v=$(ICARUS_OUT)/%.out)
+SUB_TEST_PLAIN_OBJS    := $(SUB_TEST_PLAIN_SRCS:%.v=$(OUT_BASE)/tests/sub/%.out)
 
+# --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 BOREDSOC_SRC           := boredsoc/firmware.s
 BOREDSOC_ELF           := $(BOREDSOC_SRC:%.s=%.elf)
 BOREDSOC_FIRMWARE      := $(BOREDSOC_ELF:%.elf=%.mem)
 BOREDSOC_COREGEN       := boredsoc/core_generated.v
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
-$(ICARUS_OUT)/sub_%.mem: sub_%.mem.py
-	python3 $< -out $(ICARUS_OUT)
+$(OUT_BASE)/tests/sub/sub_%.mem: sub_%.mem.py
+	python3 $< -out $(OUT_BASE)/tests/sub
 
-$(ICARUS_OUT)/sub_%.s: sub_%.asm.py
-	python3 $< -out $(ICARUS_OUT)
+$(OUT_BASE)/tests/sub/sub_%.s: sub_%.asm.py
+	python3 $< -out $(OUT_BASE)/tests/sub
 
-build/cpu/cpu_%.s: scripts/cpu_%.asm.py
-	python3 $< -out build/cpu
+$(OUT_BASE)/tests/cpu_%.s: scripts/cpu_%.asm.py
+	python3 $< -out $(OUT_BASE)/tests
 
 boredsoc/%_generated.v:
 	python3 scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
 
 .SECONDARY:
-$(ICARUS_OUT)/sub_%.elf: $(ICARUS_OUT)/sub_%.s
+$(OUT_BASE)/tests/sub/sub_%.elf: $(OUT_BASE)/tests/sub/sub_%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
-$(ICARUS_OUT)/sub_%.mem: $(ICARUS_OUT)/sub_%.elf
+$(OUT_BASE)/tests/sub/sub_%.mem: $(OUT_BASE)/tests/sub/sub_%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	python3 ./scripts/byteswap_memfile.py $@
 
@@ -119,33 +131,33 @@ boredsoc/%.mem: boredsoc/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	python3 ./scripts/byteswap_memfile.py $@
 
-$(ICARUS_OUT)/%.out: tests/sub/%.v rtl/%.v
+$(OUT_BASE)/tests/sub/%.out: tests/sub/%.v rtl/%.v
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
-$(ICARUS_OUT)/%.mem.out: tests/sub/%.v rtl/%.v $(ICARUS_OUT)/sub_%.mem
+$(OUT_BASE)/tests/sub/%.mem.out: tests/sub/%.v rtl/%.v $(OUT_BASE)/tests/sub/sub_%.mem
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
-$(ICARUS_OUT)/%.asm.out: tests/sub/%.v rtl/%.v $(ICARUS_OUT)/sub_%.mem
+$(OUT_BASE)/tests/sub/%.asm.out: tests/sub/%.v rtl/%.v $(OUT_BASE)/tests/sub/sub_%.mem
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Sim target
-build/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
-	verilator $(VERILATOR_FLAGS) --Mdir build/sim $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+$(OUT_BASE)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
+	verilator $(SIM_FLAGS) --Mdir $(OUT_BASE)/sim $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU test target
-build/cpu/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
-	verilator $(VERILATOR_FLAGS) --Mdir build/cpu $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+$(OUT_BASE)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
+	verilator $(CPU_TEST_FLAGS) --bin Vboredcore_tests --Mdir $(OUT_BASE)/tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
-build/cpu/cpu_%.elf: build/cpu/cpu_%.s
+$(OUT_BASE)/tests/cpu_%.elf: $(OUT_BASE)/tests/cpu_%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
-build/cpu/%.elf: tests/cpu/functional/%.s
+$(OUT_BASE)/tests/%.elf: tests/cpu/functional/%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
-build/cpu/%.elf: tests/cpu/algorithms/%.c
+$(OUT_BASE)/tests/%.elf: tests/cpu/algorithms/%.c
 	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
-build/cpu/%.hex: build/cpu/%.elf
+$(OUT_BASE)/tests/%.hex: $(OUT_BASE)/tests/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O binary $< $@
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
@@ -155,16 +167,16 @@ all: submodules sim tests soc
 # Build tests
 .PHONY: tests
 tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
-tests: build-test-dirs $(CPU_TEST_MEM) $(OUT_BASE)/cpu/Vboredcore.cpp
+tests: build-test-dirs $(CPU_TEST_MEM) $(OUT_BASE)/tests/Vboredcore.cpp
 tests: $(SUB_TEST_PLAIN_OBJS) $(SUB_TEST_ASM_OBJS) $(SUB_TEST_MEMH_OBJS)
-	$(MAKE) -C build/cpu -f Vboredcore.mk
+	$(MAKE) -C $(OUT_BASE)/tests -f Vboredcore.mk
 
 # Build Verilated simulator
 .PHONY: sim
 sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/verilator/main.cc
 sim: build-sim-dir $(OUT_BASE)/sim/Vboredcore.cpp
 sim:
-	$(MAKE) -C build/sim -f Vboredcore.mk
+	$(MAKE) -C $(OUT_BASE)/sim -f Vboredcore.mk
 
 # Build boredsoc firmware
 .PHONY: soc
@@ -185,8 +197,8 @@ build-sim-dir:
 
 .PHONY: build-test-dirs
 build-test-dirs:
-	@mkdir -p $(OUT_BASE)/cpu
-	@mkdir -p $(ICARUS_OUT)
+	@mkdir -p $(OUT_BASE)/tests
+	@mkdir -p $(OUT_BASE)/tests/sub
 
 .PHONY: objdump
 objdump:

@@ -9,7 +9,7 @@ module ControlUnit_tb;
 
 `ifdef DUMP_VCD
     initial begin
-        $dumpfile("obj_dir/sub/ControlUnit.vcd");
+        $dumpfile("build/tests/sub/ControlUnit.vcd");
         $dumpvars;
     end
 `endif // DUMP_VCD
@@ -18,7 +18,7 @@ module ControlUnit_tb;
     reg [31:0]  test_vector         [0:39];
     reg [12:0]  test_gold_vector    [0:39];
     initial begin
-        $readmemh("obj_dir/sub/sub_ControlUnit.mem", test_vector);
+        $readmemh("build/tests/sub/sub_ControlUnit.mem", test_vector);
     end
     reg [31:0]  instr;
     initial begin
