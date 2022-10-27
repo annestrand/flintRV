@@ -203,7 +203,7 @@ build-test-dirs:
 
 .PHONY: objdump
 objdump:
-	@$(DOCKER_CMD) $(RISCV_OBJDUMP) -D obj_dir/$(DUMP).elf
+	@$(DOCKER_CMD) $(RISCV_OBJDUMP) -D $(DUMP)
 
 .PHONY: submodules
 submodules:
