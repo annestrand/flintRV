@@ -6,6 +6,7 @@
 #define KB_MULTIPLIER           (1024)
 #define MB_MULTIPLIER           (1024*1024)
 #define DEFAULT_VIRT_MEM_SIZE   (KB_MULTIPLIER * 32) // Default to 32 KB
+#define LOG_LINE_BREAK "============================================================================================\n"
 
 void printHelp(void) {
     printf("\n"
@@ -68,6 +69,8 @@ int main(int argc, char *argv[]) {
     }
     int simTimeVal = atoi(simTime.value);
     if (simTimeVal == 0) { simTimeVal = 1000; }
+    LOG_I("Memory size set to: [ %f MB ].\n", (float)memSize / (float)(MB_MULTIPLIER));
+    LOG_I("Simulation timeout value:  [ %d ].\n", simTimeVal);
 
     // Instantiate CPU
     boredcore dut = boredcore(simTimeVal, atoi(dumpLvl.value));
@@ -81,16 +84,15 @@ int main(int argc, char *argv[]) {
     dut.writeRegfile(FP, memSize-1);
 
     // Run
-    printf("\n");
-    LOG_I("Starting simulation...\n");
+    LOG_I("Starting simulation...\n%s", LOG_LINE_BREAK);
     while(!dut.end()) {
-        if (!dut.instructionUpdate())    { return 1; }
-        if (!dut.loadStoreUpdate())      { return 1; }
+        if (!dut.instructionUpdate())    { LOG_E("Failed instruction fetch.\n"); return 1; }
+        if (!dut.loadStoreUpdate())      { LOG_E("Failed load/store fetch.\n");  return 1; }
         // Evaluate
         dut.tick();
     }
 
-    printf("\n");
+    printf("\n%s", LOG_LINE_BREAK);
     LOG_I("Simulation done.\n");
     return 0;
 }

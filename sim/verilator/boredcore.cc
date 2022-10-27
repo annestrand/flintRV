@@ -150,12 +150,13 @@ void boredcore::reset(int count) {
 // ====================================================================================================================
 void boredcore::tick() {
     dump();
+    m_cycles++;
     m_cpu->i_clk = 0;
     m_cpu->eval();
-    if(m_trace) { m_trace->dump(m_cycles++); }
+    if(m_trace) { m_trace->dump(10*m_cycles-2); }
     m_cpu->i_clk = 1;
     m_cpu->eval();
-    if(m_trace) { m_trace->dump(m_cycles++); m_trace->flush(); }
+    if(m_trace) { m_trace->dump(10*m_cycles); m_trace->flush(); }
 }
 // ====================================================================================================================
 void boredcore::dump() {
@@ -180,13 +181,12 @@ void boredcore::dump() {
     printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { printf("\n"); return; }
     // Dump more detailed info
-    unsigned long long cycle = m_cycles > 1 ? (unsigned long long)(m_cycles/2) : (unsigned long long)0;
     printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  CYCLE:[%llu]\n",
         fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-',
         fFlush ? 'x':'-', eFlush ? 'x':'-', mFlush ? 'x':'-', wFlush ? 'x':'-',
         iValid ? 'I':'-', mValid ? 'M':'-', RST    ? 'R':'-', BRA    ? 'B':'-',
         JMP    ? 'J':'-', LD_REQ ? 'L':'-', SD_REQ ? 'S':'-',
-        cycle
+        m_cycles
     );
 }
 // ====================================================================================================================
