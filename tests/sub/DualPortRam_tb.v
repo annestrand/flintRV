@@ -1,5 +1,3 @@
-`include "DualPortRam.v"
-
 module DualPortRam_tb;
     localparam XLEN = 32;
     localparam ADDR_WIDTH = 5;
@@ -11,13 +9,6 @@ module DualPortRam_tb;
     DualPortRam DualPortRam_dut(.*);
     defparam DualPortRam_dut.XLEN = XLEN;
     defparam DualPortRam_dut.ADDR_WIDTH = ADDR_WIDTH;
-
-`ifdef DUMP_VCD
-    initial begin
-        $dumpfile("build/tests/sub/DualPortRam.vcd");
-        $dumpvars;
-    end
-`endif // DUMP_VCD
 
     reg [31:0] testData [0:9];
     initial begin
@@ -43,27 +34,26 @@ module DualPortRam_tb;
         i_rAddr   = 'd0;
         i_wAddr   = 'd0;
         #20;
-        $display("\n=== Writing data =========================================");
+
         for (i=0; i<10; i=i+1) begin // Write
             #20; i_clk = ~i_clk;
             i_wAddr  = i[4:0];
             i_dataIn = testData[i];
             #20; i_clk = ~i_clk;
-            $display("Test[ %2d ]: i_wAddr = %b || i_dataIn = 0x%08h", i, i_wAddr, i_dataIn);
         end
+
         i_we      = 0;
-        $display("\n=== Reading data =========================================");
         for (i=0; i<10; i=i+1) begin // Read
             #20; i_clk = ~i_clk;
             i_rAddr = i[4:0];
             #20; i_clk = ~i_clk;
             if (o_q != testData[i]) resultStr = "ERROR";
             else                    resultStr = "PASS ";
-            $display("Test[ %2d ]: i_rAddr = %b || o_q      = 0x%08h ... %s", i, i_rAddr, o_q, resultStr);
             if (resultStr == "ERROR") errs = errs + 1;
         end
-        if (errs > 0)   $display("\nFAILED: %0d", errs);
-        else            $display("\nPASSED");
+
+        if (errs > 0)   $display("DualPortRam tests - FAILED: %0d", errs);
+        else            $display("DualPortRam tests - PASSED");
     end
 
 endmodule

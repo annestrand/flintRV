@@ -1,6 +1,3 @@
-`include "DualPortRam.v"
-`include "Regfile.v"
-
 module Regfile_tb;
     localparam XLEN = 32;
     localparam ADDR_WIDTH = 5;
@@ -12,13 +9,6 @@ module Regfile_tb;
     Regfile Regfile_dut(.*);
     defparam Regfile_dut.XLEN = XLEN;
     defparam Regfile_dut.ADDR_WIDTH = ADDR_WIDTH;
-
-`ifdef DUMP_VCD
-    initial begin
-        $dumpfile("build/tests/sub/Regfile.vcd");
-        $dumpvars;
-    end
-`endif // DUMP_VCD
 
     reg [31:0] testData [0:9];
     initial begin
@@ -47,17 +37,14 @@ module Regfile_tb;
 
         #20;
         // ============================================================================================================
-        $display("\n=== Writing data =========================================");
         for (i=0; i<10; i=i+1) begin // Write
             #20; i_clk = ~i_clk;
             i_rdAddr = i[4:0];
             i_rdData = testData[i];
             #20; i_clk = ~i_clk;
-            $display("Test[ %2d ]: wAddr = %b || dataIn = 0x%08h", i, i_rdAddr, i_rdData);
         end
         i_wrEn = 0;
         // ============================================================================================================
-        $display("\n=== Reading data =========================================");
         for (i=0; i<10; i=i+1) begin // Read
             #20; i_clk = ~i_clk;
             i_rs1Addr = i[4:0];
@@ -67,11 +54,9 @@ module Regfile_tb;
             else                          resultStr = "PASS ";
             if (o_rs2Data != testData[i]) resultStr = "ERROR (o_rs2Data)";
             else                          resultStr = "PASS ";
-            $display("Test[ %2d ]: rAddr = %b || q      = 0x%08h ... %s", i, i_rs1Addr, o_rs1Data, resultStr);
             if (resultStr == "ERROR") errs = errs + 1;
         end
         // ============================================================================================================
-        $display("\n=== Write-through read =========================================");
         #20; i_clk = ~i_clk;
         #20; i_clk = ~i_clk;
         i_rdAddr = 5'd5;
@@ -86,11 +71,10 @@ module Regfile_tb;
         else                            resultStr = "PASS ";
         if (o_rs2Data != 32'hffffffff)  resultStr = "ERROR (o_rs2Data)";
         else                            resultStr = "PASS ";
-        $display("Test[ Write-through read ]: ... %s", resultStr);
         if (resultStr == "ERROR") errs = errs + 1;
 
-        if (errs > 0)   $display("\nFAILED: %0d", errs);
-        else            $display("\nPASSED");
+        if (errs > 0)   $display("Regfile tests - FAILED: %0d", errs);
+        else            $display("Regfile tests - PASSED");
     end
 
 endmodule

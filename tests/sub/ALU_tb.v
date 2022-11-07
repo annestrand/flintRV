@@ -1,5 +1,3 @@
-`include "ALU.v"
-
 module IAlu_tb;
     reg     [31:0]  i_a, i_b;
     reg     [4:0]   i_op;
@@ -7,13 +5,6 @@ module IAlu_tb;
 
     ALU Alu_dut(.*);
     defparam Alu_dut.XLEN = 32;
-
-`ifdef DUMP_VCD
-    initial begin
-        $dumpfile("build/tests/sub/ALU.vcd");
-        $dumpvars(0, IAlu_tb);
-    end
-`endif // DUMP_VCD
 
     // Test vectors
     reg [68:0]  test_vector         [0:15];
@@ -27,7 +18,6 @@ module IAlu_tb;
     reg [39:0] resultStr;
     integer i = 0, errs = 0, subfail = 0;
     initial begin
-        $display("Running random ALU tests...\n");
         i_a       = 'd0;
         i_b       = 'd0;
         i_op      = 'd0;
@@ -38,14 +28,10 @@ module IAlu_tb;
             #20;
             if ($signed(o_result) != $signed(test_gold_vector[i])) resultStr = "ERROR";
             else                                                   resultStr = "PASS ";
-            $display("Test[ %2d ]: i_a = %10d | i_b = %10d | i_op = %2d || o_result = %10d ... %s",
-                i, $signed(i_a), $signed(i_b), i_op, $signed(o_result), resultStr
-            );
             if (resultStr == "ERROR") errs = errs + 1;
         end
-        if (errs > 0)   $display("\nFAILED: %0d", errs);
-        else            $display("\nPASSED");
-        // TODO: Use VPI to have $myReturn(...) return the "errs" value?
+        if (errs > 0)   $display("ALU tests - FAILED: %0d", errs);
+        else            $display("ALU tests - PASSED");
     end
 
 endmodule

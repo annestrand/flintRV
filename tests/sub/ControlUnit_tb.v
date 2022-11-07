@@ -1,18 +1,9 @@
-`include "ControlUnit.v"
-
 module ControlUnit_tb;
     reg     [6:0]   i_opcode;
     wire    [3:0]   o_aluOp;
     wire            o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp;
 
     ControlUnit ControlUnit_dut(.*);
-
-`ifdef DUMP_VCD
-    initial begin
-        $dumpfile("build/tests/sub/ControlUnit.vcd");
-        $dumpvars;
-    end
-`endif // DUMP_VCD
 
     // Test vectors
     reg [31:0]  test_vector         [0:39];
@@ -43,7 +34,6 @@ module ControlUnit_tb;
     reg     [12:0]  ctrlSignals;
     integer i = 0, errs = 0;
     initial begin
-        $display("Running ControlUnit tests...\n");
         i_opcode   = 'd0;
         #20;
         for (i=0; i<40; i=i+1) begin
@@ -53,14 +43,10 @@ module ControlUnit_tb;
             ctrlSignals = {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp};
             if (ctrlSignals != test_gold_vector[i]) resultStr = "ERROR";
             else                                    resultStr = "PASS ";
-            $display("Test[ %2d ]: instr = 0x%8h || ctrlSigs = %b ... %s",
-                i, instr, ctrlSignals, resultStr
-            );
             if (resultStr == "ERROR") errs = errs + 1;
         end
-        if (errs > 0)   $display("\nFAILED: %0d", errs);
-        else            $display("\nPASSED");
-        // TODO: Use VPI to have $myReturn(...) return the "errs" value?
+        if (errs > 0)   $display("ControlUnit tests - FAILED: %0d", errs);
+        else            $display("ControlUnit tests - PASSED");
     end
 
 endmodule

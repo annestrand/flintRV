@@ -9,9 +9,9 @@
 #include "Vboredcore__Syms.h"
 
 // Placeholder defines here
-#ifndef BASE_PATH // This default dir is "obj_dir/"
-#define BASE_PATH "."
-#endif // BASE_PATH
+#ifndef TESTS_PATH
+#define TESTS_PATH "."
+#endif // TESTS_PATH
 #ifndef VERILATOR_VER
 #define VERILATOR_VER 4028
 #endif // VERILATOR_VER
