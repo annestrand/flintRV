@@ -18,10 +18,10 @@ boredcore::boredcore(vluint64_t maxSimTime, int dumpLevel) :
         m_memSize(0) {}
 // ====================================================================================================================
 boredcore::~boredcore() {
+    m_cpu->final();
     if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr;  }
     if (m_cpu != nullptr)   { delete m_cpu; m_cpu = nullptr;                        }
     if (m_mem != nullptr)   { delete[] m_mem; m_mem = nullptr;                      }
-    m_cpu->final();
 }
 // ====================================================================================================================
 bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath) {
