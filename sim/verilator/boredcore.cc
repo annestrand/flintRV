@@ -7,6 +7,9 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "Vboredcore.h"
 #include "Vboredcore__Syms.h"
 #include "boredcore.hh"
@@ -182,7 +185,7 @@ void boredcore::dump() {
     printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { printf("\n"); return; }
     // Dump more detailed info
-    printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  CYCLE:[%lu]\n",
+    printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  CYCLE:[%" PRIu64 "]\n",
         fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-',
         fFlush ? 'x':'-', eFlush ? 'x':'-', mFlush ? 'x':'-', wFlush ? 'x':'-',
         iValid ? 'I':'-', mValid ? 'M':'-', RST    ? 'R':'-', BRA    ? 'B':'-',
