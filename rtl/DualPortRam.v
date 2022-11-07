@@ -1,12 +1,14 @@
 module DualPortRam (
-    input                           i_clk, i_we,
-    input       [(XLEN-1):0]        i_dataIn,
-    input       [(ADDR_WIDTH-1):0]  i_rAddr, i_wAddr,
-    output reg  [(XLEN-1):0]        o_q
+    input                           i_clk       /*verilator public*/,
+                                    i_we        /*verilator public*/,
+    input       [(XLEN-1):0]        i_dataIn    /*verilator public*/,
+    input       [(ADDR_WIDTH-1):0]  i_rAddr     /*verilator public*/,
+                                    i_wAddr     /*verilator public*/,
+    output reg  [(XLEN-1):0]        o_q         /*verilator public*/
 );
-    parameter XLEN = 32;
-    parameter ADDR_WIDTH = 5;
-    reg [XLEN-1:0] ram [2**ADDR_WIDTH-1:0];
+    parameter XLEN          /*verilator public*/ = 32;
+    parameter ADDR_WIDTH    /*verilator public*/ = 5;
+    reg [XLEN-1:0] ram [2**ADDR_WIDTH-1:0] /*verilator public*/;
 
     integer i;
     initial begin

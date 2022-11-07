@@ -11,7 +11,7 @@ bool loadMem(std::string filePath, char* mem, ssize_t memLen) {
     if (fp == NULL) { LOG_E("Could not open [ %s ]!\n", filePath.c_str()); return false; }
     for (ssize_t i=0; feof(fp) == 0; ++i) {
         if (i >= memLen) { LOG_E("Cannot fit hexfile [ %s ] in mem!\n", filePath.c_str()); fclose(fp); return false; }
-        fread(mem+i, 1, 1, fp);
+        size_t ret = fread(mem+i, 1, 1, fp);
     }
     return true;
 }

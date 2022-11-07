@@ -1,12 +1,12 @@
 `include "types.vh"
 
 module ALU_Control (
-    input       [3:0] i_aluOp,
-    input       [6:0] i_funct7,
-    input       [2:0] i_funct3,
-    output reg  [4:0] o_aluControl
+    input       [3:0] i_aluOp       /*verilator public*/,
+    input       [6:0] i_funct7      /*verilator public*/,
+    input       [2:0] i_funct3      /*verilator public*/,
+    output reg  [4:0] o_aluControl  /*verilator public*/
 );
-    localparam SRAI = 5;
+    localparam SRAI /*verilator public*/ = 5;
     always @* begin
         case (i_aluOp)
             // ~~~ U/J-Type formats ~~~

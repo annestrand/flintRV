@@ -1,17 +1,23 @@
 `include "types.vh"
 
 module Regfile (
-    input                       i_clk, i_wrEn,
-    input   [(ADDR_WIDTH-1):0]  i_rs1Addr, i_rs2Addr, i_rdAddr,
-    input   [(XLEN-1):0]        i_rdData,
-    output  [(XLEN-1):0]        o_rs1Data, o_rs2Data
+    input                       i_clk       /*verilator public*/,
+                                i_wrEn      /*verilator public*/,
+    input   [(ADDR_WIDTH-1):0]  i_rs1Addr   /*verilator public*/,
+                                i_rs2Addr   /*verilator public*/,
+                                i_rdAddr    /*verilator public*/,
+    input   [(XLEN-1):0]        i_rdData    /*verilator public*/,
+    output  [(XLEN-1):0]        o_rs1Data   /*verilator public*/,
+                                o_rs2Data   /*verilator public*/
 );
-    parameter XLEN          = 32;
-    parameter ADDR_WIDTH    = 5;
+    parameter XLEN          /*verilator public*/ = 32;
+    parameter ADDR_WIDTH    /*verilator public*/ = 5;
 
-    reg                 r_fwdRs1En, r_fwdRs2En;
-    reg  [(XLEN-1):0]   r_rdDataSave;
-    wire [(XLEN-1):0]   w_rs1PortOut, w_rs2PortOut;
+    reg                 r_fwdRs1En      /*verilator public*/,
+                        r_fwdRs2En      /*verilator public*/;
+    reg  [(XLEN-1):0]   r_rdDataSave    /*verilator public*/;
+    wire [(XLEN-1):0]   w_rs1PortOut    /*verilator public*/,
+                        w_rs2PortOut    /*verilator public*/;
 
     /*
         NOTE:   Infer 2 copied/synced 32x32 (2048 KBits) BRAMs (i.e. one BRAM per read-port)
@@ -23,7 +29,7 @@ module Regfile (
     DualPortRam #(
         .XLEN(XLEN),
         .ADDR_WIDTH(ADDR_WIDTH)
-    ) RS1_PORT (
+    ) RS1_PORT_RAM (
         .i_clk                (i_clk),
         .i_we                 (i_wrEn),
         .i_dataIn             (i_rdData),
@@ -34,7 +40,7 @@ module Regfile (
     DualPortRam #(
         .XLEN(XLEN),
         .ADDR_WIDTH(ADDR_WIDTH)
-    ) RS2_PORT (
+    ) RS2_PORT_RAM (
         .i_clk                (i_clk),
         .i_we                 (i_wrEn),
         .i_dataIn             (i_rdData),

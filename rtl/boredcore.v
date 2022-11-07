@@ -8,70 +8,109 @@ module boredcore (
     output         [XLEN-1:0]   o_pcOut, o_dataAddr, o_dataOut
 );
     // CPU configs
-    parameter         PC_START              = 0;
-    parameter         REGFILE_ADDR_WIDTH    = 5;    //  4 for RV32E (otherwise 5)
-    parameter         INSTR_WIDTH           = 32;   // 16 for RV32C (otherwise 32)
-    parameter         XLEN                  = 32;
+    parameter         PC_START              /*verilator public*/ = 0;
+    parameter         REGFILE_ADDR_WIDTH    /*verilator public*/ = 5;  //  4 for RV32E (otherwise 5)
+    parameter         INSTR_WIDTH           /*verilator public*/ = 32; // 16 for RV32C (otherwise 32)
+    parameter         XLEN                  /*verilator public*/ = 32;
     // Helper Aliases
-    localparam  [4:0] REG_0                 = 5'b00000; // Register x0
+    localparam  [4:0] REG_0                 /*verilator public*/ = 5'b00000; // Register x0
     // Init values
     initial begin
         PC = PC_START;
     end
 
     // Pipeline regs (p_*)
-    localparam  EXEC = 0;
-    localparam  MEM  = 1;
-    localparam  WB   = 2;
-    reg [XLEN-1:0]  p_rs1       [EXEC:WB];
-    reg [XLEN-1:0]  p_rs2       [EXEC:WB];
-    reg [XLEN-1:0]  p_aluOut    [EXEC:WB];
-    reg [XLEN-1:0]  p_readData  [EXEC:WB];
-    reg [XLEN-1:0]  p_PC        [EXEC:WB];
-    reg [XLEN-1:0]  p_IMM       [EXEC:WB];
-    reg      [6:0]  p_funct7    [EXEC:WB];
-    reg      [4:0]  p_rs1Addr   [EXEC:WB];
-    reg      [4:0]  p_rs2Addr   [EXEC:WB];
-    reg      [4:0]  p_rdAddr    [EXEC:WB];
-    reg      [3:0]  p_aluOp     [EXEC:WB];
-    reg      [2:0]  p_funct3    [EXEC:WB];
-    reg             p_mem_w     [EXEC:WB];
-    reg             p_reg_w     [EXEC:WB];
-    reg             p_mem2reg   [EXEC:WB];
-    reg             p_exec_a    [EXEC:WB];
-    reg             p_exec_b    [EXEC:WB];
-    reg             p_bra       [EXEC:WB];
-    reg             p_jmp       [EXEC:WB];
+    localparam  EXEC /*verilator public*/ = 0;
+    localparam  MEM  /*verilator public*/ = 1;
+    localparam  WB   /*verilator public*/ = 2;
+    reg [XLEN-1:0]  p_rs1       [EXEC:WB] /*verilator public*/;
+    reg [XLEN-1:0]  p_rs2       [EXEC:WB] /*verilator public*/;
+    reg [XLEN-1:0]  p_aluOut    [EXEC:WB] /*verilator public*/;
+    reg [XLEN-1:0]  p_readData  [EXEC:WB] /*verilator public*/;
+    reg [XLEN-1:0]  p_PC        [EXEC:WB] /*verilator public*/;
+    reg [XLEN-1:0]  p_IMM       [EXEC:WB] /*verilator public*/;
+    reg      [6:0]  p_funct7    [EXEC:WB] /*verilator public*/;
+    reg      [4:0]  p_rs1Addr   [EXEC:WB] /*verilator public*/;
+    reg      [4:0]  p_rs2Addr   [EXEC:WB] /*verilator public*/;
+    reg      [4:0]  p_rdAddr    [EXEC:WB] /*verilator public*/;
+    reg      [3:0]  p_aluOp     [EXEC:WB] /*verilator public*/;
+    reg      [2:0]  p_funct3    [EXEC:WB] /*verilator public*/;
+    reg             p_mem_w     [EXEC:WB] /*verilator public*/;
+    reg             p_reg_w     [EXEC:WB] /*verilator public*/;
+    reg             p_mem2reg   [EXEC:WB] /*verilator public*/;
+    reg             p_exec_a    [EXEC:WB] /*verilator public*/;
+    reg             p_exec_b    [EXEC:WB] /*verilator public*/;
+    reg             p_bra       [EXEC:WB] /*verilator public*/;
+    reg             p_jmp       [EXEC:WB] /*verilator public*/;
+
     // Internal wires/regs
-    reg  [XLEN-1:0] PC, PCReg, instrReg;
-    wire [XLEN-1:0] IMM, aluOut, jumpAddr, loadData, rs1Out, rs2Out, rs2FwdOut;
-    wire      [3:0] aluOp;
-    wire            exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp;
-    wire [XLEN-1:0] WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
-    wire            braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
-    wire            writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
-    wire            pcJump          = braMispredict || p_jmp[EXEC];
-    //          (Forwarding logic)
-    wire            RS1_fwd_mem     = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
-    wire            RS1_fwd_wb      = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
-    wire            RS2_fwd_mem     = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
-    wire            RS2_fwd_wb      = ~RS2_fwd_mem && p_reg_w[WB] && (p_rs2Addr[EXEC] == p_rdAddr[WB]);
-    wire      [1:0] fwdRs1          = {RS1_fwd_wb, RS1_fwd_mem},
-                    fwdRs2          = {RS2_fwd_wb, RS2_fwd_mem};
-    wire            rdFwdRs1En      = p_reg_w[WB] && (`RS1(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
-    wire            rdFwdRs2En      = p_reg_w[WB] && (`RS2(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
-    //          (Stall and flush logic)
-    wire            load_hazard     = p_mem2reg[EXEC] && (
-                                        (`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC])
-                                    );
-    wire            load_wait       = o_loadReq && ~i_memValid;
-    wire            FETCH_stall     = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
-    wire            EXEC_stall      = MEM_stall;
-    wire            MEM_stall       = load_wait;
-    wire            FETCH_flush     = i_rst || braMispredict || p_jmp[EXEC];
-    wire            EXEC_flush      = i_rst || braMispredict || p_jmp[EXEC] || load_hazard /* bubble */;
-    wire            MEM_flush       = i_rst;
-    wire            WB_flush        = i_rst || load_wait /* bubble */;
+    reg  [XLEN-1:0] PC              /*verilator public*/,
+                    PCReg           /*verilator public*/,
+                    instrReg        /*verilator public*/;
+    wire [XLEN-1:0] IMM             /*verilator public*/,
+                    aluOut          /*verilator public*/,
+                    jumpAddr        /*verilator public*/,
+                    loadData        /*verilator public*/,
+                    rs1Out          /*verilator public*/,
+                    rs2Out          /*verilator public*/,
+                    rs2FwdOut       /*verilator public*/,
+                    WB_result       /*verilator public*/;
+    wire      [3:0] aluOp           /*verilator public*/;
+    wire      [1:0] fwdRs1          /*verilator public*/,
+                    fwdRs2          /*verilator public*/;
+    wire            exec_a          /*verilator public*/,
+                    exec_b          /*verilator public*/,
+                    mem_w           /*verilator public*/,
+                    reg_w           /*verilator public*/,
+                    mem2reg         /*verilator public*/,
+                    bra             /*verilator public*/,
+                    jmp             /*verilator public*/,
+                    braMispredict   /*verilator public*/,
+                    writeRd         /*verilator public*/,
+                    pcJump          /*verilator public*/,
+                    RS1_fwd_mem     /*verilator public*/,
+                    RS1_fwd_wb      /*verilator public*/,
+                    RS2_fwd_mem     /*verilator public*/,
+                    RS2_fwd_wb      /*verilator public*/,
+                    rdFwdRs1En      /*verilator public*/,
+                    rdFwdRs2En      /*verilator public*/,
+                    load_hazard     /*verilator public*/,
+                    load_wait       /*verilator public*/,
+                    FETCH_stall     /*verilator public*/,
+                    EXEC_stall      /*verilator public*/,
+                    MEM_stall       /*verilator public*/,
+                    FETCH_flush     /*verilator public*/,
+                    EXEC_flush      /*verilator public*/,
+                    MEM_flush       /*verilator public*/,
+                    WB_flush        /*verilator public*/;
+
+    // Branch/jump logic
+    assign pcJump          = braMispredict || p_jmp[EXEC];
+    assign braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
+
+    // Writeback select and enable logic
+    assign WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
+    assign writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
+
+    // Forwarding logic
+    assign RS1_fwd_mem  = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
+    assign RS1_fwd_wb   = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
+    assign RS2_fwd_mem  = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
+    assign RS2_fwd_wb   = ~RS2_fwd_mem && p_reg_w[WB] && (p_rs2Addr[EXEC] == p_rdAddr[WB]);
+    assign fwdRs1       = {RS1_fwd_wb, RS1_fwd_mem};
+    assign fwdRs2       = {RS2_fwd_wb, RS2_fwd_mem};
+    assign rdFwdRs1En   = p_reg_w[WB] && (`RS1(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
+    assign rdFwdRs2En   = p_reg_w[WB] && (`RS2(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
+    // Stall and flush logic
+    assign load_hazard  = p_mem2reg[EXEC] && ((`RS1(instrReg) == p_rdAddr[EXEC])||(`RS2(instrReg) == p_rdAddr[EXEC]));
+    assign load_wait    = o_loadReq && ~i_memValid;
+    assign FETCH_stall  = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
+    assign EXEC_stall   = MEM_stall;
+    assign MEM_stall    = load_wait;
+    assign FETCH_flush  = i_rst || braMispredict || p_jmp[EXEC];
+    assign EXEC_flush   = i_rst || braMispredict || p_jmp[EXEC] || load_hazard /* bubble */;
+    assign MEM_flush    = i_rst;
+    assign WB_flush     = i_rst || load_wait /* bubble */;
 
     // Core submodules
     FetchDecode #(.XLEN(XLEN)) FETCH_DECODE_unit(

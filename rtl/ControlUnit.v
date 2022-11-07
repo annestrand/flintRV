@@ -1,9 +1,15 @@
 `include "types.vh"
 
 module ControlUnit (
-    input       [6:0]   i_opcode,
-    output  reg [3:0]   o_aluOp,
-    output  reg         o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp
+    input       [6:0]   i_opcode    /*verilator public*/,
+    output  reg [3:0]   o_aluOp     /*verilator public*/,
+    output  reg         o_exec_a    /*verilator public*/,
+                        o_exec_b    /*verilator public*/,
+                        o_mem_w     /*verilator public*/,
+                        o_reg_w     /*verilator public*/,
+                        o_mem2reg   /*verilator public*/,
+                        o_bra       /*verilator public*/,
+                        o_jmp       /*verilator public*/
 );
     // Main ctrl. signals
     always @* begin

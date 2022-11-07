@@ -1,20 +1,24 @@
 `include "types.vh"
 
 module ALU (
-  input         [XLEN-1:0]          i_a, i_b,
-  input         [ALU_OP_WIDTH-1:0]  i_op,
-  output reg    [XLEN-1:0]          o_result
+  input         [XLEN-1:0]          i_a         /*verilator public*/,
+                                    i_b         /*verilator public*/,
+  input         [ALU_OP_WIDTH-1:0]  i_op        /*verilator public*/,
+  output reg    [XLEN-1:0]          o_result    /*verilator public*/
 );
-    parameter   XLEN            = 32;
-    localparam  ALU_OP_WIDTH    = 5;
+    parameter   XLEN            /*verilator public*/ = 32;
+    localparam  ALU_OP_WIDTH    /*verilator public*/ = 5;
 
-    reg  [XLEN-1:0] B_in;
-    reg             ALU_SLT;
-    reg             SUB;
-    wire            cflag; // Catch unsigned overflow for SLTU/SGTEU cases
-    wire [XLEN-1:0] ALU_ADDER_result;
-    wire [XLEN-1:0] ALU_XOR_result  = i_a ^ i_b;
-    wire [XLEN-1:0] CONST_4         = {{(XLEN-3){1'b0}}, 3'd4};
+    reg  [XLEN-1:0] B_in                /*verilator public*/;
+    reg             ALU_SLT             /*verilator public*/;
+    reg             SUB                 /*verilator public*/;
+    wire            cflag               /*verilator public*/; // Catch unsigned overflow for SLTU/SGTEU cases
+    wire [XLEN-1:0] ALU_ADDER_result    /*verilator public*/;
+    wire [XLEN-1:0] ALU_XOR_result      /*verilator public*/;
+    wire [XLEN-1:0] CONST_4             /*verilator public*/;
+
+    assign ALU_XOR_result   = i_a ^ i_b;
+    assign CONST_4          = {{(XLEN-3){1'b0}}, 3'd4};
 
     // Add/Sub logic
     assign {cflag, ALU_ADDER_result[XLEN-1:0]} = i_a + B_in + {{(XLEN){1'b0}}, SUB};

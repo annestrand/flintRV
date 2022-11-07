@@ -1,10 +1,10 @@
 `include "types.vh"
 
 module ImmGen (
-    input       [31:0]      i_instr,
-    output reg  [XLEN-1:0]  o_imm
+    input       [31:0]      i_instr /*verilator public*/,
+    output reg  [XLEN-1:0]  o_imm   /*verilator public*/
 );
-    parameter XLEN = 32;
+    parameter XLEN /*verilator public*/ = 32;
 
     always @* begin
         case (`OPCODE(i_instr))

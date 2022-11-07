@@ -1,11 +1,11 @@
 `include "types.vh"
 
 module Memory (
-    input       [2:0]       i_funct3,
-    input       [XLEN-1:0]  i_dataIn,
-    output reg  [XLEN-1:0]  o_dataOut
+    input       [2:0]       i_funct3    /*verilator public*/,
+    input       [XLEN-1:0]  i_dataIn    /*verilator public*/,
+    output reg  [XLEN-1:0]  o_dataOut   /*verilator public*/
 );
-    parameter XLEN = 32;
+    parameter XLEN /*verilator public*/ = 32;
 
     // Just output store-type (w/ - w/o sign-ext) for now
     always @(*) begin

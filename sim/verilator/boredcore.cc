@@ -21,6 +21,7 @@ boredcore::~boredcore() {
     if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr;  }
     if (m_cpu != nullptr)   { delete m_cpu; m_cpu = nullptr;                        }
     if (m_mem != nullptr)   { delete[] m_mem; m_mem = nullptr;                      }
+    m_cpu->final();
 }
 // ====================================================================================================================
 bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath) {
@@ -78,26 +79,26 @@ bool boredcore::createMemory(size_t memSize, std::string hexfile) {
 bool boredcore::instructionUpdate() {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot fetch instruction from NULL memory!\n"); return false; }
-    if (cpu(this)->o_pcOut >= m_memSize) {
-        LOG_E("PC address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", cpu(this)->o_pcOut, m_memSize);
+    if (m_cpu->o_pcOut >= m_memSize) {
+        LOG_E("PC address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", m_cpu->o_pcOut, m_memSize);
         return false;
     }
     // Fetch the next instruction
-    cpu(this)->i_instr = *(int*)&m_mem[cpu(this)->o_pcOut];
+    m_cpu->i_instr = *(int*)&m_mem[m_cpu->o_pcOut];
     return true;
 }
 // ====================================================================================================================
 bool boredcore::loadStoreUpdate() {
     // Request and error checking
-    if (!cpu(this)->o_loadReq && !cpu(this)->o_storeReq) { return true; } // Skip if there was no load/store request
+    if (!m_cpu->o_loadReq && !m_cpu->o_storeReq) { return true; } // Skip if there was no load/store request
     if (m_mem == nullptr) { LOG_E("Cannot loadStoreUpdate on NULL memory!\n"); return false; }
-    if (cpu(this)->o_dataAddr >= m_memSize) {
-        LOG_E("Address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", cpu(this)->o_dataAddr, m_memSize);
+    if (m_cpu->o_dataAddr >= m_memSize) {
+        LOG_E("Address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", m_cpu->o_dataAddr, m_memSize);
         return false;
     }
 
-    if (cpu(this)->o_loadReq)   { cpu(this)->i_dataIn = *(int*)&m_mem[cpu(this)->o_dataAddr];   } // load
-    else                        { *(int*)&m_mem[cpu(this)->o_dataAddr] = cpu(this)->o_dataOut;  } // store
+    if (m_cpu->o_loadReq)   { m_cpu->i_dataIn = *(int*)&m_mem[m_cpu->o_dataAddr];   } // load
+    else                    { *(int*)&m_mem[m_cpu->o_dataAddr] = m_cpu->o_dataOut;  } // store
     return true;
 }
 // ====================================================================================================================
@@ -127,13 +128,13 @@ void boredcore::writeRegfile(int index, int val) {
     // Skip if x0 reg
     if (index == 0) { return; }
     // Need to write to both ports
-    cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[index] = val;
-    cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS2_PORT__DOT__ram[index] = val;
+    CPU(this)->REGFILE_unit->RS1_PORT_RAM->ram[index] = val;
+    CPU(this)->REGFILE_unit->RS2_PORT_RAM->ram[index] = val;
 }
 // ====================================================================================================================
 int boredcore::readRegfile(int index) {
     // Does not matter which port we read from
-    return (index == 0) ? 0 : cpu(this)->boredcore__DOT__REGFILE_unit__DOT__RS1_PORT__DOT__ram[index];
+    return (index == 0) ? 0 : CPU(this)->REGFILE_unit->RS1_PORT_RAM->ram[index];
 }
 // ====================================================================================================================
 void boredcore::reset(int count) {
@@ -161,27 +162,27 @@ void boredcore::tick() {
 // ====================================================================================================================
 void boredcore::dump() {
     if (!m_dump) { return; }
-    std::string instr   = disassembleRv32i(m_cpu->i_instr);
-    bool fStall         = cpu(this)->boredcore__DOT__FETCH_stall;
-    bool eStall         = cpu(this)->boredcore__DOT__load_wait;
-    bool mStall         = cpu(this)->boredcore__DOT__load_wait;
-    bool fFlush         = cpu(this)->boredcore__DOT__FETCH_flush;
-    bool eFlush         = cpu(this)->boredcore__DOT__EXEC_flush;
-    bool mFlush         = cpu(this)->i_rst;
-    bool wFlush         = cpu(this)->boredcore__DOT__WB_flush;
+    std::string instr   = m_cpu->i_rst ? "CPU Reset!" : disassembleRv32i(m_cpu->i_instr);
+    bool fStall         = CPU(this)->FETCH_stall;
+    bool eStall         = CPU(this)->EXEC_stall;
+    bool mStall         = CPU(this)->MEM_stall;
+    bool fFlush         = CPU(this)->FETCH_flush;
+    bool eFlush         = CPU(this)->EXEC_flush;
+    bool mFlush         = CPU(this)->MEM_flush;
+    bool wFlush         = CPU(this)->WB_flush;
     // Status codes
-    bool BRA            = cpu(this)->boredcore__DOT__braMispredict; // B
-    bool JMP            = cpu(this)->boredcore__DOT__p_jmp[0];      // J
-    bool LD_REQ         = cpu(this)->o_loadReq;                     // L
-    bool SD_REQ         = cpu(this)->o_storeReq;                    // S
-    bool RST            = cpu(this)->i_rst;                         // R
-    bool iValid         = cpu(this)->i_ifValid;                     // I
-    bool mValid         = cpu(this)->i_memValid;                    // M
+    bool BRA            = CPU(this)->braMispredict;             // B
+    bool JMP            = CPU(this)->p_jmp[CPU(this)->EXEC];    // J
+    bool LD_REQ         = m_cpu->o_loadReq;                     // L
+    bool SD_REQ         = m_cpu->o_storeReq;                    // S
+    bool RST            = m_cpu->i_rst;                         // R
+    bool iValid         = m_cpu->i_ifValid;                     // I
+    bool mValid         = m_cpu->i_memValid;                    // M
     // Dump disassembled instruction
     printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { printf("\n"); return; }
     // Dump more detailed info
-    printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  CYCLE:[%llu]\n",
+    printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  CYCLE:[%lu]\n",
         fStall ? 'x':'-', eStall ? 'x':'-', mStall ? 'x':'-',
         fFlush ? 'x':'-', eFlush ? 'x':'-', mFlush ? 'x':'-', wFlush ? 'x':'-',
         iValid ? 'I':'-', mValid ? 'M':'-', RST    ? 'R':'-', BRA    ? 'B':'-',

@@ -52,12 +52,12 @@ private:
 };
 
 /*
-    NOTE:   Verilator changes its internal-module interface scheme from v4.210 and up.
+    NOTE:   Verilator changes its internal-module interface scheme from v4.210 and up (i.e. rootp).
             Making utility wrapper here to easily handle and access module internals.
             (As well as keep track of any future-version interface changes)
 */
 #if VERILATOR_VER >= 4210
-#define cpu(sim) (sim)->m_cpu->rootp
+#define CPU(sim) (sim)->m_cpu->rootp->boredcore
 #else
-#define cpu(sim) (sim)->m_cpu
+#define CPU(sim) (sim)->m_cpu->boredcore
 #endif
