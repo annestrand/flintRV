@@ -1,6 +1,11 @@
 #! /usr/bin/env python3
 
-from common import *
+import os
+import sys
+
+# Project scripts
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from scripts.utils import *
 
 # Try each immediate-based RV32I instruction with random operands as the test vector
 test_assembly = f'''

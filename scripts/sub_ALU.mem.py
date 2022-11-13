@@ -1,6 +1,11 @@
 #! /usr/bin/env python3
 
-from common import *
+import os
+import sys
+
+# Project scripts
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from scripts.utils import *
 
 test_vector_a       = [randImmI() for x in range(2**4)]
 test_vector_b       = [

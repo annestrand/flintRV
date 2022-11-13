@@ -50,22 +50,22 @@
 `define ALU_OP_J            4'b1010
 
 // ALU EXEC Types
-`define OP_ADD              5'b0_0000
-`define OP_PASSB            5'b0_0001
-`define OP_ADD4A            5'b0_0010
-`define OP_XOR              5'b0_0011
-`define OP_SRL              5'b0_0100
-`define OP_SRA              5'b0_0101
-`define OP_OR               5'b0_0110
-`define OP_AND              5'b0_0111
-`define OP_SUB              5'b0_1000
-`define OP_SLL              5'b0_1001
-`define OP_EQ               5'b0_1010
-`define OP_NEQ              5'b0_1011
-`define OP_SLT              5'b0_1100
-`define OP_SLTU             5'b0_1101
-`define OP_SGTE             5'b0_1110
-`define OP_SGTEU            5'b0_1111
+`define ALU_EXEC_ADD        5'b0_0000
+`define ALU_EXEC_PASSB      5'b0_0001
+`define ALU_EXEC_ADD4A      5'b0_0010
+`define ALU_EXEC_XOR        5'b0_0011
+`define ALU_EXEC_SRL        5'b0_0100
+`define ALU_EXEC_SRA        5'b0_0101
+`define ALU_EXEC_OR         5'b0_0110
+`define ALU_EXEC_AND        5'b0_0111
+`define ALU_EXEC_SUB        5'b0_1000
+`define ALU_EXEC_SLL        5'b0_1001
+`define ALU_EXEC_EQ         5'b0_1010
+`define ALU_EXEC_NEQ        5'b0_1011
+`define ALU_EXEC_SLT        5'b0_1100
+`define ALU_EXEC_SLTU       5'b0_1101
+`define ALU_EXEC_SGTE       5'b0_1110
+`define ALU_EXEC_SGTEU      5'b0_1111
 
 // Load/Store op type
 `define LS_B_OP             3'b000

@@ -1,9 +1,14 @@
 #! /usr/bin/env python3
 
+import os
+import sys
 import random
 
 from math import log
-from common import *
+
+# Project scripts
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from scripts.utils import *
 
 logicVal1           = random.randint(Imm32Ranges.I_MIN.value//2, Imm32Ranges.I_MAX.value//2)
 logicVal2           = random.randint(Imm32Ranges.I_MIN.value//2, Imm32Ranges.I_MAX.value//2)

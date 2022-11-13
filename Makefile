@@ -100,7 +100,7 @@ BOREDSOC_COREGEN       := boredsoc/core_generated.v
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
-all: submodules sim tests soc
+all: submodules build-dir sim tests soc
 
 # Build tests
 .PHONY: tests
@@ -136,6 +136,10 @@ objdump:
 .PHONY: submodules
 submodules:
 	git submodule update --init --recursive
+
+.PHONY: build-dir
+build-dir:
+	@mkdir -p $(OUT_DIR)
 
 .PHONY: clean
 clean:

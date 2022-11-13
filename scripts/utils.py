@@ -1,22 +1,13 @@
 #! /usr/bin/env python3
 
 import os
-import sys
+import re
 import random
 import argparse
 from enum import Enum
-from typing import List
+from typing import *
 
-class Imm32Ranges(Enum):
-    I_MIN    = -((2**12)//2)
-    I_MAX    = ((2**12)//2)-1
-    # Unsigned max
-    I_MAX_U  = 2**12
-
-    UJ_MIN   = -((2**20)//2)
-    UJ_MAX   = ((2**20)//2)-1
-    # Unsigned max
-    UJ_MAX_U = 2**20
+rtlDir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "rtl"))
 
 class AluTypes(Enum):
     ADD     = 0
@@ -35,6 +26,17 @@ class AluTypes(Enum):
     SLTU    = 13
     SGTE    = 14
     SGTEU   = 15
+
+class Imm32Ranges(Enum):
+    I_MIN    = -((2**12)//2)
+    I_MAX    = ((2**12)//2)-1
+    # Unsigned max
+    I_MAX_U  = 2**12
+
+    UJ_MIN   = -((2**20)//2)
+    UJ_MAX   = ((2**20)//2)-1
+    # Unsigned max
+    UJ_MAX_U = 2**20
 
 def parseArgv(argv):
     parser = argparse.ArgumentParser(allow_abbrev=False)
@@ -65,9 +67,11 @@ def asmStr2AsmList(asmStr:str):
 def getOperandVals(asmList:List[List[str]]):
     '''Takes "asmList" from asmStr2AsmList() and returns only operand values from asmList'''
     return [x[1:] for x in asmList]
+
 def getInstrName(asmList:List[List[str]]):
     '''Takes "asmList" from asmStr2AsmList() and returns instrNameList from asmList'''
     return [x[0] for x in asmList]
+
 def getComments(asmStr:str):
     '''Converts multi-line assembly string to a list of comments'''
     retList = []
@@ -77,13 +81,29 @@ def getComments(asmStr:str):
         if (0 <= index) and index < len(line):
             retList.append(line[line.rfind('#'):])
     return retList
+
 def randImmI():
     return random.randint(Imm32Ranges.I_MIN.value//2, Imm32Ranges.I_MAX.value//2)
+
 def randShamt():
     return random.randint(0,31)
+
 def randImmU():
     return random.randint(0, Imm32Ranges.UJ_MAX_U.value//2)
+
 def randReg(x0=False):
     return random.randint(0,31) if x0 else random.randint(1,31)
+
 def randBit():
     return random.randint(0,1)
+
+def get_alu_ops() -> Dict[str, int]:
+    '''Returns ALU op fields'''
+    alu_ops_dict = {}
+    with open(os.path.join(rtlDir, 'types.vh'), 'r') as fp:
+        types_vh = fp.read()
+        filtered_types_vh = re.findall(r'`define ALU_OP_.*', types_vh)
+        for line in filtered_types_vh:
+            line_parts = str(line).split()
+            alu_ops_dict[line_parts[1]] = int('0' + line_parts[2].split('\'')[1], base=0)
+    return alu_ops_dict
