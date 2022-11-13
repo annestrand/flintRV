@@ -107,3 +107,28 @@ def get_alu_ops() -> Dict[str, int]:
             line_parts = str(line).split()
             alu_ops_dict[line_parts[1]] = int('0' + line_parts[2].split('\'')[1], base=0)
     return alu_ops_dict
+
+def get_alu_exec() -> Dict[str, int]:
+    '''Returns ALU exec fields'''
+    alu_exec_dict = {}
+    with open(os.path.join(rtlDir, 'types.vh'), 'r') as fp:
+        types_vh = fp.read()
+        filtered_types_vh = re.findall(r'`define ALU_EXEC_.*', types_vh)
+        for line in filtered_types_vh:
+            line_parts = str(line).split()
+            alu_exec_dict[line_parts[1]] = int('0' + line_parts[2].split('\'')[1], base=0)
+    return alu_exec_dict
+
+def get_opcodes() -> Dict[str, int]:
+    '''Returns opcode fields'''
+    opcode_dict = {}
+    with open(os.path.join(rtlDir, 'types.vh'), 'r') as fp:
+        types_vh = fp.read()
+        filtered_types_vh =  re.findall(r'`define [IU]_.*', types_vh)
+        filtered_types_vh += re.findall(r'`define [RSBJ]\s.*', types_vh)
+        for line in filtered_types_vh:
+            line_parts = str(line).split()
+            if '_CTRL' in line_parts[1]:
+                continue
+            opcode_dict[line_parts[1]] = int('0' + line_parts[2].split('\'')[1], base=0)
+    return opcode_dict
