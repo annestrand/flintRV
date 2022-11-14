@@ -113,55 +113,56 @@ module boredcore (
     assign WB_flush     = i_rst || load_wait /* bubble */;
 
     // Core submodules
-    FetchDecode #(.XLEN(XLEN)) FETCH_DECODE_unit(
-        .i_instr              (instrReg),
-        .o_imm                (IMM),
-        .o_aluOp              (aluOp),
-        .o_exec_a             (exec_a),
-        .o_exec_b             (exec_b),
-        .o_mem_w              (mem_w),
-        .o_reg_w              (reg_w),
-        .o_mem2reg            (mem2reg),
-        .o_bra                (bra),
-        .o_jmp                (jmp)
+    FetchDecode #(
+        .XLEN               (XLEN),
+        .REGFILE_ADDR_WIDTH (REGFILE_ADDR_WIDTH)
+    ) FETCH_DECODE_unit (
+        .i_clk          (i_clk),
+        .i_instr        (instrReg),
+        .i_regWrEn      (p_reg_w[WB]),
+        .i_regRs1Addr   (FETCH_stall ? `RS1(instrReg) : `RS1(i_instr)),
+        .i_regRs2Addr   (FETCH_stall ? `RS2(instrReg) : `RS2(i_instr)),
+        .i_regRdAddr    (p_rdAddr[WB]),
+        .i_regRdData    (WB_result),
+        .o_regRs1Data   (rs1Out),
+        .o_regRs2Data   (rs2Out),
+        .o_imm          (IMM),
+        .o_aluOp        (aluOp),
+        .o_exec_a       (exec_a),
+        .o_exec_b       (exec_b),
+        .o_mem_w        (mem_w),
+        .o_reg_w        (reg_w),
+        .o_mem2reg      (mem2reg),
+        .o_bra          (bra),
+        .o_jmp          (jmp)
     );
     Execute #(.XLEN(XLEN)) EXECUTE_unit (
-        .i_funct7             (p_funct7[EXEC]),
-        .i_funct3             (p_funct3[EXEC]),
-        .i_aluOp              (p_aluOp[EXEC]),
-        .i_fwdRs1             (fwdRs1),
-        .i_fwdRs2             (fwdRs2),
-        .i_aluSrcA            (p_exec_a[EXEC]),
-        .i_aluSrcB            (p_exec_b[EXEC]),
-        .i_EXEC_rs1           (p_rs1[EXEC]),
-        .i_EXEC_rs2           (p_rs2[EXEC]),
-        .i_MEM_rd             (p_aluOut[MEM]),
-        .i_WB_rd              (WB_result),
-        .i_PC                 (p_PC[EXEC]),
-        .i_IMM                (p_IMM[EXEC]),
-        .o_aluOut             (aluOut),
-        .o_addrGenOut         (jumpAddr),
-        .o_rs2FwdOut          (rs2FwdOut)
+        .i_funct7       (p_funct7[EXEC]),
+        .i_funct3       (p_funct3[EXEC]),
+        .i_aluOp        (p_aluOp[EXEC]),
+        .i_fwdRs1       (fwdRs1),
+        .i_fwdRs2       (fwdRs2),
+        .i_aluSrcA      (p_exec_a[EXEC]),
+        .i_aluSrcB      (p_exec_b[EXEC]),
+        .i_EXEC_rs1     (p_rs1[EXEC]),
+        .i_EXEC_rs2     (p_rs2[EXEC]),
+        .i_MEM_rd       (p_aluOut[MEM]),
+        .i_WB_rd        (WB_result),
+        .i_PC           (p_PC[EXEC]),
+        .i_IMM          (p_IMM[EXEC]),
+        .o_aluOut       (aluOut),
+        .o_addrGenOut   (jumpAddr),
+        .o_rs2FwdOut    (rs2FwdOut)
     );
-    Memory #(.XLEN(XLEN)) MEMORY_unit(
-        .i_funct3             (p_funct3[MEM]),
-        .i_dataIn             (p_rs2[MEM]),
-        .o_dataOut            (o_dataOut)
+    Memory #(.XLEN(XLEN)) MEMORY_unit (
+        .i_funct3       (p_funct3[MEM]),
+        .i_dataIn       (p_rs2[MEM]),
+        .o_dataOut      (o_dataOut)
     );
-    Writeback #(.XLEN(XLEN)) WRITEBACK_unit(
-        .i_funct3             (p_funct3[WB]),
-        .i_dataIn             (p_readData[WB]),
-        .o_dataOut            (loadData)
-    );
-    Regfile #(.XLEN(XLEN), .ADDR_WIDTH(REGFILE_ADDR_WIDTH)) REGFILE_unit (
-        .i_clk          (i_clk),
-        .i_wrEn         (p_reg_w[WB]),
-        .i_rs1Addr      (FETCH_stall ? `RS1(instrReg) : `RS1(i_instr)),
-        .i_rs2Addr      (FETCH_stall ? `RS2(instrReg) : `RS2(i_instr)),
-        .i_rdAddr       (p_rdAddr[WB]),
-        .i_rdData       (WB_result),
-        .o_rs1Data      (rs1Out),
-        .o_rs2Data      (rs2Out)
+    Writeback #(.XLEN(XLEN)) WRITEBACK_unit (
+        .i_funct3       (p_funct3[WB]),
+        .i_dataIn       (p_readData[WB]),
+        .o_dataOut      (loadData)
     );
 
     // Pipeline CTRL reg assignments
