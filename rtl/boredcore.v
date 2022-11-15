@@ -102,7 +102,7 @@ module boredcore (
     assign rdFwdRs1En   = p_reg_w[WB] && (`RS1(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
     assign rdFwdRs2En   = p_reg_w[WB] && (`RS2(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
     // Stall and flush logic
-    assign load_hazard  = p_mem2reg[EXEC] && ((`RS1(instrReg) == p_rdAddr[EXEC])||(`RS2(instrReg) == p_rdAddr[EXEC]));
+    assign load_hazard  = p_mem2reg[EXEC] && ((`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC]));
     assign load_wait    = o_loadReq && ~i_memValid;
     assign FETCH_stall  = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
     assign EXEC_stall   = MEM_stall;

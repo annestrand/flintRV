@@ -62,7 +62,7 @@ module Execute (
     wire indirJump                  /*verilator public*/;
     wire [XLEN-1:0] ctrlTransSrcA   /*verilator public*/;
     wire [XLEN-1:0] jmpResult       /*verilator public*/;
-    assign indirJump = `ALU_OP_I_JUMP == i_aluOp; // (i.e. JALR)
+    assign indirJump        = `ALU_OP_I_JUMP == i_aluOp; // (i.e. JALR)
     assign ctrlTransSrcA    = indirJump ? rs1Out : i_PC;
     assign jmpResult        = ctrlTransSrcA + i_IMM;
 

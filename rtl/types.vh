@@ -32,9 +32,9 @@
 `define PC                  1'b1    // Operand A
 `define IMM                 1'b1    // Operand B
 
-// Yes/No bit macros
-`define Y                   1'b1
-`define N                   1'b0
+// Bool bit macros
+`define TRUE                1'b1
+`define FALSE               1'b0
 
 // ALU OP
 `define ALU_OP_R            4'b0000
@@ -74,19 +74,19 @@
 `define LS_BU_OP            3'b100
 `define LS_HU_OP            3'b101
 
-// Opcode-type controls
-//                          | ALU_OP          | EXEC_A | EXEC_B | MEM_W | REG_W | MEM2REG | BRA | JMP |
-`define R_CTRL              { `ALU_OP_R,        `REG,    `REG,    `N,     `Y,     `N,       `N,   `N  }
-`define I_JUMP_CTRL         { `ALU_OP_I_JUMP,   `PC,     `REG,    `N,     `Y,     `N,       `N,   `Y  }
-`define I_LOAD_CTRL         { `ALU_OP_I_LOAD,   `REG,    `IMM,    `N,     `Y,     `Y,       `N,   `N  }
-`define I_ARITH_CTRL        { `ALU_OP_I_ARITH,  `REG,    `IMM,    `N,     `Y,     `N,       `N,   `N  }
-`define I_SYS_CTRL          { `ALU_OP_I_SYS,    `REG,    `IMM,    `N,     `N,     `N,       `N,   `N  }
-`define I_FENCE_CTRL        { `ALU_OP_I_FENCE,  `REG,    `IMM,    `N,     `N,     `N,       `N,   `N  }
-`define S_CTRL              { `ALU_OP_S,        `REG,    `IMM,    `Y,     `N,     `N,       `N,   `N  }
-`define B_CTRL              { `ALU_OP_B,        `REG,    `REG,    `N,     `N,     `N,       `Y,   `N  }
-`define U_LUI_CTRL          { `ALU_OP_U_LUI,    `REG,    `IMM,    `N,     `Y,     `N,       `N,   `N  }
-`define U_AUIPC_CTRL        { `ALU_OP_U_AUIPC,  `PC,     `IMM,    `N,     `Y,     `N,       `N,   `N  }
-`define J_CTRL              { `ALU_OP_J,        `PC,     `REG,    `N,     `Y,     `N,       `N,   `Y  }
+// Opcode-type controls     /==================================================================================\
+//                          | ALU_OP          | EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP    |
+`define R_CTRL              { `ALU_OP_R       , `REG   , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
+`define I_JUMP_CTRL         { `ALU_OP_I_JUMP  , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  }
+`define I_LOAD_CTRL         { `ALU_OP_I_LOAD  , `REG   , `IMM   , `FALSE , `TRUE  , `TRUE   , `FALSE  , `FALSE }
+`define I_ARITH_CTRL        { `ALU_OP_I_ARITH , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
+`define I_SYS_CTRL          { `ALU_OP_I_SYS   , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE }
+`define I_FENCE_CTRL        { `ALU_OP_I_FENCE , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE }
+`define S_CTRL              { `ALU_OP_S       , `REG   , `IMM   , `TRUE  , `FALSE , `FALSE  , `FALSE  , `FALSE }
+`define B_CTRL              { `ALU_OP_B       , `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `TRUE   , `FALSE }
+`define U_LUI_CTRL          { `ALU_OP_U_LUI   , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
+`define U_AUIPC_CTRL        { `ALU_OP_U_AUIPC , `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
+`define J_CTRL              { `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  }
 
 `define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
 `define IS_SHIFT_IMM(x)     (~x[13] && x[12])
