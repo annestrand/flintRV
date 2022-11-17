@@ -14,8 +14,17 @@ RTL_SRCS               := $(shell find rtl -type f -name "*.v")
 vpath %.v tests
 vpath %.py scripts
 
+# Find Python Interpreter
+PYTHON:=$(shell command -v python3 2> /dev/null)
+ifeq (, $(PYTHON))
+PYTHON:=$(shell command -v python 2> /dev/null)
+ifeq (, $(PYTHON))
+$(error "Cannot find either 'python3' or 'python' in $$PATH")
+endif
+endif
+
 # --- RISCV TOOLCHAIN -------------------------------------------------------------------------------------------------
-ifdef TC_TRIPLECC_FLAGS
+ifdef TC_TRIPLE
 TOOLCHAIN_PREFIX       := $(TC_TRIPLE)
 else
 TOOLCHAIN_PREFIX       := riscv64-unknown-elf
@@ -104,17 +113,19 @@ all: submodules build-dir sim tests soc
 
 # Build tests
 .PHONY: tests
+tests: build-dir
 tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
 tests: $(CPU_TEST_MEM) $(OUT_DIR)/tests/Vboredcore.cpp
 tests: $(OUT_DIR)/Submodule_tests
-	$(MAKE) -C $(OUT_DIR)/tests -f Vboredcore.mk
+	@$(MAKE) -C $(OUT_DIR)/tests -f Vboredcore.mk
 
 # Build Verilated simulator
 .PHONY: sim
+sim: build-dir
 sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/verilator/main.cc
 sim: $(OUT_DIR)/sim/Vboredcore.cpp
 sim:
-	$(MAKE) -C $(OUT_DIR)/sim -f Vboredcore.mk
+	@$(MAKE) -C $(OUT_DIR)/sim -f Vboredcore.mk
 
 # Build boredsoc firmware
 .PHONY: soc
@@ -129,13 +140,9 @@ ifeq ($(DOCKER_RUNNING),)
 endif
 	@docker start boredcore
 
-.PHONY: objdump
-objdump:
-	@$(DOCKER_CMD) $(RISCV_OBJDUMP) -D $(DUMP)
-
 .PHONY: submodules
 submodules:
-	git submodule update --init --recursive
+	@git submodule update --init --recursive
 
 .PHONY: build-dir
 build-dir:
@@ -159,16 +166,16 @@ $(OUT_DIR)/tests/sub:
 	@mkdir -p $(OUT_DIR)/tests/sub
 
 $(OUT_DIR)/tests/sub/sub_%.mem: sub_%.mem.py
-	python3 $< -out $(OUT_DIR)/tests/sub
+	$(PYTHON) $< -out $(OUT_DIR)/tests/sub
 
 $(OUT_DIR)/tests/sub/sub_%.s: sub_%.asm.py
-	python3 $< -out $(OUT_DIR)/tests/sub
+	$(PYTHON) $< -out $(OUT_DIR)/tests/sub
 
 $(OUT_DIR)/tests/cpu_%.s: scripts/cpu_%.asm.py
-	python3 $< -out $(OUT_DIR)/tests
+	$(PYTHON) $< -out $(OUT_DIR)/tests
 
 boredsoc/%_generated.v:
-	python3 scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
+	$(PYTHON) scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
 
 .SECONDARY:
 $(OUT_DIR)/tests/sub/sub_%.elf: $(OUT_DIR)/tests/sub/sub_%.s
@@ -177,7 +184,7 @@ $(OUT_DIR)/tests/sub/sub_%.elf: $(OUT_DIR)/tests/sub/sub_%.s
 .SECONDARY:
 $(OUT_DIR)/tests/sub/sub_%.mem: $(OUT_DIR)/tests/sub/sub_%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
-	python3 ./scripts/byteswap_memfile.py $@
+	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
 .SECONDARY:
 boredsoc/%.elf: boredsoc/%.s
@@ -186,7 +193,7 @@ boredsoc/%.elf: boredsoc/%.s
 .SECONDARY:
 boredsoc/%.mem: boredsoc/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
-	python3 ./scripts/byteswap_memfile.py $@
+	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
 # Submodule tests
 $(OUT_DIR)/Submodule_tests: tests/sub/main_tb.v $(OUT_DIR)/tests/sub $(SUB_SRCS) $(SUB_TEST_ASM_MEM) $(SUB_TEST_MEM)
