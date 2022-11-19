@@ -12,6 +12,12 @@
 #include "common.hh"
 #include "functional/test_binaries.h"
 
+// Initial regfile content files
+namespace {
+#include "cpu_logic_test_regs.inc"
+#include "cpu_arith_test_regs.inc"
+}
+
 extern int g_dumpLevel;
 
 // ====================================================================================================================
@@ -41,8 +47,13 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
 // ====================================================================================================================
 TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd", TESTS_PATH "/cpu_logic_test.regs"))   { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd"))                                      { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_cpu_logic_test_hex, build_tests_cpu_logic_test_hex_len))   { FAIL(); }
+
+    // Init regfile contents
+    for (int i=0; i<sizeof(cpu_logic_test_regs)/sizeof(cpu_logic_test_regs[0]); ++i) {
+        dut.writeRegfile(i, cpu_logic_test_regs[i]);
+    }
 
     bool done                   = false;
     constexpr int doneReg       = 6;
@@ -65,8 +76,13 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
 // ====================================================================================================================
 TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd", TESTS_PATH "/cpu_arith_test.regs"))   { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd"))                                      { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_cpu_arith_test_hex, build_tests_cpu_arith_test_hex_len))   { FAIL(); }
+
+    // Init regfile contents
+    for (int i=0; i<sizeof(cpu_arith_test_regs)/sizeof(cpu_arith_test_regs[0]); ++i) {
+        dut.writeRegfile(i, cpu_arith_test_regs[i]);
+    }
 
     bool done                   = false;
     constexpr int doneReg       = 13;

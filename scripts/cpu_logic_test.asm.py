@@ -57,15 +57,18 @@ if __name__ == "__main__":
     outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.s"
     with open(outfile, 'w') as fp:
         print(logicTestProgram, file=fp)
-    # Init regfile values:
-    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.regs"
+    # Init regfile values (wrap in std::vector<int> format)
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_regs.inc"
     with open(outfile, 'w') as fp:
-        print(logicRs1, file=fp)
-        print(logicRs2, file=fp)
-        print(logicRs3, file=fp)
-        print(logicRs4, file=fp)
-        print(logicRs5, file=fp)
-        print(logicRs2, file=fp)
-        print(logicRs3, file=fp)
-        print(logicRs4, file=fp)
-        print(logicRs5, file=fp)
+        print(f"long int {os.path.splitext(os.path.basename(outfile))[0]}[] = {'{'}", file=fp)
+        print(f'0, // x0 reg', file=fp)
+        print(f'{logicRs1},' , file=fp)
+        print(f'{logicRs2},' , file=fp)
+        print(f'{logicRs3},' , file=fp)
+        print(f'{logicRs4},' , file=fp)
+        print(f'{logicRs5},' , file=fp)
+        print(f'{logicRs2},' , file=fp)
+        print(f'{logicRs3},' , file=fp)
+        print(f'{logicRs4},' , file=fp)
+        print(f'{logicRs5} ' , file=fp)
+        print(f"{'}'};"      , file=fp)

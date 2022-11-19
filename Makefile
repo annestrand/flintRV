@@ -82,7 +82,6 @@ CPU_TEST_INC           := $(CPU_TEST_HEX:%.hex=%.inc)
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/tests/cpu
-CPU_TEST_CFLAGS        += -DTESTS_PATH='\"$(ROOT_DIR)/$(OUT_DIR)/tests\"'
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
 
 CPU_TEST_FLAGS         := -Wall

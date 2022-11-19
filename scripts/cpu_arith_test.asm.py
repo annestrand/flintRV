@@ -93,18 +93,21 @@ if __name__ == "__main__":
     outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.s"
     with open(outfile, 'w') as fp:
         print(arithTestProgram, file=fp)
-    # Init regfile values:
-    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}.regs"
+    # Init regfile values (wrap in std::vector<int> format)
+    outfile = f"{basenameNoExt(parseArgv(sys.argv).outDir, __file__)}_regs.inc"
     with open(outfile, 'w') as fp:
-        print(arithRs1 , file=fp)
-        print(arithRs2 , file=fp)
-        print(arithRs3 , file=fp)
-        print(arithRs4 , file=fp)
-        print(arithRs5 , file=fp)
-        print(arithRs6 , file=fp)
-        print(arithRs7 , file=fp)
-        print(arithRs8 , file=fp)
-        print(arithRs9 , file=fp)
-        print(arithRs10, file=fp)
-        print(arithRs11, file=fp)
-        print(arithRs12, file=fp)
+        print(f"long int {os.path.splitext(os.path.basename(outfile))[0]}[] = {'{'}", file=fp)
+        print(f'0, // x0 reg'   , file=fp)
+        print(f'{arithRs1 },'   , file=fp)
+        print(f'{arithRs2 },'   , file=fp)
+        print(f'{arithRs3 },'   , file=fp)
+        print(f'{arithRs4 },'   , file=fp)
+        print(f'{arithRs5 },'   , file=fp)
+        print(f'{arithRs6 },'   , file=fp)
+        print(f'{arithRs7 },'   , file=fp)
+        print(f'{arithRs8 },'   , file=fp)
+        print(f'{arithRs9 },'   , file=fp)
+        print(f'{arithRs10},'   , file=fp)
+        print(f'{arithRs11},'   , file=fp)
+        print(f'{arithRs12} '   , file=fp)
+        print(f"{'}'};"         , file=fp)

@@ -8,10 +8,6 @@
 #include "Vboredcore.h"
 #include "Vboredcore__Syms.h"
 
-// Placeholder defines here
-#ifndef TESTS_PATH
-#define TESTS_PATH "."
-#endif // TESTS_PATH
 #ifndef VERILATOR_VER
 #define VERILATOR_VER 4028
 #endif // VERILATOR_VER
@@ -28,7 +24,7 @@ class boredcore {
 public:
     boredcore(vluint64_t maxSimTime, int dumpLevel=0);
     ~boredcore();
-    bool create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath=std::string());
+    bool create(Vboredcore* cpu, const char* traceFile);
     bool createMemory(size_t memSize);
     bool createMemory(size_t memSize, std::string initHexfile);
     bool createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen);

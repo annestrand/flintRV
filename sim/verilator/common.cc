@@ -16,22 +16,6 @@ bool loadMem(std::string filePath, char* mem, ssize_t memLen) {
     return true;
 }
 // ====================================================================================================================
-std::vector<std::string> initRegfileReader(std::string filePath) {
-    std::vector<std::string> contents;
-    std::ifstream f(filePath);
-    if (!f) {
-        LOG_E("Failed reading from: [ %s ]", filePath.c_str());
-        return contents;
-    }
-    std::string line;
-    while (std::getline(f, line)) {
-        line.erase(0, line.find_first_not_of(" \t\n\r\f\v"));
-        contents.push_back(line);
-    }
-    f.close();
-    return contents;
-}
-// ====================================================================================================================
 std::string disassembleRv32i(unsigned int instr) {
     constexpr unsigned int R       = 0b0110011;
     constexpr unsigned int I_JUMP  = 0b1100111;

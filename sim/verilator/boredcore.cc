@@ -27,7 +27,7 @@ boredcore::~boredcore() {
     if (m_mem != nullptr)   { delete[] m_mem; m_mem = nullptr;                      }
 }
 // ====================================================================================================================
-bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath) {
+bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
     if (cpu == nullptr) {
         LOG_E("Failed to create Verilated boredcore module!\n");
         return false;
@@ -44,27 +44,6 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initR
         }
     }
     reset(1); // Reset CPU on create for 1cc
-
-    // Init the register file (if given) - needs to happen after reset
-    if (!initRegfilePath.empty()) {
-        auto delEmptyStrElems = [](std::vector<std::string>& strList) {
-            strList.erase(std::remove_if(
-                strList.begin(),
-                strList.end(),
-                [](std::string const& s) { return s.empty(); }
-            ), strList.end());
-        };
-        auto init_regfile = initRegfileReader(initRegfilePath);
-        if (init_regfile.empty()) {
-            return false;
-        }
-        delEmptyStrElems(init_regfile);
-        // Update regfile
-        for (auto it = init_regfile.begin(); it != init_regfile.end(); ++it) {
-            int idx = it - init_regfile.begin();
-            writeRegfile(idx+1, INT_DECODE_ASCII((*it).c_str()));
-        }
-    }
     return true;
 }
 // ====================================================================================================================
