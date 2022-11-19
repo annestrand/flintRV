@@ -176,7 +176,7 @@ $(OUT_DIR)/tests/sub/sub_%.s: sub_%.asm.py
 $(OUT_DIR)/tests/cpu_%.s: scripts/cpu_%.asm.py
 	$(PYTHON) $< -out $(OUT_DIR)/tests
 
-boredsoc/%_generated.v:
+boredsoc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	$(PYTHON) scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
 
 .SECONDARY:
@@ -202,11 +202,11 @@ $(OUT_DIR)/Submodule_tests: tests/sub/main_tb.v $(OUT_DIR)/tests/sub $(SUB_SRCS)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Sim target
-$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
+$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vboredcore $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU test target
-$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS)
+$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vboredcore_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s
