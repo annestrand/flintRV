@@ -29,14 +29,16 @@ public:
     boredcore(vluint64_t maxSimTime, int dumpLevel=0);
     ~boredcore();
     bool create(Vboredcore* cpu, const char* traceFile, std::string initRegfilePath=std::string());
-    bool createMemory(size_t memSize, std::string hexfile=std::string());
+    bool createMemory(size_t memSize);
+    bool createMemory(size_t memSize, std::string initHexfile);
+    bool createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen);
     bool instructionUpdate();
     bool loadStoreUpdate();
     bool peekMem(int addr, int& val);
     bool pokeMem(int addr, int val);
     void writeRegfile(int index, int val);
     int readRegfile(int index);
-    void reset(int count=1);
+    void reset(int cycles=1);
     void tick();
     void dump();
     bool end();

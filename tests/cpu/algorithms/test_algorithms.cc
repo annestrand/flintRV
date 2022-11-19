@@ -11,6 +11,7 @@
 #include "Vboredcore__Syms.h"
 #include "boredcore.hh"
 #include "common.hh"
+#include "algorithms/test_binaries.h"
 
 extern int g_dumpLevel;
 
@@ -18,8 +19,8 @@ extern int g_dumpLevel;
 TEST(algorithms, fibonacci) {
     constexpr int memSize = 0x4000;
     boredcore dut = boredcore(1000000, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/fibonacci.vcd"))     { FAIL(); }
-    if (!dut.createMemory(memSize, TESTS_PATH "/fibonacci.hex"))    { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/fibonacci.vcd"))                                 { FAIL(); }
+    if (!dut.createMemory(memSize, build_tests_fibonacci_hex, build_tests_fibonacci_hex_len))   { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S11;
@@ -53,8 +54,8 @@ TEST(algorithms, fibonacci) {
 TEST(algorithms, binsearch) {
     constexpr int memSize = 0x4000;
     boredcore dut = boredcore(1000000, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/binsearch.vcd"))     { FAIL(); }
-    if (!dut.createMemory(memSize, TESTS_PATH "/binsearch.hex"))    { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/binsearch.vcd"))                                 { FAIL(); }
+    if (!dut.createMemory(memSize, build_tests_binsearch_hex, build_tests_binsearch_hex_len))   { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S11;
@@ -83,8 +84,8 @@ TEST(algorithms, binsearch) {
 TEST(algorithms, mergesort) {
     constexpr int memSize = 0x4000;
     boredcore dut = boredcore(1000000, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/mergesort.vcd"))     { FAIL(); }
-    if (!dut.createMemory(memSize, TESTS_PATH "/mergesort.hex"))    { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/mergesort.vcd"))                                 { FAIL(); }
+    if (!dut.createMemory(memSize, build_tests_mergesort_hex, build_tests_mergesort_hex_len))   { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S11;

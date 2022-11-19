@@ -74,12 +74,14 @@ CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" 
 CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
 CPU_ASM_TESTS          += $(CPU_PY_TESTS:%.asm.py=%.s)
 CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
-CPU_TEST_MEM           := $(CPU_TEST_ELF:%.elf=%.hex)
-CPU_TEST_MEM           += $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
-CPU_TEST_MEM           += $(CPU_C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
+CPU_TEST_HEX           := $(CPU_TEST_ELF:%.elf=%.hex)
+CPU_TEST_HEX           += $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
+CPU_TEST_HEX           += $(CPU_C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
+CPU_TEST_INC           := $(CPU_TEST_HEX:%.hex=%.inc)
 
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
+CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/tests/cpu
 CPU_TEST_CFLAGS        += -DTESTS_PATH='\"$(ROOT_DIR)/$(OUT_DIR)/tests\"'
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
 
@@ -115,7 +117,7 @@ all: submodules build-dir sim tests soc
 .PHONY: tests
 tests: build-dir
 tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
-tests: $(CPU_TEST_MEM) $(OUT_DIR)/tests/Vboredcore.cpp
+tests: $(CPU_TEST_INC) $(OUT_DIR)/tests/Vboredcore.cpp
 tests: $(OUT_DIR)/Submodule_tests
 	@$(MAKE) -C $(OUT_DIR)/tests -f Vboredcore.mk
 
@@ -218,3 +220,6 @@ $(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c
 
 $(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O binary $< $@
+
+$(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex
+	xxd -i $< $@

@@ -10,14 +10,15 @@
 #include "Vboredcore__Syms.h"
 #include "boredcore.hh"
 #include "common.hh"
+#include "functional/test_binaries.h"
 
 extern int g_dumpLevel;
 
 // ====================================================================================================================
 TEST(functional, loop) { // Basic test loop summation for 10 iterations
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))   { FAIL(); }
-    if (!dut.createMemory(0x200, TESTS_PATH "/simple_loop.hex"))    { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))                               { FAIL(); }
+    if (!dut.createMemory(0x200, build_tests_simple_loop_hex, build_tests_simple_loop_hex_len)) { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S1;
@@ -40,8 +41,8 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
 // ====================================================================================================================
 TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd", TESTS_PATH "/cpu_logic_test.regs"))    { FAIL(); }
-    if (!dut.createMemory(0x200, TESTS_PATH "/cpu_logic_test.hex"))                                      { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd", TESTS_PATH "/cpu_logic_test.regs"))   { FAIL(); }
+    if (!dut.createMemory(0x200, build_tests_cpu_logic_test_hex, build_tests_cpu_logic_test_hex_len))   { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = 6;
@@ -64,8 +65,8 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
 // ====================================================================================================================
 TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd", TESTS_PATH "/cpu_arith_test.regs"))    { FAIL(); }
-    if (!dut.createMemory(0x200, TESTS_PATH "/cpu_arith_test.hex"))                                      { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd", TESTS_PATH "/cpu_arith_test.regs"))   { FAIL(); }
+    if (!dut.createMemory(0x200, build_tests_cpu_arith_test_hex, build_tests_cpu_arith_test_hex_len))   { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = 13;
@@ -88,8 +89,8 @@ TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g
 // ====================================================================================================================
 TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))   { FAIL(); }
-    if (!dut.createMemory(0x200, TESTS_PATH "/jump_branch.hex"))    { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))                               { FAIL(); }
+    if (!dut.createMemory(0x200, build_tests_jump_branch_hex, build_tests_jump_branch_hex_len)) { FAIL(); }
 
     bool done                   = false;
     constexpr int resultReg     = S1;
@@ -111,8 +112,8 @@ TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JA
 // ====================================================================================================================
 TEST(functional, load_store) { // Tests load and store based instructions
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd")) { FAIL(); }
-    if (!dut.createMemory(0x200, TESTS_PATH "/load_store.hex"))         { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd"))                         { FAIL(); }
+    if (!dut.createMemory(0x200, build_tests_load_store_hex, build_tests_load_store_hex_len))   { FAIL(); }
 
     bool done                   = false;
     constexpr int doneReg       = S8;

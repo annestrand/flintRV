@@ -68,14 +68,34 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile, std::string initR
     return true;
 }
 // ====================================================================================================================
-bool boredcore::createMemory(size_t memSize, std::string hexfile) {
+bool boredcore::createMemory(size_t memSize) {
     if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
     m_memSize   = memSize;
     m_mem       = new char[memSize];
     if (m_mem == nullptr) { LOG_E("Failed to allocate %ld bytes!\n", m_memSize); return false; }
-    memset(m_mem, 0, m_memSize);
-    // Init mem from hexfile (if given)
-    if (!hexfile.empty()) { return loadMem(hexfile, m_mem, m_memSize); }
+    std::memset(m_mem, 0, m_memSize);
+    return true;
+}
+// ====================================================================================================================
+bool boredcore::createMemory(size_t memSize, std::string initHexfile) {
+    if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
+    m_memSize   = memSize;
+    m_mem       = new char[memSize];
+    if (m_mem == nullptr) { LOG_E("Failed to allocate %ld bytes!\n", m_memSize); return false; }
+    std::memset(m_mem, 0, m_memSize);
+    // Init mem from hexfile
+    return loadMem(initHexfile, m_mem, m_memSize);
+}
+// ====================================================================================================================
+bool boredcore::createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen) {
+    if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
+    if (memSize < initHexarrayLen) { LOG_E("Cannot fit initialization hex char array into memory!\n"); return false; }
+    m_memSize   = memSize;
+    m_mem       = new char[memSize];
+    if (m_mem == nullptr) { LOG_E("Failed to allocate %ld bytes!\n", m_memSize); return false; }
+    std::memset(m_mem, 0, m_memSize);
+    // Init mem from char array
+    std::memcpy(m_mem, initHexarray, initHexarrayLen);
     return true;
 }
 // ====================================================================================================================
@@ -140,7 +160,7 @@ int boredcore::readRegfile(int index) {
     return (index == 0) ? 0 : CPU(this)->FETCH_DECODE_unit->REGFILE_unit->RS1_PORT_RAM->ram[index];
 }
 // ====================================================================================================================
-void boredcore::reset(int count) {
+void boredcore::reset(int cycles) {
     // Some dummy values for now
     m_cpu->i_instr    = 0x0badc0de;
     m_cpu->i_dataIn   = 0xdecafbad;
@@ -148,7 +168,7 @@ void boredcore::reset(int count) {
     m_cpu->i_memValid = 0;
     // Toggle reset
     m_cpu->i_rst = 1;
-    for (int i=0; i<count; ++i) { tick(); }
+    for (int i=0; i<cycles; ++i) { tick(); }
     m_cpu->i_rst = 0;
 }
 // ====================================================================================================================
