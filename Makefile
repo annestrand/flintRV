@@ -101,6 +101,7 @@ SUB_TEST_PY_ASM        := $(shell find scripts -type f -name "sub_*.asm.py" -exe
 SUB_TEST_MEM           := $(SUB_TEST_PY_MEM:sub_%.mem.py=$(OUT_DIR)/tests/sub/sub_%.mem)
 SUB_TEST_ASM           := $(SUB_TEST_PY_ASM:sub_%.asm.py=$(OUT_DIR)/tests/sub/sub_%.s)
 SUB_TEST_ASM_MEM       := $(SUB_TEST_ASM:%.s=%.mem)
+SUB_TEST_DEPS          := $(SUB_TEST_ASM_MEM) $(SUB_TEST_MEM)
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 BOREDSOC_SRC           := boredsoc/firmware.s
@@ -197,7 +198,7 @@ boredsoc/%.mem: boredsoc/%.elf
 	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
 # Submodule tests
-$(OUT_DIR)/Submodule_tests: tests/sub/main_tb.v $(OUT_DIR)/tests/sub $(SUB_SRCS) $(SUB_TEST_ASM_MEM) $(SUB_TEST_MEM)
+$(OUT_DIR)/Submodule_tests: tests/sub/main_tb.v $(OUT_DIR)/tests/sub $(SUB_SRCS) $(RTL_SRCS) $(SUB_TEST_DEPS)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Sim target
