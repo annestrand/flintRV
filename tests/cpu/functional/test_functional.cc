@@ -10,12 +10,17 @@
 #include "Vboredcore__Syms.h"
 #include "boredcore.hh"
 #include "common.hh"
-#include "functional/test_binaries.h"
 
-// Initial regfile content files
 namespace {
+// Embed the initial regfile content here
 #include "cpu_logic_test_regs.inc"
 #include "cpu_arith_test_regs.inc"
+// Embed the test programs binaries here
+#include "cpu_arith_test.inc"
+#include "cpu_logic_test.inc"
+#include "jump_branch.inc"
+#include "load_store.inc"
+#include "simple_loop.inc"
 }
 
 extern int g_dumpLevel;

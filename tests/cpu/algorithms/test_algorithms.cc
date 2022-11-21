@@ -11,7 +11,13 @@
 #include "Vboredcore__Syms.h"
 #include "boredcore.hh"
 #include "common.hh"
-#include "algorithms/test_binaries.h"
+
+namespace {
+// Embed the test programs binaries here
+#include "binsearch.inc"
+#include "fibonacci.inc"
+#include "mergesort.inc"
+}
 
 extern int g_dumpLevel;
 
