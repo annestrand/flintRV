@@ -11,8 +11,7 @@ module AluControl_tb;
     // Test vectors
     parameter TEST_COUNT    = 2**14;
     integer i               = 0,
-            errs            = 0,
-            subfail         = 0;
+            errs            = 0;
     reg [13:0]  test_vector         [0:TEST_COUNT-1];
     reg  [4:0]  test_gold_vector    [0:TEST_COUNT-1];
     initial begin
@@ -53,20 +52,14 @@ module AluControl_tb;
     end
 
     // Test loop
-    reg [39:0] resultStr;
-    reg [13:0] test_vector_i;
     initial begin
         i_aluOp   = 'd0;
         i_funct3  = 'd0;
         i_funct7  = 'd0;
         #20;
         for (i=0; i<TEST_COUNT; i=i+1) begin
-            test_vector_i   = test_vector[i];
-            i_aluOp         = test_vector_i[13:10];
-            i_funct7        = test_vector_i[9:3];
-            i_funct3        = test_vector_i[2:0];
-            #20;
-            if (o_aluControl != test_gold_vector[i])    begin errs = errs + 1;  end
+            {i_aluOp, i_funct7, i_funct3} = test_vector[i]; #20;
+            if (o_aluControl != test_gold_vector[i]) begin errs = errs + 1; end
         end
         if (errs > 0)   begin $display("ALU control tests - FAILED: %0d", errs);    end
         else            begin $display("ALU control tests - PASSED");               end
