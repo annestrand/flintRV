@@ -4,15 +4,20 @@ module ImmGen (
     input       [31:0]      i_instr /*verilator public*/,
     output reg  [XLEN-1:0]  o_imm   /*verilator public*/
 );
-    parameter XLEN /*verilator public*/ = 32;
+    parameter   XLEN    /*verilator public*/  = 32;
+    localparam  U_EXT   /*verilator public*/  = XLEN-32;
+    localparam  S_EXT   /*verilator public*/  = XLEN-12;
+    localparam  B_EXT   /*verilator public*/  = XLEN-12;
+    localparam  I_EXT   /*verilator public*/  = XLEN-12;
+    localparam  J_EXT   /*verilator public*/  = XLEN-20;
 
     always @* begin
         case (`OPCODE(i_instr))
-            `U_LUI, `U_AUIPC    : o_imm = {i_instr[31:12], 12'd0};
-            `S                  : o_imm = {{21{i_instr[31]}}, i_instr[30:25], i_instr[11:8], i_instr[7]};
-            `B                  : o_imm = {{20{i_instr[31]}}, i_instr[7], i_instr[30:25], i_instr[11:8], 1'd0};
-            `J                  : o_imm = {{12{i_instr[31]}}, i_instr[19:12], i_instr[20], i_instr[30:21], 1'd0};
-            default             : o_imm = {{21{i_instr[31]}}, i_instr[30:20]}; // I-type
+            `U_LUI, `U_AUIPC    : o_imm = {{U_EXT{i_instr[31]}}, i_instr[31:12], 12'd0};
+            `S                  : o_imm = {{S_EXT{i_instr[31]}}, i_instr[31:25], i_instr[11:8], i_instr[7]};
+            `B                  : o_imm = {{B_EXT{i_instr[31]}}, i_instr[7], i_instr[30:25], i_instr[11:8], 1'd0};
+            `J                  : o_imm = {{J_EXT{i_instr[31]}}, i_instr[19:12], i_instr[20], i_instr[30:21], 1'd0};
+            default             : o_imm = {{I_EXT{i_instr[31]}}, i_instr[31:20]}; // I-type
         endcase
     end
 endmodule
