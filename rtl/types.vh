@@ -89,6 +89,5 @@
 `define J_CTRL              { `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  }
 
 `define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
-`define IS_SHIFT_IMM(x)     (~x[13] && x[12])
 
 `endif // TYPES_VH
