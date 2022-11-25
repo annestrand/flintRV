@@ -147,8 +147,11 @@ if __name__ == "__main__":
         for src_file in srcs:
             with open(os.path.join(src_dir, src_file)) as src_file_fp:
                 src_code = src_file_fp.read()
-                # We dont want any includes in final file
+
+                # Remove unwanted items from final file
                 src_code = re.sub(r"`include .*\n", "", src_code)
+                src_code = re.sub(r"/\*verilator public\*/", "", src_code)
+
                 print(src_code)
                 print("// " +"="*116)
     print("\n" + top_src)
