@@ -1,21 +1,17 @@
 # boredcore
 
 Another RISC-V cpu core design.
-
-## Design 🗺️
+- RV32I ISA
 - 4-stage in-order pipelined processor
 - Aimed to be implemented as a soft-cpu for use in FPGAs
 
 ## Dependencies ✅
 - GNU Make
-- GCC RISC-V compiler/cross-compiler toolchain
+- Python >= 3.6
+- GCC RISC-V compiler/cross-compiler toolchain (testing)
 - Icarus Verilog (testing)
 - Verilator (testing)
 - GoogleTest (testing)
-- SymbiYosys (testing)
-    - Yosys
-    - z3
-- Python >= 3.6
 
 ## Make configs ⚙
 Below are a table of Make config variables:
@@ -26,28 +22,20 @@ Below are a table of Make config variables:
 |DOCKER        |Use Docker GCC toolchain    |$ make DOCKER=1 ...                      | 0 (OFF)             |
 
 ## Simulator 🖥
-
 To build Verilator simulator:
 
     $ make sim
 
-Simulator output dir: `build/Vboredcore`
+Output dir: `build/Vboredcore`
 
 ## Testing 🧪
-Functional Verification:
-- `iverilog`    : Unit testing CPU sub-modules
-- `Verilator`   : CPU testing
-
-Formal Verification:
-- `SymbiYosys`  : Formal verify critical pieces of sub-module logic (TODO)
-
 To build tests:
 
     $ make tests
 
-CPU test runner: `build/Vboredcore_tests`
+CPU/Functional test runner: `build/Vboredcore_tests`
 
-Submodule test runner: `build/Submodule_tests`
+Submodule unit test runner: `build/Unit_tests`
 
 ## Docker 🐳
 RISC-V GCC cross-compiler is needed for building tests and building example firmware. There is a Dockerfile

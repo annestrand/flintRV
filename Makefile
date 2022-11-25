@@ -42,7 +42,7 @@ RISCV_AS_FLAGS         += -mabi=ilp32
 # --- IVERILOG --------------------------------------------------------------------------------------------------------
 ICARUS_FLAGS           := -Wall
 ICARUS_FLAGS           += -Irtl
-ICARUS_FLAGS           += -Itests/sub
+ICARUS_FLAGS           += -Itests/unit
 
 # --- SIMULATOR (VERILATOR) -------------------------------------------------------------------------------------------
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
@@ -89,7 +89,7 @@ CPU_TEST_FLAGS         += --x-initial unique
 CPU_TEST_FLAGS         += --top-module boredcore
 CPU_TEST_FLAGS         += --exe
 
-SUB_SRCS               := $(shell find tests/sub -type f -name "*.v")
+SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 BOREDSOC_SRC           := boredsoc/firmware.s
@@ -105,7 +105,7 @@ all: submodules sim tests soc
 .PHONY: tests
 tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
 tests: $(CPU_TEST_INC) $(CPU_TEST_HEX) $(OUT_DIR)/tests/Vboredcore.cpp
-tests: $(OUT_DIR)/Submodule_tests
+tests: $(OUT_DIR)/Unit_tests
 	@$(MAKE) -C $(OUT_DIR)/tests -f Vboredcore.mk
 
 # Build Verilated simulator
@@ -164,15 +164,15 @@ boredsoc/%.mem: boredsoc/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
-# Submodule tests
-$(OUT_DIR)/Submodule_tests: tests/sub/main_tb.v $(SUB_SRCS) $(RTL_SRCS) $(OUT_DIR)
+# Unit tests
+$(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) $(OUT_DIR)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Simulator (Verilator)
 $(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/sim
 	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vboredcore $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
-# CPU tests
+# CPU/Functional tests
 $(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/tests
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vboredcore_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 

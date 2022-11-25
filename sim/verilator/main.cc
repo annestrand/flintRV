@@ -11,7 +11,7 @@
 void printHelp(void) {
     printf("\n"
         "Vboredcore - Verilated boredcore simulator\n"
-        "[Usage]: Vboredcore [OPTIONS] <program_binary>\n"
+        "[Usage]: Vboredcore [OPTIONS] <program_binary>.hex\n"
         "\n\n"
         "OPTIONS:\n"
     );

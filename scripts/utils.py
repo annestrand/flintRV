@@ -18,7 +18,7 @@ class Imm32Ranges(Enum):
 
 def parseArgv(argv):
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument("-out", dest="outDir", default="obj_dir/sub", help="Output directory.")
+    parser.add_argument("-out", dest="outDir", default="build", help="Output directory.")
     args, unknown = parser.parse_known_args(args=argv)
     return args
 
