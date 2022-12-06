@@ -151,15 +151,17 @@ void boredcore::reset(int cycles) {
     m_cpu->i_rst = 0;
 }
 // ====================================================================================================================
-void boredcore::tick() {
-    dump();
-    m_cycles++;
-    m_cpu->i_clk = 0;
-    m_cpu->eval();
-    if(m_trace) { m_trace->dump(10*m_cycles-2); }
-    m_cpu->i_clk = 1;
-    m_cpu->eval();
-    if(m_trace) { m_trace->dump(10*m_cycles); m_trace->flush(); }
+void boredcore::tick(int cycles) {
+    for (int i=0; i<cycles; ++i) {
+        dump();
+        m_cycles++;
+        m_cpu->i_clk = 0;
+        m_cpu->eval();
+        if(m_trace) { m_trace->dump(10*m_cycles-2); }
+        m_cpu->i_clk = 1;
+        m_cpu->eval();
+        if(m_trace) { m_trace->dump(10*m_cycles); m_trace->flush(); }
+    }
 }
 // ====================================================================================================================
 void boredcore::dump() {

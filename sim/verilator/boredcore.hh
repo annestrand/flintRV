@@ -35,7 +35,7 @@ public:
     void writeRegfile(int index, int val);
     int readRegfile(int index);
     void reset(int cycles=1);
-    void tick();
+    void tick(int cycles=1);
     void dump();
     bool end();
     Vboredcore*             m_cpu;      // Reference to CPU object
