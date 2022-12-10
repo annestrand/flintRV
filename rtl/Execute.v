@@ -1,22 +1,22 @@
 `include "types.vh"
 
 module Execute (
-    input   [6:0]   i_funct7        /*verilator public*/,
-    input   [2:0]   i_funct3        /*verilator public*/,
-    input   [3:0]   i_aluOp         /*verilator public*/,
-    input   [1:0]   i_fwdRs1        /*verilator public*/,
-                    i_fwdRs2        /*verilator public*/,
-    input           i_aluSrcA       /*verilator public*/,
-                    i_aluSrcB       /*verilator public*/,
-    input   [31:0]  i_EXEC_rs1      /*verilator public*/,
-                    i_EXEC_rs2      /*verilator public*/,
-                    i_MEM_rd        /*verilator public*/,
-                    i_WB_rd         /*verilator public*/,
-    input   [31:0]  i_PC            /*verilator public*/,
-                    i_IMM           /*verilator public*/,
-    output  [31:0]  o_aluOut        /*verilator public*/,
-                    o_addrGenOut    /*verilator public*/,
-                    o_rs2FwdOut     /*verilator public*/
+    input   [6:0]       i_funct7        /*verilator public*/,
+    input   [2:0]       i_funct3        /*verilator public*/,
+    input   [3:0]       i_aluOp         /*verilator public*/,
+    input   [1:0]       i_fwdRs1        /*verilator public*/,
+                        i_fwdRs2        /*verilator public*/,
+    input               i_aluSrcA       /*verilator public*/,
+                        i_aluSrcB       /*verilator public*/,
+    input   [XLEN-1:0]  i_EXEC_rs1      /*verilator public*/,
+                        i_EXEC_rs2      /*verilator public*/,
+                        i_MEM_rd        /*verilator public*/,
+                        i_WB_rd         /*verilator public*/,
+                        i_PC            /*verilator public*/,
+                        i_IMM           /*verilator public*/,
+    output  [XLEN-1:0]  o_aluOut        /*verilator public*/,
+                        o_addrGenOut    /*verilator public*/,
+                        o_rs2FwdOut     /*verilator public*/
 );
     parameter XLEN /*verilator public*/ = 32;
 

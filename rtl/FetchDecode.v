@@ -10,8 +10,8 @@ module FetchDecode (
                                         i_instr         /*verilator public*/,
     output  [XLEN-1:0]                  o_regRs1Data    /*verilator public*/,
                                         o_regRs2Data    /*verilator public*/,
-    output  [XLEN-1:0]                  o_imm           /*verilator public*/,
-    output  [XLEN-1:0]                  o_ctrlSigs      /*verilator public*/
+                                        o_imm           /*verilator public*/,
+                                        o_ctrlSigs      /*verilator public*/
 );
     parameter XLEN                  /*verilator public*/ = 32;
     parameter REGFILE_ADDR_WIDTH    /*verilator public*/ = 5;
