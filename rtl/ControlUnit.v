@@ -1,33 +1,33 @@
 `include "types.vh"
 
 module ControlUnit (
-    input       [6:0]   i_opcode    /*verilator public*/,
-    output  reg [3:0]   o_aluOp     /*verilator public*/,
-    output  reg         o_exec_a    /*verilator public*/,
-                        o_exec_b    /*verilator public*/,
-                        o_mem_w     /*verilator public*/,
-                        o_reg_w     /*verilator public*/,
-                        o_mem2reg   /*verilator public*/,
-                        o_bra       /*verilator public*/,
-                        o_jmp       /*verilator public*/
+    input       [XLEN-1:0]  i_instr     /*verilator public*/,
+    output  reg [XLEN-1:0]  o_ctrlSigs  /*verilator public*/
 );
-    // Main ctrl. signals
+    parameter XLEN      = 32;
+    localparam NOP      = 32'd0;
+    localparam I_SYS    = 3;
+
+    reg [10:0] ctrlType /*verilator public*/;
+
     always @* begin
-        case (i_opcode)
-            // Invalid opcode - set all lines to 0
-            default     : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = 11'd0;
-            // Instruction formats
-            `R          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `R_CTRL;
-            `I_JUMP     : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_JUMP_CTRL;
-            `I_LOAD     : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_LOAD_CTRL;
-            `I_ARITH    : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_ARITH_CTRL;
-            `I_SYS      : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_SYS_CTRL;
-            `I_FENCE    : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `I_FENCE_CTRL;
-            `S          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `S_CTRL;
-            `B          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `B_CTRL;
-            `U_LUI      : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `U_LUI_CTRL;
-            `U_AUIPC    : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `U_AUIPC_CTRL;
-            `J          : {o_aluOp, o_exec_a, o_exec_b, o_mem_w, o_reg_w, o_mem2reg, o_bra, o_jmp} = `J_CTRL;
+        // Core control signal defaults
+        case (`OPCODE(i_instr))
+            `I_JUMP     : begin ctrlType = 11'b00000000001; o_ctrlSigs = `I_JUMP_CTRL;    end
+            `I_LOAD     : begin ctrlType = 11'b00000000010; o_ctrlSigs = `I_LOAD_CTRL;    end
+            `I_ARITH    : begin ctrlType = 11'b00000000100; o_ctrlSigs = `I_ARITH_CTRL;   end
+            `I_SYS      : begin ctrlType = 11'b00000001000; o_ctrlSigs = `I_SYS_CTRL;     end
+            `I_FENCE    : begin ctrlType = 11'b00000010000; o_ctrlSigs = `I_FENCE_CTRL;   end
+            `U_LUI      : begin ctrlType = 11'b00000100000; o_ctrlSigs = `U_LUI_CTRL;     end
+            `U_AUIPC    : begin ctrlType = 11'b00001000000; o_ctrlSigs = `U_AUIPC_CTRL;   end
+            `S          : begin ctrlType = 11'b00010000000; o_ctrlSigs = `S_CTRL;         end
+            `B          : begin ctrlType = 11'b00100000000; o_ctrlSigs = `B_CTRL;         end
+            `J          : begin ctrlType = 11'b01000000000; o_ctrlSigs = `J_CTRL;         end
+            `R          : begin ctrlType = 11'b10000000000; o_ctrlSigs = `R_CTRL;         end
+            default     : begin ctrlType = 11'b00000000000; o_ctrlSigs = NOP;             end
         endcase
+        // Other control signal settings/overrides
+        `CTRL_ECALL(o_ctrlSigs)     = ctrlType[I_SYS] && !(`FUNCT7(i_instr) == 7'b0000001);
+        `CTRL_EBREAK(o_ctrlSigs)    = ctrlType[I_SYS] &&  (`FUNCT7(i_instr) == 7'b0000001);
     end
 endmodule

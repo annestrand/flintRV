@@ -54,6 +54,7 @@ module boredcore (
                     rs1Out          /*verilator public*/,
                     rs2Out          /*verilator public*/,
                     rs2FwdOut       /*verilator public*/,
+                    ctrlSigs        /*verilator public*/,
                     WB_result       /*verilator public*/;
     wire      [3:0] aluOp           /*verilator public*/;
     wire      [1:0] fwdRs1          /*verilator public*/,
@@ -83,6 +84,16 @@ module boredcore (
                     EXEC_flush      /*verilator public*/,
                     MEM_flush       /*verilator public*/,
                     WB_flush        /*verilator public*/;
+
+    // Control signals
+    assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
+    assign exec_a   = `CTRL_EXEC_A(ctrlSigs);
+    assign exec_b   = `CTRL_EXEC_B(ctrlSigs);
+    assign mem_w    = `CTRL_MEM_W(ctrlSigs);
+    assign reg_w    = `CTRL_REG_W(ctrlSigs);
+    assign mem2reg  = `CTRL_MEM2REG(ctrlSigs);
+    assign bra      = `CTRL_BRA(ctrlSigs);
+    assign jmp      = `CTRL_JMP(ctrlSigs);
 
     // Branch/jump logic
     assign pcJump          = braMispredict || p_jmp[EXEC];
@@ -127,14 +138,7 @@ module boredcore (
         .o_regRs1Data   (rs1Out),
         .o_regRs2Data   (rs2Out),
         .o_imm          (IMM),
-        .o_aluOp        (aluOp),
-        .o_exec_a       (exec_a),
-        .o_exec_b       (exec_b),
-        .o_mem_w        (mem_w),
-        .o_reg_w        (reg_w),
-        .o_mem2reg      (mem2reg),
-        .o_bra          (bra),
-        .o_jmp          (jmp)
+        .o_ctrlSigs     (ctrlSigs)
     );
     Execute #(.XLEN(XLEN)) EXECUTE_unit (
         .i_funct7       (p_funct7[EXEC]),

@@ -74,19 +74,32 @@
 `define LS_BU_OP            3'b100
 `define LS_HU_OP            3'b101
 
-// Opcode-type controls     /==================================================================================\
-//                          | ALU_OP          | EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP    |
-`define R_CTRL              { `ALU_OP_R       , `REG   , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
-`define I_JUMP_CTRL         { `ALU_OP_I_JUMP  , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  }
-`define I_LOAD_CTRL         { `ALU_OP_I_LOAD  , `REG   , `IMM   , `FALSE , `TRUE  , `TRUE   , `FALSE  , `FALSE }
-`define I_ARITH_CTRL        { `ALU_OP_I_ARITH , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
-`define I_SYS_CTRL          { `ALU_OP_I_SYS   , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE }
-`define I_FENCE_CTRL        { `ALU_OP_I_FENCE , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE }
-`define S_CTRL              { `ALU_OP_S       , `REG   , `IMM   , `TRUE  , `FALSE , `FALSE  , `FALSE  , `FALSE }
-`define B_CTRL              { `ALU_OP_B       , `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `TRUE   , `FALSE }
-`define U_LUI_CTRL          { `ALU_OP_U_LUI   , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
-`define U_AUIPC_CTRL        { `ALU_OP_U_AUIPC , `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE }
-`define J_CTRL              { `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  }
+// Control signal fields
+`define CTRL_JMP(x)         x[0:0]
+`define CTRL_BRA(x)         x[1:1]
+`define CTRL_MEM2REG(x)     x[2:2]
+`define CTRL_REG_W(x)       x[3:3]
+`define CTRL_MEM_W(x)       x[4:4]
+`define CTRL_EXEC_B(x)      x[5:5]
+`define CTRL_EXEC_A(x)      x[6:6]
+`define CTRL_ALU_OP(x)      x[10:7]
+`define CTRL_ECALL(x)       x[11:11]
+`define CTRL_EBREAK(x)      x[12:12]
+
+// Core control unit signal defaults
+// _________________________________________________________________________________________________________________
+//                             | ALU_OP          | EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP      |
+`define R_CTRL          { 21'd0, `ALU_OP_R       , `REG   , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
+`define I_JUMP_CTRL     { 21'd0, `ALU_OP_I_JUMP  , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE    }
+`define I_LOAD_CTRL     { 21'd0, `ALU_OP_I_LOAD  , `REG   , `IMM   , `FALSE , `TRUE  , `TRUE   , `FALSE  , `FALSE   }
+`define I_ARITH_CTRL    { 21'd0, `ALU_OP_I_ARITH , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
+`define I_SYS_CTRL      { 21'd0, `ALU_OP_I_SYS   , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE   }
+`define I_FENCE_CTRL    { 21'd0, `ALU_OP_I_FENCE , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE   }
+`define S_CTRL          { 21'd0, `ALU_OP_S       , `REG   , `IMM   , `TRUE  , `FALSE , `FALSE  , `FALSE  , `FALSE   }
+`define B_CTRL          { 21'd0, `ALU_OP_B       , `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `TRUE   , `FALSE   }
+`define U_LUI_CTRL      { 21'd0, `ALU_OP_U_LUI   , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
+`define U_AUIPC_CTRL    { 21'd0, `ALU_OP_U_AUIPC , `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
+`define J_CTRL          { 21'd0, `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE    }
 
 `define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
 
