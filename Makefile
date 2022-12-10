@@ -104,6 +104,7 @@ all: submodules sim tests soc
 # Build tests
 .PHONY: tests
 tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
+tests: $(OUT_DIR) $(OUT_DIR)/tests
 tests: $(CPU_TEST_INC) $(CPU_TEST_HEX) $(OUT_DIR)/tests/Vboredcore.cpp
 tests: $(OUT_DIR)/Unit_tests
 	@$(MAKE) -C $(OUT_DIR)/tests -f Vboredcore.mk
@@ -111,6 +112,7 @@ tests: $(OUT_DIR)/Unit_tests
 # Build Verilated simulator
 .PHONY: sim
 sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/verilator/main.cc
+sim: $(OUT_DIR) $(OUT_DIR)/sim
 sim: $(OUT_DIR)/sim/Vboredcore.cpp
 sim:
 	@$(MAKE) -C $(OUT_DIR)/sim -f Vboredcore.mk
@@ -150,7 +152,7 @@ $(OUT_DIR)/tests:
 	mkdir -p $(OUT_DIR)/tests
 
 # Testgen
-$(OUT_DIR)/tests/cpu_%.s: scripts/cpu_%.asm.py $(OUT_DIR)
+$(OUT_DIR)/tests/cpu_%.s: scripts/cpu_%.asm.py
 	$(PYTHON) $< -out $(OUT_DIR)/tests
 
 # boredsoc
@@ -165,31 +167,28 @@ boredsoc/%.mem: boredsoc/%.elf
 	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
 # Unit tests
-$(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) $(OUT_DIR)
+$(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Simulator (Verilator)
-$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/sim
+$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vboredcore $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU/Functional tests
-$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vboredcore_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
-.SECONDARY:
-$(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s $(OUT_DIR)/tests
+$(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
-.SECONDARY:
-$(OUT_DIR)/tests/%.elf: tests/cpu/functional/%.s $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.elf: tests/cpu/functional/%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
-.SECONDARY:
-$(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c
 	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
-$(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf
 	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O binary $< $@
 
-$(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex
 	xxd -i $< $@
