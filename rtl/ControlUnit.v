@@ -27,7 +27,7 @@ module ControlUnit (
             default     : begin ctrlType = 11'b00000000000; o_ctrlSigs = NOP;             end
         endcase
         // Other control signal settings/overrides
-        `CTRL_ECALL(o_ctrlSigs)     = ctrlType[I_SYS] && !(`FUNCT7(i_instr) == 7'b0000001);
-        `CTRL_EBREAK(o_ctrlSigs)    = ctrlType[I_SYS] &&  (`FUNCT7(i_instr) == 7'b0000001);
+        `CTRL_ECALL(o_ctrlSigs)     = ctrlType[I_SYS] && (`IMM_11_0(i_instr) == 12'b000000000000);
+        `CTRL_EBREAK(o_ctrlSigs)    = ctrlType[I_SYS] && (`IMM_11_0(i_instr) == 12'b000000000001);
     end
 endmodule

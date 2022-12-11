@@ -21,7 +21,7 @@ module ControlUnit_tb;
                 `I_ARITH : test_gold_vector[i] = `I_ARITH_CTRL;
                 `I_SYS   : begin
                     tmp                 = `I_SYS_CTRL;
-                    `CTRL_EBREAK(tmp)   = `FUNCT7(i) == 7'b0000001;
+                    `CTRL_EBREAK(tmp)   = `IMM_11_0(i) == 12'b000000000001;
                     `CTRL_ECALL(tmp)    = `TRUE;
                     test_gold_vector[i] = tmp;
                 end
@@ -50,7 +50,7 @@ module ControlUnit_tb;
         // Also test EBREAK case
         tmp                 = `I_SYS_CTRL;
         `CTRL_EBREAK(tmp)   = `TRUE;
-        i_instr = {7'b0000001, 18'd0, `I_SYS}; #20;
+        i_instr = {12'b000000000001, 13'd0, `I_SYS}; #20;
         if (o_ctrlSigs != tmp) begin
             errs = errs + 1;
         end

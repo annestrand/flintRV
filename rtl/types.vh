@@ -21,6 +21,7 @@
 `define RS1(x)              x[19:15]
 `define RS2(x)              x[24:20]
 `define FUNCT7(x)           x[31:25]
+`define IMM_11_0(x)         x[31:20]
 
 // Forward select
 `define NO_FWD              2'b00
