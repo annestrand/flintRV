@@ -178,12 +178,15 @@ $(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 $(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vboredcore_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
+.SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
+.SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/cpu/functional/%.s
 	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
+.SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c
 	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
