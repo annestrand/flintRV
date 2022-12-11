@@ -12,7 +12,7 @@
 LOOP:   add  s2, s3, s2     # j += i
         addi s3, s3, 1      # ++i
         bne  s3, s4, LOOP   # i<10
-        li s1, 0xcafebabe   # Done signal for simulation
+        ebreak
 STALL:  j  STALL
         # Add some nop padding
         nop

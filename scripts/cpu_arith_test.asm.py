@@ -77,9 +77,8 @@ arithTestProgram    = f'''
     addi  x30, x30, 1
     jal   x29, STALL
 
-    FAIL:   addi x13, x0, -1  # DONE
-            add  x31, x0, x30
-    STALL:  addi x13, x0, -1  # DONE
+    FAIL:   add  x31, x0, x30
+    STALL:  ebreak
             jal  x0, STALL
             # Add some NOP padding
             nop

@@ -83,7 +83,9 @@ module boredcore (
                     FETCH_flush     /*verilator public*/,
                     EXEC_flush      /*verilator public*/,
                     MEM_flush       /*verilator public*/,
-                    WB_flush        /*verilator public*/;
+                    WB_flush        /*verilator public*/,
+                    ecall           /*verilator public*/,
+                    ebreak          /*verilator public*/;
 
     // Control signals
     assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
@@ -94,14 +96,16 @@ module boredcore (
     assign mem2reg  = `CTRL_MEM2REG(ctrlSigs);
     assign bra      = `CTRL_BRA(ctrlSigs);
     assign jmp      = `CTRL_JMP(ctrlSigs);
+    assign ecall    = `CTRL_ECALL(ctrlSigs);
+    assign ebreak   = `CTRL_EBREAK(ctrlSigs);
 
     // Branch/jump logic
     assign pcJump          = braMispredict || p_jmp[EXEC];
-    assign braMispredict   = p_bra[EXEC] && aluOut[0];                 // Assume branch not-taken
+    assign braMispredict   = p_bra[EXEC] && aluOut[0]; // Assume branch not-taken
 
     // Writeback select and enable logic
     assign WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
-    assign writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0;    // Skip regfile write for x0
+    assign writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
 
     // Forwarding logic
     assign RS1_fwd_mem  = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);

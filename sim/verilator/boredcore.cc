@@ -151,17 +151,15 @@ void boredcore::reset(int cycles) {
     m_cpu->i_rst = 0;
 }
 // ====================================================================================================================
-void boredcore::tick(int cycles) {
-    for (int i=0; i<cycles; ++i) {
-        dump();
-        m_cycles++;
-        m_cpu->i_clk = 0;
-        m_cpu->eval();
-        if(m_trace) { m_trace->dump(10*m_cycles-2); }
-        m_cpu->i_clk = 1;
-        m_cpu->eval();
-        if(m_trace) { m_trace->dump(10*m_cycles); m_trace->flush(); }
-    }
+void boredcore::tick(bool enableDump) {
+    if (enableDump) { dump(); }
+    m_cycles++;
+    m_cpu->i_clk = 0;
+    m_cpu->eval();
+    if(m_trace) { m_trace->dump(10*m_cycles-2); }
+    m_cpu->i_clk = 1;
+    m_cpu->eval();
+    if(m_trace) { m_trace->dump(10*m_cycles); m_trace->flush(); }
 }
 // ====================================================================================================================
 void boredcore::dump() {
@@ -195,5 +193,16 @@ void boredcore::dump() {
     );
 }
 // ====================================================================================================================
-bool boredcore::end() { return (Verilated::gotFinish() || m_cycles > m_maxSimTime); }
+bool boredcore::end() {
+    bool isEbreak   = CPU(this)->ebreak && !CPU(this)->pcJump;
+    bool isFinished = Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;
+    if (isEbreak) {
+        // Need to finish draining pipeline here...
+        for (int i=0; i<3; i++) {
+            loadStoreUpdate();
+            tick(false);
+        }
+    }
+    return isFinished;
+}
 // ====================================================================================================================

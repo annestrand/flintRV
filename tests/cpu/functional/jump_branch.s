@@ -20,7 +20,7 @@ L4: bltu  zero, s3, L5
 L5: bgeu  s3, zero, STALL
     addi  s1, s1, 1
 
-STALL:  li s2, 0xcafebabe # done signal
+STALL:  ebreak
         # Add some NOP padding
         nop
         nop

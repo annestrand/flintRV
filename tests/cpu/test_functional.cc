@@ -31,22 +31,18 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
     if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))                               { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_simple_loop_hex, build_tests_simple_loop_hex_len)) { FAIL(); }
 
-    bool done                   = false;
-    constexpr int doneReg       = S1;
     constexpr int resultReg     = S2;
     constexpr int expectedVal   = 45;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
 
-    while (!dut.end() && !done) {
+    while (!dut.end()) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == SIM_DONE_VAL;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(done, true) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), expectedVal);
 }
 // ====================================================================================================================
@@ -60,22 +56,18 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
         dut.writeRegfile(i, cpu_logic_test_regs[i]);
     }
 
-    bool done                   = false;
-    constexpr int doneReg       = 6;
     constexpr int resultReg     = 31;
     constexpr int simDoneVal    = -1;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
 
-    while (!dut.end() && !done) {
+    while (!dut.end()) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
@@ -89,22 +81,18 @@ TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g
         dut.writeRegfile(i, cpu_arith_test_regs[i]);
     }
 
-    bool done                   = false;
-    constexpr int doneReg       = 13;
     constexpr int resultReg     = 31;
     constexpr int simDoneVal    = -1;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
 
-    while (!dut.end() && !done) {
+    while (!dut.end()) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == simDoneVal;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(dut.readRegfile(doneReg), simDoneVal) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
@@ -113,21 +101,17 @@ TEST(functional, jump) { // Tests all the core branch instructions (e.g. BEQ, JA
     if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))                               { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_jump_branch_hex, build_tests_jump_branch_hex_len)) { FAIL(); }
 
-    bool done                   = false;
     constexpr int resultReg     = S1;
-    constexpr int doneReg       = S2;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
 
-    while (!dut.end() && !done) {
+    while (!dut.end()) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == SIM_DONE_VAL;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(done, true) << "Simulation timeout!";
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
 // ====================================================================================================================
@@ -136,8 +120,6 @@ TEST(functional, load_store) { // Tests load and store based instructions
     if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd"))                         { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_load_store_hex, build_tests_load_store_hex_len))   { FAIL(); }
 
-    bool done                   = false;
-    constexpr int doneReg       = S8;
     constexpr int resultReg     = S7;
     constexpr int testAddress   = 0x100; // Lower half of test memory for data
     constexpr int sbGold        = 0xffffffef;
@@ -148,15 +130,13 @@ TEST(functional, load_store) { // Tests load and store based instructions
     // Init test location of memory
     if(!dut.pokeMem(testAddress, swGold)) { FAIL(); }
 
-    while (!dut.end() && !done) {
+    while (!dut.end()) {
         if (!dut.instructionUpdate())    { FAIL(); }
         if (!dut.loadStoreUpdate())      { FAIL(); }
-        done = dut.readRegfile(doneReg) == SIM_DONE_VAL;
         // Evaluate
         dut.tick();
     }
 
-    EXPECT_EQ(done, true) << "Simulation timeout!";
     // Load instructions
     EXPECT_EQ(dut.readRegfile(resultReg), 0);
     // Store instructions

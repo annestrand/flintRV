@@ -42,9 +42,8 @@
         sw   s1, 12(a0)
         j    STALL
 
-FAIL:   li   s8, TEST_DONE # Done signal for simulation
-        add  s7, x0, s6
-STALL:  li   s8, TEST_DONE # Done signal for simulation
+FAIL:   add  s7, x0, s6
+STALL:  ebreak
         j    STALL
         # Add some nop padding
         nop

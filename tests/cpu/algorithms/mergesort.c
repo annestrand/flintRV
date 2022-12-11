@@ -86,7 +86,6 @@ int main() {
     register long s8  asm("s8")     = len;
     register long s9  asm("s9")     = (long int)testArr;
     register long s10 asm("s10")    = (long int)g_testArrSorted;
-    register long s11 asm("s11")    = 0xcafebabe; // Done.
-
+    asm("ebreak");
     return 0;
 }

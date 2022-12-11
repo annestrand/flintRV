@@ -42,6 +42,6 @@ int main(void) {
     register long s2 asm("s2")      = exists2;      // Should be (1)
     register long s3 asm("s3")      = exists3;      // Should be (1)
     register long s4 asm("s4")      = notExist;     // Should be (0)
-    register long s11 asm("s11")    = 0xcafebabe;   // Done.
+    asm("ebreak");
     return 0;
 }

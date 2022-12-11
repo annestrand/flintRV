@@ -12,8 +12,6 @@
 #define VERILATOR_VER 4028
 #endif // VERILATOR_VER
 
-#define SIM_DONE_VAL 0xcafebabe
-
 // Regfile aliases
 typedef enum {
     ZERO=0, RA, SP, GP, TP, T0, T1, T2, S0, FP=S0, S1, A0, A1, A2, A3, A4, A5, A6, A7,
@@ -35,7 +33,7 @@ public:
     void writeRegfile(int index, int val);
     int readRegfile(int index);
     void reset(int cycles=1);
-    void tick(int cycles=1);
+    void tick(bool enableDump=true);
     void dump();
     bool end();
     Vboredcore*             m_cpu;      // Reference to CPU object
