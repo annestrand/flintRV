@@ -1,10 +1,10 @@
 # --- BUILD ENV -------------------------------------------------------------------------------------------------------
 ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
-DOCKER_CMD             := docker exec -u user -w /src boredcore
+CMD_PREFIX             := docker exec -u user -w /src boredcore
 DOCKER_RUNNING         := $(shell docker ps -a -q -f name=boredcore)
 else
-DOCKER_CMD             :=
+CMD_PREFIX             :=
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
 
@@ -67,15 +67,19 @@ VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/verilator -type f -name "
 CPU_TEST_SRCS          := $(shell find $(ROOT_DIR)/tests/cpu -type f -name "*.cc")
 CPU_ASM_TESTS          := $(shell find tests/cpu/functional -type f -name "*.s" -exec basename {} \;)
 CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" -exec basename {} \;)
-CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
-CPU_TEST_HEX           := $(CPU_TEST_ELF:%.elf=%.hex)
-CPU_TEST_HEX           += $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
+CPU_TEST_HEX           := $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
 CPU_TEST_HEX           += $(CPU_C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
 CPU_TEST_INC           := $(CPU_TEST_HEX:%.hex=%.inc)
 
-# External conformace tests
-RV32I_CONFORM_STR      := -name "*.S" ! -name "rem*" ! -name "mul*" ! -name "div*"
-RV32I_CONFORM_SRCS     := $(shell find external/riscv-tests -type f $(RV32I_CONFORM_STR))
+# External riscv tests
+RV32I_TEST_STR         := -name "*.S" ! -name "rem*" ! -name "mul*" ! -name "div*"
+RV32I_TEST_SRCS        := $(shell find external/riscv-tests -type f $(RV32I_TEST_STR) -exec basename {} \;)
+RV32I_TEST_HEX         := $(RV32I_TEST_SRCS:%.S=$(OUT_DIR)/external/riscv_tests/%.hex)
+RV32I_TEST_INC         := $(RV32I_TEST_HEX:%.hex=%.inc)
+# ---
+RV32I_TEST_CC_FLAGS    := -c
+RV32I_TEST_CC_FLAGS    += -march=rv32i
+RV32I_TEST_CC_FLAGS    += -mabi=ilp32
 
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
@@ -107,6 +111,7 @@ all: submodules sim tests soc
 .PHONY: tests
 tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
 tests: $(CPU_TEST_INC) $(CPU_TEST_HEX) $(OUT_DIR)/tests/Vboredcore.cpp
+tests: $(RV32I_TEST_INC)
 tests: $(OUT_DIR)/Unit_tests
 	@$(MAKE) -C $(OUT_DIR)/tests -f Vboredcore.mk
 
@@ -143,23 +148,26 @@ clean:
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
 $(OUT_DIR):
-	mkdir -p $(OUT_DIR)
+	mkdir -p $@
 
 $(OUT_DIR)/sim:
-	mkdir -p $(OUT_DIR)/sim
+	mkdir -p $@
 
 $(OUT_DIR)/tests:
-	mkdir -p $(OUT_DIR)/tests
+	mkdir -p $@
+
+$(OUT_DIR)/external/riscv_tests:
+	mkdir -p $@
 
 # boredsoc
 boredsoc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	$(PYTHON) scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
 
 boredsoc/%.elf: boredsoc/%.s
-	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 boredsoc/%.mem: boredsoc/%.elf
-	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+	$(CMD_PREFIX) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
 # Unit tests
@@ -176,18 +184,32 @@ $(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
-	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/cpu/functional/%.s | $(OUT_DIR)/tests
-	$(DOCKER_CMD) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c
-	$(DOCKER_CMD) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
+	$(CMD_PREFIX) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
 $(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf
-	$(DOCKER_CMD) $(RISCV_OBJCOPY) -O binary $< $@
+	$(CMD_PREFIX) $(RISCV_OBJCOPY) -O binary $< $@
 
 $(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex
+	xxd -i $< $@
+
+# RV32I external tests
+$(OUT_DIR)/external/riscv_tests/%.elf: external/riscv-tests/%.S | $(OUT_DIR)/external/riscv_tests
+	$(CMD_PREFIX) $(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ \
+		-DTEST_FUNC_NAME=$(notdir $(basename $<)) \
+		-DTEST_FUNC_TXT='"$(notdir $(basename $<))"' \
+		-DTEST_FUNC_RET=$(notdir $(basename $<))_ret \
+		$<
+
+$(OUT_DIR)/external/riscv_tests/%.hex: $(OUT_DIR)/external/riscv_tests/%.elf
+	$(CMD_PREFIX) $(RISCV_OBJCOPY) -O binary $< $@
+
+$(OUT_DIR)/external/riscv_tests/%.inc: $(OUT_DIR)/external/riscv_tests/%.hex
 	xxd -i $< $@
