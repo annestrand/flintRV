@@ -65,7 +65,7 @@ VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/verilator -type f -name "
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
 CPU_TEST_SRCS          := $(shell find $(ROOT_DIR)/tests/cpu -type f -name "*.cc")
-CPU_ASM_TESTS          := $(shell find tests/cpu/functional -type f -name "*.s" -exec basename {} \;)
+CPU_ASM_TESTS          := $(shell find tests/cpu/basic -type f -name "*.s" -exec basename {} \;)
 CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" -exec basename {} \;)
 CPU_TEST_HEX           := $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
 CPU_TEST_HEX           += $(CPU_C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
@@ -76,6 +76,7 @@ RV32I_TEST_STR         := -name "*.S" ! -name "rem*" ! -name "mul*" ! -name "div
 RV32I_TEST_SRCS        := $(shell find external/riscv-tests -type f $(RV32I_TEST_STR) -exec basename {} \;)
 RV32I_TEST_HEX         := $(RV32I_TEST_SRCS:%.S=$(OUT_DIR)/external/riscv_tests/%.hex)
 RV32I_TEST_INC         := $(RV32I_TEST_HEX:%.hex=%.inc)
+RV32I_TEST_HEADERS     := $(shell find external/riscv-tests -type f -name "*.h")
 # ---
 RV32I_TEST_CC_FLAGS    := -c
 RV32I_TEST_CC_FLAGS    += -march=rv32i
@@ -83,6 +84,7 @@ RV32I_TEST_CC_FLAGS    += -mabi=ilp32
 
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
+CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/build/external/riscv_tests
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
 
 CPU_TEST_FLAGS         := -Wall
@@ -187,7 +189,7 @@ $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
 	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
-$(OUT_DIR)/tests/%.elf: tests/cpu/functional/%.s | $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.elf: tests/cpu/basic/%.s | $(OUT_DIR)/tests
 	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
@@ -201,7 +203,7 @@ $(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex
 	xxd -i $< $@
 
 # RV32I external tests
-$(OUT_DIR)/external/riscv_tests/%.elf: external/riscv-tests/%.S | $(OUT_DIR)/external/riscv_tests
+$(OUT_DIR)/external/riscv_tests/%.elf: external/riscv-tests/%.S $(RV32I_TEST_HEADERS) | $(OUT_DIR)/external/riscv_tests
 	$(CMD_PREFIX) $(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ \
 		-DTEST_FUNC_NAME=$(notdir $(basename $<)) \
 		-DTEST_FUNC_TXT='"$(notdir $(basename $<))"' \
