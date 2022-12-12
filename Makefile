@@ -67,13 +67,15 @@ VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/verilator -type f -name "
 CPU_TEST_SRCS          := $(shell find $(ROOT_DIR)/tests/cpu -type f -name "*.cc")
 CPU_ASM_TESTS          := $(shell find tests/cpu/functional -type f -name "*.s" -exec basename {} \;)
 CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" -exec basename {} \;)
-CPU_PY_TESTS           := $(shell find scripts -type f -name "cpu_*.asm.py" -exec basename {} \;)
-CPU_ASM_TESTS          += $(CPU_PY_TESTS:%.asm.py=%.s)
 CPU_TEST_ELF           := $(CPU_PY_ASM_TESTS:%.s=%.elf)
 CPU_TEST_HEX           := $(CPU_TEST_ELF:%.elf=%.hex)
 CPU_TEST_HEX           += $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
 CPU_TEST_HEX           += $(CPU_C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
 CPU_TEST_INC           := $(CPU_TEST_HEX:%.hex=%.inc)
+
+# External conformace tests
+RV32I_CONFORM_STR      := -name "*.S" ! -name "rem*" ! -name "mul*" ! -name "div*"
+RV32I_CONFORM_SRCS     := $(shell find external/riscv-tests -type f $(RV32I_CONFORM_STR))
 
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
@@ -148,10 +150,6 @@ $(OUT_DIR)/sim:
 
 $(OUT_DIR)/tests:
 	mkdir -p $(OUT_DIR)/tests
-
-# Testgen
-$(OUT_DIR)/tests/cpu_%.s: scripts/cpu_%.asm.py
-	$(PYTHON) $< -out $(OUT_DIR)/tests
 
 # boredsoc
 boredsoc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh

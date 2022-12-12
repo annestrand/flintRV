@@ -12,12 +12,9 @@
 #include "common.hh"
 
 namespace {
-// Embed the initial regfile content here
-#include "cpu_logic_test_regs.inc"
-#include "cpu_arith_test_regs.inc"
 // Embed the test programs binaries here
-#include "cpu_arith_test.inc"
-#include "cpu_logic_test.inc"
+#include "arith.inc"
+#include "logic.inc"
 #include "jump_branch.inc"
 #include "load_store.inc"
 #include "simple_loop.inc"
@@ -48,11 +45,15 @@ TEST(functional, loop) { // Basic test loop summation for 10 iterations
 // ====================================================================================================================
 TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd"))                                      { FAIL(); }
-    if (!dut.createMemory(0x200, build_tests_cpu_logic_test_hex, build_tests_cpu_logic_test_hex_len))   { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd"))                  { FAIL(); }
+    if (!dut.createMemory(0x200, build_tests_logic_hex, build_tests_logic_hex_len)) { FAIL(); }
 
     // Init regfile contents
-    for (int i=0; i<sizeof(cpu_logic_test_regs)/sizeof(cpu_logic_test_regs[0]); ++i) {
+    constexpr int cpu_logic_test_regs_len = 10;
+    long int cpu_logic_test_regs[] = {
+        0 /* x0 reg */, 834, 391, 258, 967, 709, 391, 258, 967, 709
+    };
+    for (int i=0; i<cpu_logic_test_regs_len; ++i) {
         dut.writeRegfile(i, cpu_logic_test_regs[i]);
     }
 
@@ -73,11 +74,15 @@ TEST(functional, logic) { // Tests all the core logic functions of ALU (e.g. AND
 // ====================================================================================================================
 TEST(functional, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
     boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd"))                                      { FAIL(); }
-    if (!dut.createMemory(0x200, build_tests_cpu_arith_test_hex, build_tests_cpu_arith_test_hex_len))   { FAIL(); }
+    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd"))                  { FAIL(); }
+    if (!dut.createMemory(0x200, build_tests_arith_hex, build_tests_arith_hex_len)) { FAIL(); }
 
     // Init regfile contents
-    for (int i=0; i<sizeof(cpu_arith_test_regs)/sizeof(cpu_arith_test_regs[0]); ++i) {
+    constexpr int cpu_arith_test_regs_len = 13;
+    long int cpu_arith_test_regs[cpu_arith_test_regs_len] = {
+        0 /* x0 reg */, 439, -371, 68, 810, 230162432, 1182793728, 0, 511, 0, 4294967295, 23, 19
+    };
+    for (int i=0; i<cpu_arith_test_regs_len; ++i) {
         dut.writeRegfile(i, cpu_arith_test_regs[i]);
     }
 
