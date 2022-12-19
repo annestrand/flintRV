@@ -68,13 +68,6 @@
 `define ALU_EXEC_SGTE       5'b0_1110
 `define ALU_EXEC_SGTEU      5'b0_1111
 
-// Load/Store op type
-`define LS_B_OP             3'b000
-`define LS_H_OP             3'b001
-`define LS_W_OP             3'b010
-`define LS_BU_OP            3'b100
-`define LS_HU_OP            3'b101
-
 // Control signal fields
 `define CTRL_JMP(x)         x[0:0]
 `define CTRL_BRA(x)         x[1:1]

@@ -78,9 +78,12 @@ RV32I_TEST_HEX         := $(RV32I_TEST_SRCS:%.S=$(OUT_DIR)/external/riscv_tests/
 RV32I_TEST_INC         := $(RV32I_TEST_HEX:%.hex=%.inc)
 RV32I_TEST_HEADERS     := $(shell find external/riscv-tests -type f -name "*.h")
 # ---
-RV32I_TEST_CC_FLAGS    := -c
+RV32I_TEST_CC_FLAGS    := -nostdlib
+RV32I_TEST_CC_FLAGS    += -nostartfiles
 RV32I_TEST_CC_FLAGS    += -march=rv32i
 RV32I_TEST_CC_FLAGS    += -mabi=ilp32
+RV32I_TEST_CC_FLAGS    += -Wl,-Ttext 0x0
+RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator

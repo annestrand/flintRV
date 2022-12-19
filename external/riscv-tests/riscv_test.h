@@ -11,7 +11,9 @@
 #define TESTNUM x28
 
 #define RVTEST_CODE_BEGIN           \
-    .text;                          \
+    .section .text;                 \
+    .global _start;                 \
+    _start: nop;                    \
     .global TEST_FUNC_NAME;         \
     .global TEST_FUNC_RET;
 

@@ -194,7 +194,7 @@ std::string disassembleRv32i(unsigned int instr) {
         }
         case U_LUI   :
         case U_AUIPC : {
-            auto immFinal = IMM_31_12 << 12;
+            auto immFinal = IMM_31_12;
             switch (OPCODE) {
                 case LUI   : ss << "lui "   << regName[RD] << ", " << immFinal; break;
                 case AUIPC : ss << "auipc " << regName[RD] << ", " << immFinal; break;

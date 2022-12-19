@@ -99,8 +99,23 @@ bool boredcore::loadStoreUpdate() {
         return false;
     }
 
-    if (m_cpu->o_loadReq)   { m_cpu->i_dataIn = *(int*)&m_mem[m_cpu->o_dataAddr];   } // load
-    else                    { *(int*)&m_mem[m_cpu->o_dataAddr] = m_cpu->o_dataOut;  } // store
+    if (m_cpu->o_loadReq) { // Load
+        m_cpu->i_dataIn = *(int*)&m_mem[m_cpu->o_dataAddr];
+    } else { // Store
+        switch(CPU(this)->MEMORY_unit->i_funct3) {
+            case CPU(this)->MEMORY_unit->S_B_OP:
+                *(int*)&m_mem[m_cpu->o_dataAddr] &= 0xffffff00;
+                *(int*)&m_mem[m_cpu->o_dataAddr] |= m_cpu->o_dataOut;
+                break;
+            case CPU(this)->MEMORY_unit->S_H_OP:
+                *(int*)&m_mem[m_cpu->o_dataAddr] &= 0xffff0000;
+                *(int*)&m_mem[m_cpu->o_dataAddr] |= m_cpu->o_dataOut;
+                break;
+            default:
+                *(int*)&m_mem[m_cpu->o_dataAddr] = m_cpu->o_dataOut;
+                break;
+        }
+    }
     return true;
 }
 // ====================================================================================================================

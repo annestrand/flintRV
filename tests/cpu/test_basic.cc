@@ -127,8 +127,8 @@ TEST(basic, load_store) { // Tests load and store based instructions
 
     constexpr int resultReg     = S7;
     constexpr int testAddress   = 0x100; // Lower half of test memory for data
-    constexpr int sbGold        = 0xffffffef;
-    constexpr int shGold        = 0xffffbeef;
+    constexpr int sbGold        = 0xef;
+    constexpr int shGold        = 0xbeef;
     constexpr int swGold        = 0xdeadbeef;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
