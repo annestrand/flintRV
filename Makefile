@@ -1,10 +1,10 @@
 # --- BUILD ENV -------------------------------------------------------------------------------------------------------
 ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
-CMD_PREFIX             := docker exec -u user -w /src boredcore
+DOCKER_PREFIX          := docker exec -u user -w /src boredcore
 DOCKER_RUNNING         := $(shell docker ps -a -q -f name=boredcore)
 else
-CMD_PREFIX             :=
+DOCKER_PREFIX          :=
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
 
@@ -26,10 +26,10 @@ TOOLCHAIN_PREFIX       := $(TC_TRIPLE)
 else
 TOOLCHAIN_PREFIX       := riscv64-unknown-elf
 endif
-RISCV_CC               := $(TOOLCHAIN_PREFIX)-gcc
-RISCV_AS               := $(TOOLCHAIN_PREFIX)-as
-RISCV_OBJCOPY          := $(TOOLCHAIN_PREFIX)-objcopy
-RISCV_OBJDUMP          := $(TOOLCHAIN_PREFIX)-objdump
+RISCV_CC               := $(DOCKER_PREFIX) $(TOOLCHAIN_PREFIX)-gcc
+RISCV_AS               := $(DOCKER_PREFIX) $(TOOLCHAIN_PREFIX)-as
+RISCV_OBJCOPY          := $(DOCKER_PREFIX) $(TOOLCHAIN_PREFIX)-objcopy
+RISCV_OBJDUMP          := $(DOCKER_PREFIX) $(TOOLCHAIN_PREFIX)-objdump
 
 RISCV_CC_FLAGS         := -march=rv32i
 RISCV_CC_FLAGS         += -mabi=ilp32
@@ -86,6 +86,8 @@ RV32I_TEST_CC_FLAGS    += -Wl,-Ttext 0x0
 RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
 CPU_TEST_CFLAGS        := -g
+CPU_TEST_CFLAGS        += -Wall
+CPU_TEST_CFLAGS        += -Werror
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/build/external/riscv_tests
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
@@ -169,10 +171,10 @@ boredsoc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	$(PYTHON) scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
 
 boredsoc/%.elf: boredsoc/%.s
-	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 boredsoc/%.mem: boredsoc/%.elf
-	$(CMD_PREFIX) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+	$(DOCKER_PREFIX) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
 # Unit tests
@@ -189,32 +191,32 @@ $(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
-	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/cpu/basic/%.s | $(OUT_DIR)/tests
-	$(CMD_PREFIX) $(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c
-	$(CMD_PREFIX) $(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
+	$(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
 
 $(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf
-	$(CMD_PREFIX) $(RISCV_OBJCOPY) -O binary $< $@
+	$(RISCV_OBJCOPY) -O binary $< $@
 
 $(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex
 	xxd -i $< $@
 
 # RV32I external tests
 $(OUT_DIR)/external/riscv_tests/%.elf: external/riscv-tests/%.S $(RV32I_TEST_HEADERS) | $(OUT_DIR)/external/riscv_tests
-	$(CMD_PREFIX) $(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ \
+	$(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ \
 		-DTEST_FUNC_NAME=$(notdir $(basename $<)) \
 		-DTEST_FUNC_TXT='"$(notdir $(basename $<))"' \
 		-DTEST_FUNC_RET=$(notdir $(basename $<))_ret \
 		$<
 
 $(OUT_DIR)/external/riscv_tests/%.hex: $(OUT_DIR)/external/riscv_tests/%.elf
-	$(CMD_PREFIX) $(RISCV_OBJCOPY) -O binary $< $@
+	$(RISCV_OBJCOPY) -O binary $< $@
 
 $(OUT_DIR)/external/riscv_tests/%.inc: $(OUT_DIR)/external/riscv_tests/%.hex
 	xxd -i $< $@
