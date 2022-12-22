@@ -112,7 +112,7 @@ BOREDSOC_COREGEN       := boredsoc/core_generated.v
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
-all: submodules sim tests soc
+all: sim tests soc
 
 # Build tests
 .PHONY: tests
@@ -141,10 +141,6 @@ ifeq ($(DOCKER_RUNNING),)
 	@docker create -it -v $(ROOT_DIR):/src --name boredcore riscv-gnu-toolchain
 endif
 	@docker start boredcore
-
-.PHONY: submodules
-submodules:
-	git submodule update --init --recursive
 
 .PHONY: clean
 clean:
@@ -182,11 +178,11 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Simulator (Verilator)
-$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/sim
+$(OUT_DIR)/sim/%.cpp: | $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/sim
 	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vboredcore $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU/Functional tests
-$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
+$(OUT_DIR)/tests/%.cpp: | $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/tests
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vboredcore_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 .SECONDARY:

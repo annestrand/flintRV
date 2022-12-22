@@ -6,13 +6,12 @@
 #define KB_MULTIPLIER           (1024)
 #define MB_MULTIPLIER           (1024*1024)
 #define DEFAULT_VIRT_MEM_SIZE   (KB_MULTIPLIER * 32) // Default to 32 KB
-#define LOG_LINE_BREAK "============================================================================================\n"
+#define OUTPUT_LINE     "===[ OUTPUT ]===============================================================================\n"
+#define LOG_LINE_BREAK  "============================================================================================\n"
 
 void printHelp(void) {
-    printf("\n"
-        "Vboredcore - Verilated boredcore simulator\n"
-        "[Usage]: Vboredcore [OPTIONS] <program_binary>.hex\n"
-        "\n\n"
+    printf("Vboredcore - Verilated boredcore simulator\n"
+        "[Usage]: Vboredcore [OPTIONS] <program_binary>.hex\n\n"
         "OPTIONS:\n"
     );
     miniargparsePrint();
@@ -29,7 +28,7 @@ int main(int argc, char *argv[]) {
     // Parse the args
     int unknownOpt = miniargparseParse(argc, argv);
     if (unknownOpt > 0) {
-        LOG_E("Unknown option ( %s ) used.\n", argv[unknownOpt]);
+        LOG_E("Unknown option ( %s ) used.\n\n", argv[unknownOpt]);
         printHelp();
         return 1;
     }
@@ -44,7 +43,7 @@ int main(int argc, char *argv[]) {
     miniargparseOpt *tmp = miniargparseOptlistController(NULL);
     while (tmp != NULL) {
         if (tmp->infoBits.hasErr) {
-            LOG_E("%s ( Option: %s )\n", tmp->errValMsg, argv[tmp->index]);
+            LOG_E("%s ( Option: %s )\n\n", tmp->errValMsg, argv[tmp->index]);
             printHelp();
             return 1;
         }
@@ -54,7 +53,7 @@ int main(int argc, char *argv[]) {
     // Get needed positional arg (i.e. program binary)
     int programIndex = miniargparseGetPositionalArg(argc, argv, 0);
     if (programIndex == 0) {
-        LOG_E("No program binary given.\n");
+        LOG_E("No program binary given.\n\n");
         printHelp();
         return 1;
     }
@@ -74,7 +73,7 @@ int main(int argc, char *argv[]) {
 
     // Instantiate CPU
     boredcore dut = boredcore(simTimeVal, atoi(dumpLvl.value));
-    LOG_I("Create and Reset CPU object...\n");
+    LOG_I("Starting simulation...\n\n%s", OUTPUT_LINE);
     if (!dut.create(new Vboredcore(), NULL))        { LOG_E("Failed to create Vboredcore.\n");  return 1; }
     if (!dut.createMemory(memSize, programFile))    { LOG_E("Failed to create memory.\n");      return 1; }
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
@@ -84,7 +83,6 @@ int main(int argc, char *argv[]) {
     dut.writeRegfile(FP, memSize-1);
 
     // Run
-    LOG_I("Starting simulation...\n%s", LOG_LINE_BREAK);
     while(!dut.end()) {
         if (!dut.instructionUpdate())    { LOG_E("Failed instruction fetch.\n"); return 1; }
         if (!dut.loadStoreUpdate())      { LOG_E("Failed load/store fetch.\n");  return 1; }
@@ -92,7 +90,7 @@ int main(int argc, char *argv[]) {
         dut.tick();
     }
 
-    printf("\n%s", LOG_LINE_BREAK);
+    printf("%s\n", LOG_LINE_BREAK);
     LOG_I("Simulation done.\n");
     return 0;
 }
