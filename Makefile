@@ -1,8 +1,28 @@
+# Copyright (c) 2022 Austin Annestrand
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 # --- BUILD ENV -------------------------------------------------------------------------------------------------------
 ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 ifdef DOCKER
-DOCKER_PREFIX          := docker exec -u user -w /src boredcore
-DOCKER_RUNNING         := $(shell docker ps -a -q -f name=boredcore)
+DOCKER_PREFIX          := docker exec -u user -w /src drop32
+DOCKER_RUNNING         := $(shell docker ps -a -q -f name=drop32)
 else
 DOCKER_PREFIX          :=
 endif
@@ -58,7 +78,7 @@ SIM_FLAGS              += --trace
 SIM_FLAGS              += -CFLAGS "$(SIM_CFLAGS)"
 SIM_FLAGS              += --x-assign unique
 SIM_FLAGS              += --x-initial unique
-SIM_FLAGS              += --top-module boredcore
+SIM_FLAGS              += --top-module drop32
 SIM_FLAGS              += --exe
 
 VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/src -type f -name "*.cc" ! -name "main.cc")
@@ -87,7 +107,6 @@ RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -Wall
-CPU_TEST_CFLAGS        += -Werror
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/src
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/build/external/riscv_tests
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
@@ -99,16 +118,16 @@ CPU_TEST_FLAGS         += -CFLAGS "$(CPU_TEST_CFLAGS)"
 CPU_TEST_FLAGS         += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
 CPU_TEST_FLAGS         += --x-assign unique
 CPU_TEST_FLAGS         += --x-initial unique
-CPU_TEST_FLAGS         += --top-module boredcore
+CPU_TEST_FLAGS         += --top-module drop32
 CPU_TEST_FLAGS         += --exe
 
 SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
-BOREDSOC_SRC           := boredsoc/firmware.s
+BOREDSOC_SRC           := drop32soc/firmware.s
 BOREDSOC_ELF           := $(BOREDSOC_SRC:%.s=%.elf)
 BOREDSOC_FIRMWARE      := $(BOREDSOC_ELF:%.elf=%.mem)
-BOREDSOC_COREGEN       := boredsoc/core_generated.v
+BOREDSOC_COREGEN       := drop32soc/core_generated.v
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
@@ -117,19 +136,19 @@ all: sim tests soc
 # Build tests
 .PHONY: tests
 tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
-tests: $(CPU_TEST_INC) $(CPU_TEST_HEX) $(OUT_DIR)/tests/Vboredcore.cpp
+tests: $(CPU_TEST_INC) $(CPU_TEST_HEX) $(OUT_DIR)/tests/Vdrop32.cpp
 tests: $(RV32I_TEST_INC)
 tests: $(OUT_DIR)/Unit_tests
-	@$(MAKE) -C $(OUT_DIR)/tests -f Vboredcore.mk
+	@$(MAKE) -C $(OUT_DIR)/tests -f Vdrop32.mk
 
-# Build Verilated simulator
+# Build Verilator-based simulator
 .PHONY: sim
 sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/src/main.cc
-sim: $(OUT_DIR)/sim/Vboredcore.cpp
+sim: $(OUT_DIR)/sim/Vdrop32.cpp
 sim:
-	@$(MAKE) -C $(OUT_DIR)/sim -f Vboredcore.mk
+	@$(MAKE) -C $(OUT_DIR)/sim -f Vdrop32.mk
 
-# Build boredsoc firmware
+# Build drop32soc firmware and generate drop32 core
 .PHONY: soc
 soc: $(BOREDSOC_COREGEN) $(BOREDSOC_ELF) $(BOREDSOC_FIRMWARE)
 
@@ -138,16 +157,16 @@ soc: $(BOREDSOC_COREGEN) $(BOREDSOC_ELF) $(BOREDSOC_FIRMWARE)
 docker:
 ifeq ($(DOCKER_RUNNING),)
 	@docker build -t riscv-gnu-toolchain .
-	@docker create -it -v $(ROOT_DIR):/src --name boredcore riscv-gnu-toolchain
+	@docker create -it -v $(ROOT_DIR):/src --name drop32 riscv-gnu-toolchain
 endif
-	@docker start boredcore
+	@docker start drop32
 
 .PHONY: clean
 clean:
 	rm -rf $(OUT_DIR)
-	rm -rf boredsoc/firmware.mem
-	rm -rf boredsoc/firmware.elf
-	rm -rf boredsoc/*_generated.v
+	rm -rf drop32soc/firmware.mem
+	rm -rf drop32soc/firmware.elf
+	rm -rf drop32soc/*_generated.v
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
 $(OUT_DIR):
@@ -162,14 +181,14 @@ $(OUT_DIR)/tests:
 $(OUT_DIR)/external/riscv_tests:
 	mkdir -p $@
 
-# boredsoc
-boredsoc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
+# drop32soc
+drop32soc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	$(PYTHON) scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
 
-boredsoc/%.elf: boredsoc/%.s
+drop32soc/%.elf: drop32soc/%.s
 	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
-boredsoc/%.mem: boredsoc/%.elf
+drop32soc/%.mem: drop32soc/%.elf
 	$(DOCKER_PREFIX) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
@@ -179,11 +198,11 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 
 # Simulator (Verilator)
 $(OUT_DIR)/sim/%.cpp: | $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/sim
-	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vboredcore $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vdrop32 $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU/Functional tests
 $(OUT_DIR)/tests/%.cpp: | $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/tests
-	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vboredcore_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vdrop32_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
@@ -195,7 +214,7 @@ $(OUT_DIR)/tests/%.elf: tests/cpu/basic/%.s | $(OUT_DIR)/tests
 
 .SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c
-	$(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/boredcore.ld,-Map=$@.map -o $@ $<
+	$(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/drop32.ld,-Map=$@.map -o $@ $<
 
 $(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf
 	$(RISCV_OBJCOPY) -O binary $< $@

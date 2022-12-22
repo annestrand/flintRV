@@ -55,7 +55,7 @@ SECTIONS
   .iplt           : { *(.iplt) }
   .text           :
   {
-    *(.text._boredcore_start) /* boredcore: ADDED */
+    *(.text._drop32_start) /* drop32: ADDED */
     *(.text.unlikely .text.*_unlikely .text.unlikely.*)
     *(.text.exit .text.exit.*)
     *(.text.startup .text.startup.*)

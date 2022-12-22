@@ -1,3 +1,23 @@
+// Copyright (c) 2022 Austin Annestrand
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -6,9 +26,9 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#include "Vboredcore.h"
-#include "Vboredcore__Syms.h"
-#include "boredcore.hh"
+#include "Vdrop32.h"
+#include "Vdrop32__Syms.h"
+#include "drop32.hh"
 #include "common.hh"
 
 namespace {
@@ -24,8 +44,8 @@ extern int g_dumpLevel;
 
 // ====================================================================================================================
 TEST(basic, loop) { // Basic test loop summation for 10 iterations
-    boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_loop.vcd"))                               { FAIL(); }
+    drop32 dut = drop32(200, g_dumpLevel);
+    if (!dut.create(new Vdrop32(), "obj_dir/simple_loop.vcd"))                               { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_simple_loop_hex, build_tests_simple_loop_hex_len)) { FAIL(); }
 
     constexpr int resultReg     = S2;
@@ -44,8 +64,8 @@ TEST(basic, loop) { // Basic test loop summation for 10 iterations
 }
 // ====================================================================================================================
 TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR, XOR, etc.)
-    boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_logic.vcd"))                  { FAIL(); }
+    drop32 dut = drop32(200, g_dumpLevel);
+    if (!dut.create(new Vdrop32(), "obj_dir/simple_logic.vcd"))                  { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_logic_hex, build_tests_logic_hex_len)) { FAIL(); }
 
     // Init regfile contents
@@ -73,8 +93,8 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
 }
 // ====================================================================================================================
 TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD, SUB, SRL etc.)
-    boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_arith.vcd"))                  { FAIL(); }
+    drop32 dut = drop32(200, g_dumpLevel);
+    if (!dut.create(new Vdrop32(), "obj_dir/simple_arith.vcd"))                  { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_arith_hex, build_tests_arith_hex_len)) { FAIL(); }
 
     // Init regfile contents
@@ -102,8 +122,8 @@ TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD
 }
 // ====================================================================================================================
 TEST(basic, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
-    boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_jump.vcd"))                               { FAIL(); }
+    drop32 dut = drop32(200, g_dumpLevel);
+    if (!dut.create(new Vdrop32(), "obj_dir/simple_jump.vcd"))                               { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_jump_branch_hex, build_tests_jump_branch_hex_len)) { FAIL(); }
 
     constexpr int resultReg     = S1;
@@ -121,8 +141,8 @@ TEST(basic, jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BN
 }
 // ====================================================================================================================
 TEST(basic, load_store) { // Tests load and store based instructions
-    boredcore dut = boredcore(200, g_dumpLevel);
-    if (!dut.create(new Vboredcore(), "obj_dir/simple_load_store.vcd"))                         { FAIL(); }
+    drop32 dut = drop32(200, g_dumpLevel);
+    if (!dut.create(new Vdrop32(), "obj_dir/simple_load_store.vcd"))                         { FAIL(); }
     if (!dut.createMemory(0x200, build_tests_load_store_hex, build_tests_load_store_hex_len))   { FAIL(); }
 
     constexpr int resultReg     = S7;

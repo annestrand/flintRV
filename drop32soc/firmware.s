@@ -18,32 +18,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# --- Jump/Branch tests ---
-#   (Fails if s1 is non-zero)
+# firmware.s:
+# -------------------------
+# Test program to blink an LED on drop32soc
 
-    li    s3, 1
-    li    s1, 0
-    j     L0
-    addi  s1, s1, 1
-L0: jalr  zero, zero, 24    # Jump to "beq" below
-    addi  s1, s1, 1
-    beq   zero, zero, L1
-    addi  s1, s1, 1
-L1: bne   s1, s3, L2
-    addi  s1, s1, 1
-L2: blt   zero, s3, L3
-    addi  s1, s1, 1
-L3: bge   s3, zero, L4
-    addi  s1, s1, 1
-L4: bltu  zero, s3, L5
-    addi  s1, s1, 1
-L5: bgeu  s3, zero, STALL
-    addi  s1, s1, 1
+.equ LED_BASE, 0x00003000
 
-STALL:  ebreak
-        # Add some NOP padding
+        li  x20, LED_BASE
+        li  x4, 0           # i = 0
+        li  x8, 0           # j = 0
+        li  x9, 0           # LED_val = 0
+        li  x5, 500000      # loop-range
+LOOP:   add  x8, x4, x8     # j += i
+        addi x4, x4, 1      # ++i
+        bne  x4, x5, LOOP   # i<(loop-range)
+        xori x9, x9, 1      # Toggle LED
+        sb   x9, 0(x20)     # Update LED value
+        li   x4, 0          # i = 0
+        j LOOP
+        # Add some nop padding
         nop
         nop
         nop
         nop
-        j STALL

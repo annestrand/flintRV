@@ -1,3 +1,23 @@
+# Copyright (c) 2022 Austin Annestrand
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 #! /usr/bin/env python3
 
 import os
@@ -68,12 +88,12 @@ def build_top_module(args):
                 output [{xlen-1}:0] o_dataOut
             );
                 // Instantiate and configure CPU
-                boredcore #(
+                drop32 #(
                     .PC_START           ({args.pcStart}),
                     .REGFILE_ADDR_WIDTH ({regfile_addr_width}),
                     .INSTR_WIDTH        ({instr_width}),
                     .XLEN               ({xlen})
-                ) boredcore_unit (
+                ) drop32_unit (
                     .i_clk              (i_clk     ),
                     .i_rst              (i_rst     ),
                     .i_ifValid          (i_ifValid ),
@@ -149,8 +169,9 @@ if __name__ == "__main__":
                 src_code = src_file_fp.read()
 
                 # Remove unwanted items from final file
-                src_code = re.sub(r"`include .*\n", "", src_code)
+                src_code = re.sub(r"`include .*\n\n", "", src_code)
                 src_code = re.sub(r"/\*verilator public\*/", "", src_code)
+                src_code = re.sub(r"// Copyright.*" + (r"\n.*" * 18) + r"\n", "", src_code)
 
                 print(src_code)
                 print("// " +"="*116)

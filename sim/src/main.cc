@@ -1,4 +1,24 @@
-#include "boredcore.hh"
+// Copyright (c) 2022 Austin Annestrand
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include "drop32.hh"
 #include "common.hh"
 
 #include "miniargparse.h"
@@ -6,10 +26,14 @@
 #define KB_MULTIPLIER           (1024)
 #define MB_MULTIPLIER           (1024*1024)
 #define DEFAULT_VIRT_MEM_SIZE   (KB_MULTIPLIER * 32) // Default to 32 KB
+#define OUTPUT_LINE \
+    "===[ OUTPUT ]===================================================================================================\n"
+#define LOG_LINE_BREAK \
+    "================================================================================================================\n"
 
 void printHelp(void) {
-    printf("Vboredcore - Verilated boredcore simulator\n"
-        "[Usage]: Vboredcore [OPTIONS] <program_binary>.hex\n\n"
+    printf("Vdrop32 - Verilator based drop32 simulator\n"
+        "[Usage]: Vdrop32 [OPTIONS] <program_binary>.hex\n\n"
         "OPTIONS:\n"
     );
     miniargparsePrint();
@@ -20,7 +44,7 @@ int main(int argc, char *argv[]) {
     MINIARGPARSE_OPT(virtMem, "m", "memSize", 1,
         "Virtual memory/IO size (in bytes - decimal or hex format) [DEFAULT=32KB].");
     MINIARGPARSE_OPT(help, "h", "help", 0, "Print help and exit.");
-    MINIARGPARSE_OPT(dumpLvl, "d", "dumpLevel", 1, "Verbose trace print-level [DEFAULT=0].");
+    MINIARGPARSE_OPT(dumpLvl, "d", "dumpLevel", 1, "Verbose trace print-level (0-2) [DEFAULT=0].");
     MINIARGPARSE_OPT(simTime, "t", "timeout", 1, "Simulation timeout value [DEFAULT=1000].");
 
     // Parse the args
@@ -70,8 +94,9 @@ int main(int argc, char *argv[]) {
     LOG_I("Simulation timeout value:  [ %d ].\n", simTimeVal);
 
     // Instantiate CPU
-    boredcore dut = boredcore(simTimeVal, atoi(dumpLvl.value));
-    if (!dut.create(new Vboredcore(), NULL))        { LOG_E("Failed to create Vboredcore.\n");  return 1; }
+    drop32 dut = drop32(simTimeVal, atoi(dumpLvl.value));
+    LOG_I("Starting simulation...\n\n%s", OUTPUT_LINE);
+    if (!dut.create(new Vdrop32(), NULL))        { LOG_E("Failed to create Vdrop32.\n");  return 1; }
     if (!dut.createMemory(memSize, programFile))    { LOG_E("Failed to create memory.\n");      return 1; }
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
@@ -80,7 +105,6 @@ int main(int argc, char *argv[]) {
     dut.writeRegfile(FP, memSize-1);
 
     // Run
-    LOG_I("Starting simulation...\n\n");
     while(!dut.end()) {
         if (!dut.instructionUpdate())    { LOG_E("Failed instruction fetch.\n"); return 1; }
         if (!dut.loadStoreUpdate())      { LOG_E("Failed load/store fetch.\n");  return 1; }
@@ -88,7 +112,7 @@ int main(int argc, char *argv[]) {
         dut.tick();
     }
 
-    printf("\n");
+    printf("%s\n", LOG_LINE_BREAK);
     LOG_I("Simulation done.\n");
     return 0;
 }

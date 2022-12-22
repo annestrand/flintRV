@@ -1,3 +1,23 @@
+// Copyright (c) 2022 Austin Annestrand
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -10,26 +30,26 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#include "Vboredcore.h"
-#include "Vboredcore__Syms.h"
-#include "boredcore.hh"
+#include "Vdrop32.h"
+#include "Vdrop32__Syms.h"
+#include "drop32.hh"
 #include "common.hh"
 
 // ====================================================================================================================
-boredcore::boredcore(vluint64_t maxSimTime, int dumpLevel) :
+drop32::drop32(vluint64_t maxSimTime, int dumpLevel) :
     m_cpu(nullptr), m_cycles(0), m_trace(nullptr), m_maxSimTime(maxSimTime), m_dump(dumpLevel), m_mem(nullptr),
         m_memSize(0) {}
 // ====================================================================================================================
-boredcore::~boredcore() {
+drop32::~drop32() {
     m_cpu->final();
     if (m_trace != nullptr) { m_trace->close(); delete m_trace; m_trace = nullptr;  }
     if (m_cpu != nullptr)   { delete m_cpu; m_cpu = nullptr;                        }
     if (m_mem != nullptr)   { delete[] m_mem; m_mem = nullptr;                      }
 }
 // ====================================================================================================================
-bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
+bool drop32::create(Vdrop32* cpu, const char* traceFile) {
     if (cpu == nullptr) {
-        LOG_E("Failed to create Verilated boredcore module!\n");
+        LOG_E("Failed to create Verilated drop32 module!\n");
         return false;
     }
     m_cpu = cpu;
@@ -37,7 +57,7 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
     if (m_trace == nullptr) {
         m_trace = new VerilatedVcdC;
         if (m_trace == nullptr) {
-            LOG_W("Failed to create boredcore VCD dumper!\n");
+            LOG_W("Failed to create drop32 VCD dumper!\n");
         } else if (traceFile != nullptr) {
             m_cpu->trace(m_trace, 99);
             m_trace->open(traceFile);
@@ -47,7 +67,7 @@ bool boredcore::create(Vboredcore* cpu, const char* traceFile) {
     return true;
 }
 // ====================================================================================================================
-bool boredcore::createMemory(size_t memSize) {
+bool drop32::createMemory(size_t memSize) {
     if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
     m_memSize   = memSize;
     m_mem       = new char[memSize];
@@ -56,7 +76,7 @@ bool boredcore::createMemory(size_t memSize) {
     return true;
 }
 // ====================================================================================================================
-bool boredcore::createMemory(size_t memSize, std::string initHexfile) {
+bool drop32::createMemory(size_t memSize, std::string initHexfile) {
     if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
     m_memSize   = memSize;
     m_mem       = new char[memSize];
@@ -66,7 +86,7 @@ bool boredcore::createMemory(size_t memSize, std::string initHexfile) {
     return loadMem(initHexfile, m_mem, m_memSize);
 }
 // ====================================================================================================================
-bool boredcore::createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen) {
+bool drop32::createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen) {
     if (memSize == 0) { LOG_E("Memory cannot be of size 0!\n"); return false; }
     if (memSize < initHexarrayLen) { LOG_E("Cannot fit initialization hex char array into memory!\n"); return false; }
     m_memSize   = memSize;
@@ -78,7 +98,7 @@ bool boredcore::createMemory(size_t memSize, unsigned char* initHexarray, unsign
     return true;
 }
 // ====================================================================================================================
-bool boredcore::instructionUpdate() {
+bool drop32::instructionUpdate() {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot fetch instruction from NULL memory!\n"); return false; }
     if (m_cpu->o_pcOut >= m_memSize) {
@@ -90,7 +110,7 @@ bool boredcore::instructionUpdate() {
     return true;
 }
 // ====================================================================================================================
-bool boredcore::loadStoreUpdate() {
+bool drop32::loadStoreUpdate() {
     // Request and error checking
     if (!m_cpu->o_loadReq && !m_cpu->o_storeReq) { return true; } // Skip if there was no load/store request
     if (m_mem == nullptr) { LOG_E("Cannot loadStoreUpdate on NULL memory!\n"); return false; }
@@ -115,7 +135,7 @@ bool boredcore::loadStoreUpdate() {
     return true;
 }
 // ====================================================================================================================
-bool boredcore::peekMem(int addr, int& val) {
+bool drop32::peekMem(int addr, int& val) {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot 'peek' in NULL memory!\n"); return false; }
     if (addr >= m_memSize) {
@@ -126,7 +146,7 @@ bool boredcore::peekMem(int addr, int& val) {
     return true;
 }
 // ====================================================================================================================
-bool boredcore::pokeMem(int addr, int val) {
+bool drop32::pokeMem(int addr, int val) {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot 'poke' at NULL memory!\n"); return false; }
     if (addr >= m_memSize) {
@@ -137,7 +157,7 @@ bool boredcore::pokeMem(int addr, int val) {
     return true;
 }
 // ====================================================================================================================
-void boredcore::writeRegfile(int index, int val) {
+void drop32::writeRegfile(int index, int val) {
     // Skip if x0 reg
     if (index == 0) { return; }
     // Need to write to both ports
@@ -145,12 +165,12 @@ void boredcore::writeRegfile(int index, int val) {
     CPU(this)->FETCH_DECODE_unit->REGFILE_unit->RS2_PORT_RAM->ram[index] = val;
 }
 // ====================================================================================================================
-int boredcore::readRegfile(int index) {
+int drop32::readRegfile(int index) {
     // Does not matter which port we read from
     return (index == 0) ? 0 : CPU(this)->FETCH_DECODE_unit->REGFILE_unit->RS1_PORT_RAM->ram[index];
 }
 // ====================================================================================================================
-void boredcore::reset(int cycles) {
+void drop32::reset(int cycles) {
     // Some dummy values for now
     m_cpu->i_instr    = 0x0badc0de;
     m_cpu->i_dataIn   = 0xdecafbad;
@@ -162,7 +182,7 @@ void boredcore::reset(int cycles) {
     m_cpu->i_rst = 0;
 }
 // ====================================================================================================================
-void boredcore::tick(bool enableDump) {
+void drop32::tick(bool enableDump) {
     if (enableDump) { dump(); }
     m_cycles++;
     m_cpu->i_clk = 0;
@@ -173,7 +193,7 @@ void boredcore::tick(bool enableDump) {
     if(m_trace) { m_trace->dump(10*m_cycles); m_trace->flush(); }
 }
 // ====================================================================================================================
-void boredcore::dump() {
+void drop32::dump() {
     if (!m_dump) { return; }
     std::string instr   = m_cpu->i_rst ? "CPU Reset!" : disassembleRv32i(m_cpu->i_instr);
     bool fStall         = CPU(this)->FETCH_stall;
@@ -204,7 +224,7 @@ void boredcore::dump() {
     );
 }
 // ====================================================================================================================
-bool boredcore::end() {
+bool drop32::end() {
     bool isEbreak   = CPU(this)->ebreak && !CPU(this)->pcJump;
     bool isFinished = Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;
     if (isEbreak) {

@@ -1,6 +1,26 @@
+// Copyright (c) 2022 Austin Annestrand
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 `include "types.vh"
 
-module boredcore (
+module drop32 (
     input                       i_clk, i_rst, i_ifValid, i_memValid,
     input   [INSTR_WIDTH-1:0]   i_instr,
     input          [XLEN-1:0]   i_dataIn,
@@ -15,10 +35,6 @@ module boredcore (
     // Helper Aliases
     localparam   [4:0] REG_0                /*verilator public*/ = 5'b00000; // Register x0
     localparam  [31:0] NOP                  /*verilator public*/ = 32'h13;
-    // Init values
-    initial begin
-        PC = PC_START;
-    end
 
     // Pipeline regs (p_*)
     localparam  EXEC /*verilator public*/ = 0;
@@ -219,17 +235,17 @@ module boredcore (
 
     // Fetch/Decode reg assignments
     always @(posedge i_clk) begin
-        PC          <=  i_rst       ?   {(XLEN){1'b0}}  :
-                        FETCH_stall ?   PC              :
-                        pcJump      ?   jumpAddr        :
+        PC          <=  i_rst       ?   PC_START    :
+                        FETCH_stall ?   PC          :
+                        pcJump      ?   jumpAddr    :
                                         PC + 32'd4;
         // Buffer PC reg to balance the 1cc BRAM-based regfile read
-        PCReg       <=  FETCH_flush ?   {(XLEN){1'b0}}  :
-                        FETCH_stall ?   PCReg           :
+        PCReg       <=  FETCH_flush ?   PC_START    :
+                        FETCH_stall ?   PCReg       :
                                         PC;
         // Buffer instruction fetch to balance the 1cc BRAM-based regfile read
-        instrReg    <=  FETCH_flush ?   NOP             :
-                        FETCH_stall ?   instrReg        :
+        instrReg    <=  FETCH_flush ?   NOP         :
+                        FETCH_stall ?   instrReg    :
                                         i_instr;
     end
 

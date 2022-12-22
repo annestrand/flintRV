@@ -1,5 +1,25 @@
+// Copyright (c) 2022 Austin Annestrand
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 // Really simple example SoC design
-module boredsoc (
+module drop32soc (
     input   i_clk, i_rst,
     output  o_led
 );
@@ -12,6 +32,14 @@ module boredsoc (
 
     // TODO: Add UART module
     // ...
+
+    // Reset logic
+    reg [3:0] resetReg  = 0;
+    wire startupRstDone = &resetReg;
+    wire rst            = i_rst | !startupRstDone;
+    always @(posedge i_clk) begin
+        resetReg <= startupRstDone ? resetReg : resetReg + 4'b1;
+    end
 
     // IMEM ROM (bootrom.v)
     bootrom #(
@@ -39,7 +67,7 @@ module boredsoc (
     // CPU (core_generated.v)
     CPU CPU_unit (
         .i_clk                  (i_clk),
-        .i_rst                  (i_rst),
+        .i_rst                  (rst),
         .i_ifValid              (ifValid),
         .i_memValid             (memValid),
         .i_instr                (bootRomOut),
@@ -54,16 +82,16 @@ module boredsoc (
     // Output MMIO led reg
     reg [31:0] ledReg = 32'd0;
     always @(posedge i_clk) begin
-        ledReg <= i_rst ? 32'd0 : (storeReq && led_data_sel) ? dataOut : ledReg;
+        ledReg <= rst ? 32'd0 : (storeReq && led_data_sel) ? dataOut : ledReg;
     end
 
     // Data memory valid logic on load/store requests (reset after each transaction)
     always @(posedge i_clk) begin
-        memValid <= (i_rst || memValid) ? 1'b0 : (loadReq | storeReq);
+        memValid <= (rst || memValid) ? 1'b0 : (loadReq | storeReq);
     end
     // Instruction memory valid logic (need to wait 1cc per transaction)
     always @(posedge i_clk) begin
-        ifValid <= i_rst ? 1'b0 : ~ifValid;
+        ifValid <= rst ? 1'b0 : ~ifValid;
     end
 
     // Simple memory map controller
@@ -71,12 +99,12 @@ module boredsoc (
     // -------------------------------------------------------------------------
     // | Address Range             | Description                               |
     // | ------------------------- | ---------------------------------------   |
-    // | 0x00000000 ... 0x000001FF | Internal IMEM ROM (BRAM) - 2KB (readonly) |
-    // | 0x00000200 ... 0x000003FF | Internal DMEM (BRAM) - 2KB                |
+    // | 0x00000000 ... 0x000003FF | Internal IMEM ROM (BRAM) - 1KB (readonly) |
+    // | 0x00000400 ... 0x000007FF | Internal DMEM (BRAM) - 1KB                |
     // | 0x00003000 ... 0x00003003 | Output LED                                |
     // -------------------------------------------------------------------------
-    assign imem_data_sel    = ~dataAddr[12] & ~dataAddr[9];
-    assign dmem_data_sel    = ~dataAddr[12] &  dataAddr[9];
+    assign imem_data_sel    = ~dataAddr[12] & ~dataAddr[10];
+    assign dmem_data_sel    = ~dataAddr[12] &  dataAddr[10];
     assign led_data_sel     =  dataAddr[12];
     always @* begin
         if (imem_data_sel) begin

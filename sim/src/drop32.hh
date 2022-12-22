@@ -1,3 +1,23 @@
+// Copyright (c) 2022 Austin Annestrand
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cstdio>
@@ -5,8 +25,8 @@
 #include <vector>
 #include <gtest/gtest.h>
 
-#include "Vboredcore.h"
-#include "Vboredcore__Syms.h"
+#include "Vdrop32.h"
+#include "Vdrop32__Syms.h"
 
 #ifndef VERILATOR_VER
 #define VERILATOR_VER 4028
@@ -18,11 +38,11 @@ typedef enum {
         S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, T3, T4, T5, T6, REGISTER_COUNT
 } RV32I_Registers;
 
-class boredcore {
+class drop32 {
 public:
-    boredcore(vluint64_t maxSimTime, int dumpLevel=0);
-    ~boredcore();
-    bool create(Vboredcore* cpu, const char* traceFile);
+    drop32(vluint64_t maxSimTime, int dumpLevel=0);
+    ~drop32();
+    bool create(Vdrop32* cpu, const char* traceFile);
     bool createMemory(size_t memSize);
     bool createMemory(size_t memSize, std::string initHexfile);
     bool createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen);
@@ -36,7 +56,7 @@ public:
     void tick(bool enableDump=true);
     void dump();
     bool end();
-    Vboredcore*             m_cpu;      // Reference to CPU object
+    Vdrop32*             m_cpu;      // Reference to CPU object
 
 private:
     vluint64_t              m_cycles;
@@ -53,7 +73,7 @@ private:
             (As well as keep track of any future-version interface changes)
 */
 #if VERILATOR_VER >= 4210
-#define CPU(sim) (sim)->m_cpu->rootp->boredcore
+#define CPU(sim) (sim)->m_cpu->rootp->drop32
 #else
-#define CPU(sim) (sim)->m_cpu->boredcore
+#define CPU(sim) (sim)->m_cpu->drop32
 #endif

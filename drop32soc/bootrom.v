@@ -18,24 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <gtest/gtest.h>
-#include "drop32.hh"
+module bootrom (
+    input                           i_clk, i_en,
+    input       [ADDR_WIDTH-1:0]    i_addr,
+    output reg  [DATA_WIDTH-1:0]    o_data
+);
+    parameter DATA_WIDTH = 32;
+    parameter ADDR_WIDTH = 5;
+    parameter MEMFILE = "init.mem";
+    reg [DATA_WIDTH-1:0] rom [2**ADDR_WIDTH-1:0];
 
-int g_dumpLevel = 0;
+    // Load mem file values into "synchronous ROM" - then read if enabled
+    initial $readmemh(MEMFILE, rom);
+    always @(posedge i_clk) begin if(i_en) o_data <= rom[i_addr]; end
 
-int main(int argc, char *argv[]) {
-    // Parse any passed option(s)
-    // | -dump      : Prints disassembled instruction
-    // | -dump-all  : Prints disassembled instruction + CPU state
-    for (int i=0; i<argc; ++i) {
-        std::string s(argv[i]);
-        if (s.find("-dump") != std::string::npos) {
-            g_dumpLevel = g_dumpLevel > 0 ? g_dumpLevel : 1;
-        }
-        if (s.find("-dump-all") != std::string::npos) {
-            g_dumpLevel = g_dumpLevel > 1 ? g_dumpLevel : 2;
-        }
-    }
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+endmodule
