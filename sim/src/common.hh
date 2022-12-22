@@ -10,11 +10,11 @@
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define LOG_I(msg, ...) \
-    printf("[INFO ]:[%s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
+    printf("[Info ]:[%16s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_W(msg, ...) \
-    printf("[WARN ]:[%s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
+    printf("[WARN ]:[%16s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_E(msg, ...) \
-    printf("[ERROR]:[%s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
+    printf("[ERROR]:[%16s:%d] - " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
 
 std::string disassembleRv32i(unsigned int instr);
 bool loadMem(std::string filePath, char* mem, ssize_t memLen);

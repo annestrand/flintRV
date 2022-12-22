@@ -6,10 +6,6 @@
 #define KB_MULTIPLIER           (1024)
 #define MB_MULTIPLIER           (1024*1024)
 #define DEFAULT_VIRT_MEM_SIZE   (KB_MULTIPLIER * 32) // Default to 32 KB
-#define OUTPUT_LINE \
-    "===[ OUTPUT ]===================================================================================================\n"
-#define LOG_LINE_BREAK \
-    "================================================================================================================\n"
 
 void printHelp(void) {
     printf("Vboredcore - Verilated boredcore simulator\n"
@@ -75,7 +71,6 @@ int main(int argc, char *argv[]) {
 
     // Instantiate CPU
     boredcore dut = boredcore(simTimeVal, atoi(dumpLvl.value));
-    LOG_I("Starting simulation...\n\n%s", OUTPUT_LINE);
     if (!dut.create(new Vboredcore(), NULL))        { LOG_E("Failed to create Vboredcore.\n");  return 1; }
     if (!dut.createMemory(memSize, programFile))    { LOG_E("Failed to create memory.\n");      return 1; }
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
@@ -85,6 +80,7 @@ int main(int argc, char *argv[]) {
     dut.writeRegfile(FP, memSize-1);
 
     // Run
+    LOG_I("Starting simulation...\n\n");
     while(!dut.end()) {
         if (!dut.instructionUpdate())    { LOG_E("Failed instruction fetch.\n"); return 1; }
         if (!dut.loadStoreUpdate())      { LOG_E("Failed load/store fetch.\n");  return 1; }
@@ -92,7 +88,7 @@ int main(int argc, char *argv[]) {
         dut.tick();
     }
 
-    printf("%s\n", LOG_LINE_BREAK);
+    printf("\n");
     LOG_I("Simulation done.\n");
     return 0;
 }

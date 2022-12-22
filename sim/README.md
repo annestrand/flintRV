@@ -1,6 +1,4 @@
 # Simulator
-Directory contains the Verilator-based boredcore simualtor: `Vboredcore`.
-
 ```
 $ ./build/Vboredcore ./build/tests/load_store.hex -d 2
 [INFO ]:[main.cc:73] - Memory size set to: [ 0.031250 MB ].
