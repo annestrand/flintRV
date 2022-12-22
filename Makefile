@@ -48,7 +48,7 @@ ICARUS_FLAGS           += -Itests/unit
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
 
 SIM_CFLAGS             := -g
-SIM_CFLAGS             += -I$(ROOT_DIR)/sim/verilator
+SIM_CFLAGS             += -I$(ROOT_DIR)/sim/src
 SIM_CFLAGS             += -I$(ROOT_DIR)/external/miniargparse
 SIM_CFLAGS             += -DVERILATOR_VER=$(VERILATOR_VER)
 
@@ -61,7 +61,7 @@ SIM_FLAGS              += --x-initial unique
 SIM_FLAGS              += --top-module boredcore
 SIM_FLAGS              += --exe
 
-VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/verilator -type f -name "*.cc" ! -name "main.cc")
+VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/src -type f -name "*.cc" ! -name "main.cc")
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
 CPU_TEST_SRCS          := $(shell find $(ROOT_DIR)/tests/cpu -type f -name "*.cc")
@@ -88,7 +88,7 @@ RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 CPU_TEST_CFLAGS        := -g
 CPU_TEST_CFLAGS        += -Wall
 CPU_TEST_CFLAGS        += -Werror
-CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/verilator
+CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/src
 CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/build/external/riscv_tests
 CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
 
@@ -124,7 +124,7 @@ tests: $(OUT_DIR)/Unit_tests
 
 # Build Verilated simulator
 .PHONY: sim
-sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/verilator/main.cc
+sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/src/main.cc
 sim: $(OUT_DIR)/sim/Vboredcore.cpp
 sim:
 	@$(MAKE) -C $(OUT_DIR)/sim -f Vboredcore.mk

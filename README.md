@@ -27,11 +27,13 @@ This repo uses git submodules - make sure to pull those first:
     $ git submodule update --init --recursive
 
 ## Build Simulator 🖥
-To build Verilator simulator:
+To build Verilator-based simulator:
 
     $ make sim
 
 Output dir: `build/Vboredcore`
+
+See this [README.md](./sim/README.md) for guide.
 
 ## Build Tests 🧪
 To build tests:

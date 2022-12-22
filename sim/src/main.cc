@@ -6,8 +6,10 @@
 #define KB_MULTIPLIER           (1024)
 #define MB_MULTIPLIER           (1024*1024)
 #define DEFAULT_VIRT_MEM_SIZE   (KB_MULTIPLIER * 32) // Default to 32 KB
-#define OUTPUT_LINE     "===[ OUTPUT ]===============================================================================\n"
-#define LOG_LINE_BREAK  "============================================================================================\n"
+#define OUTPUT_LINE \
+    "===[ OUTPUT ]===================================================================================================\n"
+#define LOG_LINE_BREAK \
+    "================================================================================================================\n"
 
 void printHelp(void) {
     printf("Vboredcore - Verilated boredcore simulator\n"
