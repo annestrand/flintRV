@@ -13,7 +13,8 @@ module boredcore (
     parameter         INSTR_WIDTH           /*verilator public*/ = 32; // 16 for RV32C (otherwise 32)
     parameter         XLEN                  /*verilator public*/ = 32;
     // Helper Aliases
-    localparam  [4:0] REG_0                 /*verilator public*/ = 5'b00000; // Register x0
+    localparam   [4:0] REG_0                /*verilator public*/ = 5'b00000; // Register x0
+    localparam  [31:0] NOP                  /*verilator public*/ = 32'h13;
     // Init values
     initial begin
         PC = PC_START;
@@ -122,7 +123,7 @@ module boredcore (
     assign FETCH_stall  = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
     assign EXEC_stall   = MEM_stall;
     assign MEM_stall    = load_wait;
-    assign FETCH_flush  = i_rst || braMispredict || p_jmp[EXEC];
+    assign FETCH_flush  = i_rst || ~i_ifValid || braMispredict || p_jmp[EXEC];
     assign EXEC_flush   = i_rst || braMispredict || p_jmp[EXEC] || load_hazard /* bubble */;
     assign MEM_flush    = i_rst;
     assign WB_flush     = i_rst || load_wait /* bubble */;
@@ -227,7 +228,7 @@ module boredcore (
                         FETCH_stall ?   PCReg           :
                                         PC;
         // Buffer instruction fetch to balance the 1cc BRAM-based regfile read
-        instrReg    <=  FETCH_flush ?   {(XLEN){1'b0}}  :
+        instrReg    <=  FETCH_flush ?   NOP             :
                         FETCH_stall ?   instrReg        :
                                         i_instr;
     end
