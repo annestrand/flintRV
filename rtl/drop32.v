@@ -32,6 +32,7 @@ module drop32 (
     parameter         REGFILE_ADDR_WIDTH    /*verilator public*/ = 5;  //  4 for RV32E (otherwise 5)
     parameter         INSTR_WIDTH           /*verilator public*/ = 32; // 16 for RV32C (otherwise 32)
     parameter         XLEN                  /*verilator public*/ = 32;
+    parameter         ICACHE_LATENCY        /*verilator public*/ = 0;  // 0 cc: LUT cache, 1 cc: BRAM cache
     // Helper Aliases
     localparam   [4:0] REG_0                /*verilator public*/ = 5'b00000; // Register x0
     localparam  [31:0] NOP                  /*verilator public*/ = 32'h13;
@@ -145,22 +146,6 @@ module drop32 (
     assign WB_flush     = i_rst || load_wait /* bubble */;
 
     // Core submodules
-    FetchDecode #(
-        .XLEN               (XLEN),
-        .REGFILE_ADDR_WIDTH (REGFILE_ADDR_WIDTH)
-    ) FETCH_DECODE_unit (
-        .i_clk          (i_clk),
-        .i_instr        (instrReg),
-        .i_regWrEn      (p_reg_w[WB]),
-        .i_regRs1Addr   (FETCH_stall ? `RS1(instrReg) : `RS1(i_instr)),
-        .i_regRs2Addr   (FETCH_stall ? `RS2(instrReg) : `RS2(i_instr)),
-        .i_regRdAddr    (p_rdAddr[WB]),
-        .i_regRdData    (WB_result),
-        .o_regRs1Data   (rs1Out),
-        .o_regRs2Data   (rs2Out),
-        .o_imm          (IMM),
-        .o_ctrlSigs     (ctrlSigs)
-    );
     Execute #(.XLEN(XLEN)) EXECUTE_unit (
         .i_funct7       (p_funct7[EXEC]),
         .i_funct3       (p_funct3[EXEC]),
@@ -233,21 +218,69 @@ module drop32 (
         p_readData [WB]    <= i_dataIn;
     end
 
-    // Fetch/Decode reg assignments
+    // Fetch/Decode
     always @(posedge i_clk) begin
         PC          <=  i_rst       ?   PC_START    :
                         FETCH_stall ?   PC          :
                         pcJump      ?   jumpAddr    :
-                                        PC + 32'd4;
-        // Buffer PC reg to balance the 1cc BRAM-based regfile read
-        PCReg       <=  FETCH_flush ?   PC_START    :
-                        FETCH_stall ?   PCReg       :
-                                        PC;
-        // Buffer instruction fetch to balance the 1cc BRAM-based regfile read
-        instrReg    <=  FETCH_flush ?   NOP         :
-                        FETCH_stall ?   instrReg    :
-                                        i_instr;
+                                        PC + 32'd4  ;
     end
+    generate
+        if (ICACHE_LATENCY == 1) begin // BRAM-based I$
+            reg [XLEN-1:0]  PC2                 /*verilator public*/;
+            reg             FETCH_flush2        /*verilator public*/;
+            wire            FETCH_flush_line    /*verilator public*/;
+            assign          FETCH_flush_line = FETCH_flush || FETCH_flush2;
+            always @(posedge i_clk) begin
+                // Hold fetch-flush line for 1cc extra
+                FETCH_flush2    <= FETCH_flush;
+                // Buffer PC reg to balance the 1cc BRAM-based I$ read
+                PC2             <=  i_rst               ?   0           :
+                                    FETCH_stall         ?   PC2         :
+                                                            PC          ;
+                // Buffer instruction fetch to balance the 1cc BRAM-based regfile read
+                instrReg        <=  FETCH_flush_line    ?   NOP         :
+                                    FETCH_stall         ?   instrReg    :
+                                                            i_instr     ;
+                // Buffer PC reg to balance the 1cc BRAM-based regfile read
+                PCReg           <=  FETCH_flush_line    ?   0           :
+                                    FETCH_stall         ?   PCReg       :
+                                                            PC2         ;
+            end
+        end else begin // LUT-based I$
+            always @(posedge i_clk) begin
+                // Buffer instruction fetch to balance the 1cc BRAM-based regfile read
+                instrReg    <=  FETCH_flush ?   NOP         :
+                                FETCH_stall ?   instrReg    :
+                                                i_instr     ;
+                // Buffer PC reg to balance the 1cc BRAM-based regfile read
+                PCReg       <=  FETCH_flush ?   0           :
+                                FETCH_stall ?   PCReg       :
+                                                PC          ;
+            end
+        end
+    endgenerate
+    ImmGen #(.XLEN(XLEN)) IMMGEN_unit (
+        .i_instr    (instrReg),
+        .o_imm      (IMM)
+    );
+    ControlUnit #(.XLEN(XLEN)) CTRL_unit (
+        .i_instr    (instrReg),
+        .o_ctrlSigs (ctrlSigs)
+    );
+    Regfile #(
+        .XLEN       (XLEN),
+        .ADDR_WIDTH (REGFILE_ADDR_WIDTH)
+    ) REGFILE_unit (
+        .i_clk      (i_clk),
+        .i_wrEn     (p_reg_w[WB]),
+        .i_rs1Addr  (FETCH_stall ? `RS1(instrReg) : `RS1(i_instr)),
+        .i_rs2Addr  (FETCH_stall ? `RS2(instrReg) : `RS2(i_instr)),
+        .i_rdAddr   (p_rdAddr[WB]),
+        .i_rdData   (WB_result),
+        .o_rs1Data  (rs1Out),
+        .o_rs2Data  (rs2Out)
+    );
 
     // CPU outputs
     assign o_pcOut      = PC;

@@ -161,13 +161,13 @@ void drop32::writeRegfile(int index, int val) {
     // Skip if x0 reg
     if (index == 0) { return; }
     // Need to write to both ports
-    CPU(this)->FETCH_DECODE_unit->REGFILE_unit->RS1_PORT_RAM->ram[index] = val;
-    CPU(this)->FETCH_DECODE_unit->REGFILE_unit->RS2_PORT_RAM->ram[index] = val;
+    CPU(this)->REGFILE_unit->RS1_PORT_RAM->ram[index] = val;
+    CPU(this)->REGFILE_unit->RS2_PORT_RAM->ram[index] = val;
 }
 // ====================================================================================================================
 int drop32::readRegfile(int index) {
     // Does not matter which port we read from
-    return (index == 0) ? 0 : CPU(this)->FETCH_DECODE_unit->REGFILE_unit->RS1_PORT_RAM->ram[index];
+    return (index == 0) ? 0 : CPU(this)->REGFILE_unit->RS1_PORT_RAM->ram[index];
 }
 // ====================================================================================================================
 void drop32::reset(int cycles) {

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (c) 2022 Austin Annestrand
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,8 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-#! /usr/bin/env python3
 
 import os
 import re
@@ -72,6 +72,7 @@ def build_top_module(args):
             //     ISA config           : {args.ISA}
             //     Interface protocol   : {args.interface}
             //     PC start value       : 0x{args.pcStart:x}
+            //     I$ latency           : {args.iLatency} cc
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             module {args.topName} (
@@ -92,7 +93,8 @@ def build_top_module(args):
                     .PC_START           ({args.pcStart}),
                     .REGFILE_ADDR_WIDTH ({regfile_addr_width}),
                     .INSTR_WIDTH        ({instr_width}),
-                    .XLEN               ({xlen})
+                    .XLEN               ({xlen}),
+                    .ICACHE_LATENCY     ({args.iLatency})
                 ) drop32_unit (
                     .i_clk              (i_clk     ),
                     .i_rst              (i_rst     ),
@@ -116,6 +118,7 @@ def parse_has_err(args, unknown):
     args.interface  = str.lower(args.interface)
     args.ISA        = str.lower(args.ISA)
     args.pcStart    = int(args.pcStart, 16) if args.pcStart[:2] == "0x" else int(args.pcStart)
+    args.iLatency   = int(args.iLatency)
     if len(unknown) != 0:
         print(f"[{file_name} - Error]: Unknown argument(s)/option(s): {unknown}\n")
         return False
@@ -130,6 +133,10 @@ def parse_has_err(args, unknown):
     if not abs(int(args.pcStart)) <= 0xffffffff:
         print(f"[{file_name} - Error]: PC start value out of range: [ {args.pcStart} ].")
         print(f"    Valid range: [0x0 - 0xffffffff]\n")
+        return False
+    if args.iLatency < 0 or args.iLatency > 1:
+        print(f"[{file_name} - Error]: Invalid instruction cache latency value: [ {args.iLatency} ].")
+        print(f"    Valid values: [0 or 1] - 0:combinatorial, 1:BRAM\n")
         return False
     return True
 
@@ -147,12 +154,14 @@ if __name__ == "__main__":
         help="PC start/reset value (Prefix value with '0x' for hex). [Default: 0x0].")
     parser.add_argument("-name", dest="topName", default="top",
         help="Generated top module name. [Default: top].")
+    parser.add_argument("-ilat", dest="iLatency", default="0",
+        help="Latency of the attached instruction cache. [Default: 0].")
 
     # Parse and err check
     args, unknown = parser.parse_known_args()
     if not parse_has_err(args, unknown):
         parser.print_help()
-        exit()
+        exit(1)
 
     # Create top module source based on interface choice
     top_src = build_top_module(args)

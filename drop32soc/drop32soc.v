@@ -27,7 +27,7 @@ module drop32soc (
     reg  [31:0] dataIn;
     wire loadReq, storeReq, imem_data_sel, dmem_data_sel, led_data_sel;
 
-    reg ifValid     = 1'b0; // Reading/Writing from DualPortRam takes 1cc (we can pipeline the reads after)
+    reg ifValid     = 1'b0; // Reading/Writing from DualPortRam takes 1cc (we pipeline the reads after)
     reg memValid    = 1'b0; // Reading/Writing from DualPortRam takes 1cc
 
     // TODO: Add UART module
@@ -60,8 +60,8 @@ module drop32soc (
         .i_clk                  (i_clk),
         .i_we                   (dmem_data_sel && storeReq),
         .i_dataIn               (dataOut),
-        .i_rAddr                (dataAddr[10:0]),
-        .i_wAddr                (dataAddr[10:0]),
+        .i_rAddr                (dataAddr[9:0]),
+        .i_wAddr                (dataAddr[9:0]),
         .o_q                    (dataMemOut)
     );
     // CPU (core_generated.v)
@@ -89,9 +89,9 @@ module drop32soc (
     always @(posedge i_clk) begin
         memValid <= (rst || memValid) ? 1'b0 : (loadReq | storeReq);
     end
-    // Instruction memory valid logic (need to wait 1cc per transaction)
+    // Instruction memory valid logic
     always @(posedge i_clk) begin
-        ifValid <= rst ? 1'b0 : ~ifValid;
+        ifValid <= rst ? 1'b0 : 1;
     end
 
     // Simple memory map controller

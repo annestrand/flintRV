@@ -5,5 +5,7 @@ __pycache__/
 *.gtkw
 *.mem
 *.elf
+*.out
+*.vcd
 *.map
 *_generated.v

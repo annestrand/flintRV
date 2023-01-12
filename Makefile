@@ -124,10 +124,11 @@ CPU_TEST_FLAGS         += --exe
 SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
-BOREDSOC_SRC           := drop32soc/firmware.s
-BOREDSOC_ELF           := $(BOREDSOC_SRC:%.s=%.elf)
-BOREDSOC_FIRMWARE      := $(BOREDSOC_ELF:%.elf=%.mem)
-BOREDSOC_COREGEN       := drop32soc/core_generated.v
+DROP32SOC_SRC          := drop32soc/firmware.s
+DROP32SOC_OPTS         := -if none -pc 0x0 -isa RV32I -name CPU -ilat 1
+DROP32SOC_ELF          := $(DROP32SOC_SRC:%.s=%.elf)
+DROP32SOC_FIRMWARE     := $(DROP32SOC_ELF:%.elf=%.mem)
+DROP32SOC_COREGEN      := drop32soc/core_generated.v
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
@@ -150,7 +151,7 @@ sim:
 
 # Build drop32soc firmware and generate drop32 core
 .PHONY: soc
-soc: $(BOREDSOC_COREGEN) $(BOREDSOC_ELF) $(BOREDSOC_FIRMWARE)
+soc: $(DROP32SOC_COREGEN) $(DROP32SOC_ELF) $(DROP32SOC_FIRMWARE)
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -183,7 +184,7 @@ $(OUT_DIR)/external/riscv_tests:
 
 # drop32soc
 drop32soc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
-	$(PYTHON) scripts/core_gen.py -if none -pc 0x0 -isa RV32I -name CPU > $@
+	$(PYTHON) scripts/core_gen.py $(DROP32SOC_OPTS) > $@
 
 drop32soc/%.elf: drop32soc/%.s
 	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
@@ -197,11 +198,11 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Simulator (Verilator)
-$(OUT_DIR)/sim/%.cpp: | $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/sim
+$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/sim
 	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vdrop32 $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU/Functional tests
-$(OUT_DIR)/tests/%.cpp: | $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/tests
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vdrop32_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 .SECONDARY:
