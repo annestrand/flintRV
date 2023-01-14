@@ -130,7 +130,7 @@ if __name__ == "__main__":
     parser.add_argument("-name", dest="topName", default="top",
         help="Generated top module name. [Default: top].")
     parser.add_argument("-ilat", dest="iLatency", default="0",
-        help="Latency of the attached instruction cache. [Default: 0].")
+        help="Latency of the attached instruction cache (0cc - 1cc). [Default: 0].")
 
     # Parse and err check
     args, unknown = parser.parse_known_args()
