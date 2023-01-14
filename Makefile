@@ -165,6 +165,9 @@ $(OUT_DIR)/tests:
 $(OUT_DIR)/external/riscv_tests:
 	mkdir -p $@
 
+$(OUT_DIR)/vcd:
+	mkdir -p $@
+
 # drop32soc
 drop32soc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
 	$(PYTHON) scripts/core_gen.py $(DROP32SOC_OPTS) > $@
@@ -181,11 +184,11 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Simulator (Verilator)
-$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/sim
+$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/sim $(OUT_DIR)/vcd
 	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vdrop32 $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU/Functional tests
-$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/tests $(OUT_DIR)/vcd
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vdrop32_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 .SECONDARY:

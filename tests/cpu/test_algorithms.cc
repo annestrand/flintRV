@@ -28,7 +28,7 @@ extern int g_dumpLevel;
 TEST(algorithms, fibonacci) {
     constexpr int memSize = 0x4000;
     drop32 dut = drop32(1000000, g_dumpLevel);
-    if (!dut.create(new Vdrop32(), "obj_dir/fibonacci.vcd"))                                 { FAIL(); }
+    if (!dut.create(new Vdrop32(), "build/vcd/fibonacci.vcd"))                                 { FAIL(); }
     if (!dut.createMemory(memSize, build_tests_fibonacci_hex, build_tests_fibonacci_hex_len))   { FAIL(); }
 
     dut.m_cpu->i_ifValid        = 1;    // Always valid since we assume combinatorial read/write for test memory
@@ -58,7 +58,7 @@ TEST(algorithms, fibonacci) {
 TEST(algorithms, binsearch) {
     constexpr int memSize = 0x4000;
     drop32 dut = drop32(1000000, g_dumpLevel);
-    if (!dut.create(new Vdrop32(), "obj_dir/binsearch.vcd"))                                 { FAIL(); }
+    if (!dut.create(new Vdrop32(), "build/vcd/binsearch.vcd"))                                 { FAIL(); }
     if (!dut.createMemory(memSize, build_tests_binsearch_hex, build_tests_binsearch_hex_len))   { FAIL(); }
 
     dut.m_cpu->i_ifValid        = 1;    // Always valid since we assume combinatorial read/write for test memory
@@ -83,7 +83,7 @@ TEST(algorithms, binsearch) {
 TEST(algorithms, mergesort) {
     constexpr int memSize = 0x4000;
     drop32 dut = drop32(1000000, g_dumpLevel);
-    if (!dut.create(new Vdrop32(), "obj_dir/mergesort.vcd"))                                 { FAIL(); }
+    if (!dut.create(new Vdrop32(), "build/vcd/mergesort.vcd"))                                 { FAIL(); }
     if (!dut.createMemory(memSize, build_tests_mergesort_hex, build_tests_mergesort_hex_len))   { FAIL(); }
 
     dut.m_cpu->i_ifValid        = 1;    // Always valid since we assume combinatorial read/write for test memory

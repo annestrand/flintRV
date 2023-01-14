@@ -1,5 +1,5 @@
 .vscode/
-obj_dir/
+build/vcd/
 build/
 __pycache__/
 *.gtkw
