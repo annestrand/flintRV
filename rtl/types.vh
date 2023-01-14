@@ -26,11 +26,6 @@
 `define FUNCT7(x)           x[31:25]
 `define IMM_11_0(x)         x[31:20]
 
-// Forward select
-`define NO_FWD              2'b00
-`define FWD_MEM             2'b01
-`define FWD_WB              2'b10
-
 // EXEC operand select
 `define REG                 1'b0
 `define PC                  1'b1    // Operand A

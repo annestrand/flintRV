@@ -54,12 +54,11 @@ module drop32 (
                     loadData        /*verilator public*/,
                     rs1Out          /*verilator public*/,
                     rs2Out          /*verilator public*/,
-                    rs2FwdOut       /*verilator public*/,
+                    rs1Exec         /*verilator public*/,
+                    rs2Exec         /*verilator public*/,
                     ctrlSigs        /*verilator public*/,
                     WB_result       /*verilator public*/;
     wire      [3:0] aluOp           /*verilator public*/;
-    wire      [1:0] fwdRs1          /*verilator public*/,
-                    fwdRs2          /*verilator public*/;
     wire            exec_a          /*verilator public*/,
                     exec_b          /*verilator public*/,
                     mem_w           /*verilator public*/,
@@ -89,34 +88,39 @@ module drop32 (
                     ebreak          /*verilator public*/;
 
     // Control signals
-    assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
-    assign exec_a   = `CTRL_EXEC_A(ctrlSigs);
-    assign exec_b   = `CTRL_EXEC_B(ctrlSigs);
-    assign mem_w    = `CTRL_MEM_W(ctrlSigs);
-    assign reg_w    = `CTRL_REG_W(ctrlSigs);
-    assign mem2reg  = `CTRL_MEM2REG(ctrlSigs);
-    assign bra      = `CTRL_BRA(ctrlSigs);
-    assign jmp      = `CTRL_JMP(ctrlSigs);
-    assign ecall    = `CTRL_ECALL(ctrlSigs);
-    assign ebreak   = `CTRL_EBREAK(ctrlSigs);
+    assign aluOp            = `CTRL_ALU_OP(ctrlSigs);
+    assign exec_a           = `CTRL_EXEC_A(ctrlSigs);
+    assign exec_b           = `CTRL_EXEC_B(ctrlSigs);
+    assign mem_w            = `CTRL_MEM_W(ctrlSigs);
+    assign reg_w            = `CTRL_REG_W(ctrlSigs);
+    assign mem2reg          = `CTRL_MEM2REG(ctrlSigs);
+    assign bra              = `CTRL_BRA(ctrlSigs);
+    assign jmp              = `CTRL_JMP(ctrlSigs);
+    assign ecall            = `CTRL_ECALL(ctrlSigs);
+    assign ebreak           = `CTRL_EBREAK(ctrlSigs);
 
     // Branch/jump logic
-    assign pcJump          = braMispredict || p_jmp[EXEC];
-    assign braMispredict   = p_bra[EXEC] && aluOut[0]; // Assume branch not-taken
+    assign pcJump           = braMispredict || p_jmp[EXEC];
+    assign braMispredict    = p_bra[EXEC] && aluOut[0]; // Assume branch not-taken
 
     // Writeback select and enable logic
-    assign WB_result       = p_mem2reg[WB] ? loadData : p_aluOut[WB];
-    assign writeRd         = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
+    assign WB_result        = p_mem2reg[WB] ? loadData : p_aluOut[WB];
+    assign writeRd          = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
 
     // Forwarding logic
     assign RS1_fwd_mem  = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
     assign RS1_fwd_wb   = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
     assign RS2_fwd_mem  = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
     assign RS2_fwd_wb   = ~RS2_fwd_mem && p_reg_w[WB] && (p_rs2Addr[EXEC] == p_rdAddr[WB]);
-    assign fwdRs1       = {RS1_fwd_wb, RS1_fwd_mem};
-    assign fwdRs2       = {RS2_fwd_wb, RS2_fwd_mem};
+    assign rs1Exec      = RS1_fwd_wb    ?   WB_result       :
+                          RS1_fwd_mem   ?   p_aluOut[MEM]   :
+                                            p_rs1[EXEC]     ;
+    assign rs2Exec      = RS2_fwd_wb    ?   WB_result       :
+                          RS2_fwd_mem   ?   p_aluOut[MEM]   :
+                                            p_rs2[EXEC]     ;
     assign rdFwdRs1En   = p_reg_w[WB] && (`RS1(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
     assign rdFwdRs2En   = p_reg_w[WB] && (`RS2(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
+
     // Stall and flush logic
     assign load_hazard  = p_mem2reg[EXEC] && ((`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC]));
     assign load_wait    = o_loadReq && ~i_memValid;
@@ -133,19 +137,14 @@ module drop32 (
         .i_funct7       (p_funct7[EXEC]),
         .i_funct3       (p_funct3[EXEC]),
         .i_aluOp        (p_aluOp[EXEC]),
-        .i_fwdRs1       (fwdRs1),
-        .i_fwdRs2       (fwdRs2),
-        .i_aluSrcA      (p_exec_a[EXEC]),
-        .i_aluSrcB      (p_exec_b[EXEC]),
-        .i_EXEC_rs1     (p_rs1[EXEC]),
-        .i_EXEC_rs2     (p_rs2[EXEC]),
-        .i_MEM_rd       (p_aluOut[MEM]),
-        .i_WB_rd        (WB_result),
+        .i_aluSelA      (p_exec_a[EXEC]),
+        .i_aluSelB      (p_exec_b[EXEC]),
+        .i_rs1Exec      (rs1Exec),
+        .i_rs2Exec      (rs2Exec),
         .i_PC           (p_PC[EXEC]),
         .i_IMM          (p_IMM[EXEC]),
         .o_aluOut       (aluOut),
-        .o_addrGenOut   (jumpAddr),
-        .o_rs2FwdOut    (rs2FwdOut)
+        .o_addrGenOut   (jumpAddr)
     );
     Memory #(.XLEN(XLEN)) MEMORY_unit (
         .i_funct3       (p_funct3[MEM]),
@@ -190,7 +189,7 @@ module drop32 (
         p_rs2Addr  [EXEC]  <= EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
         p_rdAddr   [EXEC]  <= EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
         // --- Memory ---
-        p_rs2      [MEM]   <= MEM_stall ? p_rs2    [MEM] : rs2FwdOut;
+        p_rs2      [MEM]   <= MEM_stall ? p_rs2    [MEM] : rs2Exec;
         p_rdAddr   [MEM]   <= MEM_stall ? p_rdAddr [MEM] : p_rdAddr  [EXEC];
         p_funct3   [MEM]   <= MEM_stall ? p_funct3 [MEM] : p_funct3  [EXEC];
         p_aluOut   [MEM]   <= MEM_stall ? p_aluOut [MEM] : aluOut;
