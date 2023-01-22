@@ -79,8 +79,8 @@ int main(int argc, char *argv[]) {
     // Instantiate CPU
     drop32 dut = drop32(simTimeVal, atoi(dumpLvl.value));
     LOG_I("Starting simulation...\n\n%s", OUTPUT_LINE);
-    if (!dut.create(new Vdrop32(), NULL))        { LOG_E("Failed to create Vdrop32.\n");  return 1; }
-    if (!dut.createMemory(memSize, programFile))    { LOG_E("Failed to create memory.\n");      return 1; }
+    if (!dut.create(new Vdrop32(), NULL))           { LOG_E("Failed to create Vdrop32.\n"); return 1; }
+    if (!dut.createMemory(memSize, programFile))    { LOG_E("Failed to create memory.\n");  return 1; }
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
     // Init stack and frame pointers
