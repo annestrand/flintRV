@@ -14,7 +14,8 @@ module Execute (
                         i_PC            /*verilator public*/,
                         i_IMM           /*verilator public*/,
     output  [XLEN-1:0]  o_aluOut        /*verilator public*/,
-                        o_addrGenOut    /*verilator public*/
+                        o_addrGenOut    /*verilator public*/,
+    output              o_braOutcome    /*verilator public*/
 );
     parameter XLEN /*verilator public*/ = 32;
 
@@ -23,6 +24,11 @@ module Execute (
     wire [XLEN-1:0] aluSrcB /*verilator public*/;
     assign aluSrcA  = (i_aluSelA == `PC)    ? i_PC  : i_rs1Exec;
     assign aluSrcB  = (i_aluSelB == `IMM)   ? i_IMM : i_rs2Exec;
+
+    // ALU output flags
+    wire    zflag /*verilator public*/,
+            cflag /*verilator public*/,
+            lflag /*verilator public*/;
 
     // ALU/ALU_Control
     wire [4:0]  aluControl /*verilator public*/;
@@ -36,7 +42,10 @@ module Execute (
         .i_a      (aluSrcA),
         .i_b      (aluSrcB),
         .i_op     (aluControl),
-        .o_result (o_aluOut)
+        .o_result (o_aluOut),
+        .o_zflag  (zflag),
+        .o_cflag  (cflag),
+        .o_lflag  (lflag)
     );
 
     // Generate jump address
@@ -47,5 +56,21 @@ module Execute (
     assign ctrlTransSrcA    = indirJump ? i_rs1Exec : i_PC;
     assign jmpResult        = ctrlTransSrcA + i_IMM;
     assign o_addrGenOut     = indirJump ? {jmpResult[XLEN-1:1],1'b0} : jmpResult;
+
+    // Comparison expressions for branch instructions
+    wire beq     /*verilator public*/,
+         bne     /*verilator public*/,
+         blt     /*verilator public*/,
+         bge     /*verilator public*/,
+         bltu    /*verilator public*/,
+         bgeu    /*verilator public*/;
+    assign beq  = aluControl == `ALU_EXEC_EQ    &&  zflag;
+    assign bne  = aluControl == `ALU_EXEC_NEQ   && ~zflag;
+    assign blt  = aluControl == `ALU_EXEC_SLT   &&  lflag;
+    assign bge  = aluControl == `ALU_EXEC_SGTE  && ~lflag;
+    assign bltu = aluControl == `ALU_EXEC_SLTU  && ~cflag;
+    assign bgeu = aluControl == `ALU_EXEC_SGTEU &&  cflag;
+    // Static branch prediction - assume not taken
+    assign o_braOutcome = i_aluOp == `ALU_OP_B && (beq | bne | blt | bge | bltu | bgeu);
 
 endmodule
