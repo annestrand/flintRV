@@ -26,7 +26,7 @@ module Execute (
     assign aluSrcB  = (i_aluSelB == `IMM)   ? i_IMM : i_rs2Exec;
 
     // ALU output flags
-    wire    zflag /*verilator public*/,
+    wire    eflag /*verilator public*/,
             cflag /*verilator public*/,
             lflag /*verilator public*/;
 
@@ -43,7 +43,7 @@ module Execute (
         .i_b      (aluSrcB),
         .i_op     (aluControl),
         .o_result (o_aluOut),
-        .o_zflag  (zflag),
+        .o_eflag  (eflag),
         .o_cflag  (cflag),
         .o_lflag  (lflag)
     );
@@ -64,8 +64,8 @@ module Execute (
          bge     /*verilator public*/,
          bltu    /*verilator public*/,
          bgeu    /*verilator public*/;
-    assign beq  = aluControl == `ALU_EXEC_EQ    &&  zflag;
-    assign bne  = aluControl == `ALU_EXEC_NEQ   && ~zflag;
+    assign beq  = aluControl == `ALU_EXEC_EQ    &&  eflag;
+    assign bne  = aluControl == `ALU_EXEC_NEQ   && ~eflag;
     assign blt  = aluControl == `ALU_EXEC_SLT   &&  lflag;
     assign bge  = aluControl == `ALU_EXEC_SGTE  && ~lflag;
     assign bltu = aluControl == `ALU_EXEC_SLTU  && ~cflag;

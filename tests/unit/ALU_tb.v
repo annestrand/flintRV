@@ -7,7 +7,7 @@ module IAlu_tb;
     reg     [31:0]  i_a, i_b;
     reg     [4:0]   i_op;
     wire    [31:0]  o_result;
-    wire            o_zflag, o_cflag, o_lflag;
+    wire            o_eflag, o_cflag, o_lflag;
 
     ALU Alu_dut(.*);
     defparam Alu_dut.XLEN = 32;
@@ -18,7 +18,6 @@ module IAlu_tb;
             j               = 0,
             errs            = 0;
 
-    reg sub;
     reg [31:0] r;
     initial begin
         i_a       = 'd0;
@@ -66,7 +65,11 @@ module IAlu_tb;
                         r = i_a & i_b;
                         if (o_result != r) begin errs = errs + 1; end
                     end
-                    `ALU_EXEC_SUB   : begin
+                    `ALU_EXEC_SUB   ,
+                    `ALU_EXEC_EQ    ,
+                    `ALU_EXEC_NEQ   ,
+                    `ALU_EXEC_SGTE  ,
+                    `ALU_EXEC_SGTEU : begin
                         r = i_a - i_b;
                         if (o_result != r) begin errs = errs + 1; end
                     end
@@ -76,11 +79,13 @@ module IAlu_tb;
                     end
                     `ALU_EXEC_SLT   : begin
                         r = $signed(i_a) < $signed(i_b);
-                        if (o_result != r) begin errs = errs + 1; end
+                        if (o_result != r)      begin errs = errs + 1; end
+                        if (o_lflag  != r[0])   begin errs = errs + 1; end
                     end
                     `ALU_EXEC_SLTU  : begin
                         r = i_a < i_b;
-                        if (o_result != r) begin errs = errs + 1; end
+                        if (o_result != r)      begin errs = errs + 1; end
+                        if (o_cflag == r[0])    begin errs = errs + 1; end
                     end
                     default         : begin
                         // Default op is adder/subtractor
@@ -92,6 +97,7 @@ module IAlu_tb;
                         if (o_result != r) begin errs = errs + 1; end
                     end
                 endcase
+                if (i_a == i_b && !o_eflag) begin  errs = errs + 1; end
             end
         end
         if (errs > 0)   $display("ALU tests - FAILED: %0d", errs);
