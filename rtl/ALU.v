@@ -47,8 +47,6 @@ module ALU (
         // --- Main operations ---
         case (i_op)
             default         : o_result = ALU_ADDER_result;
-            `ALU_EXEC_ADD   : o_result = ALU_ADDER_result;
-            `ALU_EXEC_SUB   : o_result = ALU_ADDER_result;
             `ALU_EXEC_AND   : o_result = i_a & i_b;
             `ALU_EXEC_OR    : o_result = i_a | i_b;
             `ALU_EXEC_XOR   : o_result = ALU_XOR_result;
@@ -56,7 +54,6 @@ module ALU (
             `ALU_EXEC_SRL   : o_result = i_a >> i_b[4:0];
             `ALU_EXEC_SRA   : o_result = $signed(i_a) >>> i_b[4:0];
             `ALU_EXEC_PASSB : o_result = i_b;
-            `ALU_EXEC_ADD4A : o_result = ALU_ADDER_result;
             `ALU_EXEC_EQ    : o_result = {31'd0, ~|ALU_XOR_result};
             `ALU_EXEC_NEQ   : o_result = {31'd0, ~(~|ALU_XOR_result)};
             `ALU_EXEC_SLT   : o_result = {31'd0,  ALU_SLT};
