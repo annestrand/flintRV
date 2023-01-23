@@ -2,6 +2,7 @@
 build/vcd/
 build/
 __pycache__/
+
 *.gtkw
 *.mem
 *.elf
@@ -9,3 +10,8 @@ __pycache__/
 *.vcd
 *.map
 *_generated.v
+
+drop32soc/*.sh
+drop32soc/*.pcf
+drop32soc/*.asc
+drop32soc/*.json
