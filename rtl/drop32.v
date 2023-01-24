@@ -66,7 +66,7 @@ module drop32 (
                     mem2reg         /*verilator public*/,
                     bra             /*verilator public*/,
                     jmp             /*verilator public*/,
-                    braMispredict   /*verilator public*/,
+                    braOutcome      /*verilator public*/,
                     writeRd         /*verilator public*/,
                     pcJump          /*verilator public*/,
                     RS1_fwd_mem     /*verilator public*/,
@@ -100,8 +100,8 @@ module drop32 (
     assign ebreak           = `CTRL_EBREAK(ctrlSigs);
 
     // Branch/jump logic
-    assign pcJump           = braMispredict || p_jmp[EXEC];
-    assign braMispredict    = p_bra[EXEC] && aluOut[0]; // Assume branch not-taken
+    assign pcJump           = braOutcome || p_jmp[EXEC];
+    assign braOutcome       = p_bra[EXEC] && aluOut[0]; // Assume branch not-taken
 
     // Writeback select and enable logic
     assign WB_result        = p_mem2reg[WB] ? loadData : p_aluOut[WB];
@@ -127,8 +127,8 @@ module drop32 (
     assign FETCH_stall  = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
     assign EXEC_stall   = MEM_stall;
     assign MEM_stall    = load_wait;
-    assign FETCH_flush  = i_rst || ~i_ifValid || braMispredict || p_jmp[EXEC];
-    assign EXEC_flush   = i_rst || braMispredict || p_jmp[EXEC] || load_hazard /* bubble */;
+    assign FETCH_flush  = i_rst || ~i_ifValid || braOutcome || p_jmp[EXEC];
+    assign EXEC_flush   = i_rst || braOutcome || p_jmp[EXEC] || load_hazard /* bubble */;
     assign MEM_flush    = i_rst;
     assign WB_flush     = i_rst || load_wait /* bubble */;
 

@@ -187,7 +187,7 @@ void drop32::dump() {
     bool mFlush         = CPU(this)->MEM_flush;
     bool wFlush         = CPU(this)->WB_flush;
     // Status codes
-    bool BRA            = CPU(this)->braMispredict;             // B
+    bool BRA            = CPU(this)->braOutcome;                // B
     bool JMP            = CPU(this)->p_jmp[CPU(this)->EXEC];    // J
     bool LD_REQ         = m_cpu->o_loadReq;                     // L
     bool SD_REQ         = m_cpu->o_storeReq;                    // S
