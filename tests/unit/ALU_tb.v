@@ -7,7 +7,6 @@ module IAlu_tb;
     reg     [31:0]  i_a, i_b;
     reg     [4:0]   i_op;
     wire    [31:0]  o_result;
-    wire            o_zflag, o_cflag, o_lflag;
 
     ALU Alu_dut(.*);
     defparam Alu_dut.XLEN = 32;
@@ -18,7 +17,6 @@ module IAlu_tb;
             j               = 0,
             errs            = 0;
 
-    reg sub;
     reg [31:0] r;
     initial begin
         i_a       = 'd0;
@@ -74,6 +72,14 @@ module IAlu_tb;
                         r = i_a << i_b[4:0];
                         if (o_result != r) begin errs = errs + 1; end
                     end
+                    `ALU_EXEC_EQ    : begin
+                        r = i_a == i_b;
+                        if (o_result != r) begin errs = errs + 1; end
+                    end
+                    `ALU_EXEC_NEQ   : begin
+                        r = i_a != i_b;
+                        if (o_result != r) begin errs = errs + 1; end
+                    end
                     `ALU_EXEC_SLT   : begin
                         r = $signed(i_a) < $signed(i_b);
                         if (o_result != r) begin errs = errs + 1; end
@@ -82,13 +88,16 @@ module IAlu_tb;
                         r = i_a < i_b;
                         if (o_result != r) begin errs = errs + 1; end
                     end
+                    `ALU_EXEC_SGTE  : begin
+                        r = $signed(i_a) >= $signed(i_b);
+                        if (o_result != r) begin errs = errs + 1; end
+                    end
+                    `ALU_EXEC_SGTEU : begin
+                        r = i_a >= i_b;
+                        if (o_result != r) begin errs = errs + 1; end
+                    end
                     default         : begin
-                        // Default op is adder/subtractor
-                        if ((i_op == `ALU_EXEC_SGTE) || (i_op == `ALU_EXEC_SGTEU)) begin
-                            r = i_a - i_b;
-                        end else begin
-                            r = i_a + i_b;
-                        end
+                        r = i_a + i_b;
                         if (o_result != r) begin errs = errs + 1; end
                     end
                 endcase
