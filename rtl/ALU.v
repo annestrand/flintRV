@@ -13,9 +13,10 @@ module ALU (
     localparam  ALU_OP_WIDTH    /*verilator public*/ = 5;
 
     wire            SLT                 /*verilator public*/;
+    wire            SLTU                /*verilator public*/;
     wire [XLEN-1:0] B_in                /*verilator public*/;
     wire            SUB                 /*verilator public*/;
-    wire            cflag               /*verilator public*/; // Catch unsigned overflow for SLTU/SGTEU cases
+    wire            cflag               /*verilator public*/;
     wire [XLEN-1:0] ALU_ADDER_result    /*verilator public*/;
     wire [XLEN-1:0] ALU_XOR_result      /*verilator public*/;
     wire [XLEN-1:0] CONST_4             /*verilator public*/;
@@ -24,7 +25,8 @@ module ALU (
     assign CONST_4          = {{(XLEN-3){1'b0}}, 3'd4};
     assign SUB              = ~i_op[4] && i_op[3]; // Encoding 01000 - 01111 of ALU exec/op to SUB on adder unit
     assign B_in             = i_op == `ALU_EXEC_ADD4A ? CONST_4 : SUB ? ~i_b : i_b;
-    assign SLT              = ~(i_a[XLEN-1] ^ i_b[XLEN-1]) ? ALU_ADDER_result[XLEN-1] : i_a[XLEN-1];
+    assign SLT              = $signed(i_a) < $signed(i_b);
+    assign SLTU             = i_a < i_b;
 
     // Add/Sub logic
     assign {cflag, ALU_ADDER_result[XLEN-1:0]} = i_a + B_in + {{(XLEN){1'b0}}, SUB};
@@ -43,8 +45,8 @@ module ALU (
             `ALU_EXEC_NEQ   : o_result = {31'd0, ~(~|ALU_XOR_result)};
             `ALU_EXEC_SLT   : o_result = {31'd0,  SLT};
             `ALU_EXEC_SGTE  : o_result = {31'd0, ~SLT};
-            `ALU_EXEC_SLTU  : o_result = {31'd0, ~cflag};
-            `ALU_EXEC_SGTEU : o_result = {31'd0,  cflag};
+            `ALU_EXEC_SLTU  : o_result = {31'd0,  SLTU};
+            `ALU_EXEC_SGTEU : o_result = {31'd0, ~SLTU};
         endcase
     end
 endmodule

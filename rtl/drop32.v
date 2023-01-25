@@ -30,6 +30,7 @@ module drop32 (
     reg [XLEN-1:0]  p_readData  [EXEC:WB] /*verilator public*/;
     reg [XLEN-1:0]  p_PC        [EXEC:WB] /*verilator public*/;
     reg [XLEN-1:0]  p_IMM       [EXEC:WB] /*verilator public*/;
+    reg [XLEN-1:0]  p_jumpAddr  [EXEC:WB] /*verilator public*/;
     reg      [6:0]  p_funct7    [EXEC:WB] /*verilator public*/;
     reg      [4:0]  p_rs1Addr   [EXEC:WB] /*verilator public*/;
     reg      [4:0]  p_rs2Addr   [EXEC:WB] /*verilator public*/;
@@ -43,6 +44,7 @@ module drop32 (
     reg             p_exec_b    [EXEC:WB] /*verilator public*/;
     reg             p_bra       [EXEC:WB] /*verilator public*/;
     reg             p_jmp       [EXEC:WB] /*verilator public*/;
+    reg             p_ebreak    [EXEC:WB] /*verilator public*/;
 
     // Internal wires/regs
     reg  [XLEN-1:0] PC              /*verilator public*/,
@@ -100,8 +102,8 @@ module drop32 (
     assign ebreak           = `CTRL_EBREAK(ctrlSigs);
 
     // Branch/jump logic
-    assign pcJump           = braOutcome || p_jmp[EXEC];
-    assign braOutcome       = p_bra[EXEC] && aluOut[0]; // Assume branch not-taken
+    assign pcJump           = braOutcome || p_jmp[MEM];
+    assign braOutcome       = p_bra[MEM] && p_aluOut[MEM][0]; // [Static predictor]: Assume branch not-taken
 
     // Writeback select and enable logic
     assign WB_result        = p_mem2reg[WB] ? loadData : p_aluOut[WB];
@@ -127,9 +129,9 @@ module drop32 (
     assign FETCH_stall  = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
     assign EXEC_stall   = MEM_stall;
     assign MEM_stall    = load_wait;
-    assign FETCH_flush  = i_rst || ~i_ifValid || braOutcome || p_jmp[EXEC];
-    assign EXEC_flush   = i_rst || braOutcome || p_jmp[EXEC] || load_hazard /* bubble */;
-    assign MEM_flush    = i_rst;
+    assign FETCH_flush  = i_rst || ~i_ifValid || braOutcome || p_jmp[MEM];
+    assign EXEC_flush   = i_rst || braOutcome || p_jmp[MEM] || load_hazard /* bubble */;
+    assign MEM_flush    = i_rst || braOutcome || p_jmp[MEM];
     assign WB_flush     = i_rst || load_wait /* bubble */;
 
     // Core submodules
@@ -168,10 +170,13 @@ module drop32 (
         p_exec_b   [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_exec_b  [EXEC] : exec_b;
         p_bra      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_bra     [EXEC] : bra;
         p_jmp      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jmp     [EXEC] : jmp;
+        p_ebreak   [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ebreak  [EXEC] : ebreak;
         // --- Memory ---
         p_mem_w    [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem_w    [MEM] : p_mem_w   [EXEC];
         p_reg_w    [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_reg_w    [MEM] : p_reg_w   [EXEC];
         p_mem2reg  [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem2reg  [MEM] : p_mem2reg [EXEC];
+        p_bra      [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_bra      [MEM] : p_bra     [EXEC];
+        p_jmp      [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_jmp      [MEM] : p_jmp     [EXEC];
         // --- Writeback ---
         p_reg_w    [WB]    <= WB_flush ? 1'd0 : p_reg_w   [MEM];
         p_mem2reg  [WB]    <= WB_flush ? 1'd0 : p_mem2reg [MEM];
@@ -189,10 +194,11 @@ module drop32 (
         p_rs2Addr  [EXEC]  <= EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
         p_rdAddr   [EXEC]  <= EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
         // --- Memory ---
-        p_rs2      [MEM]   <= MEM_stall ? p_rs2    [MEM] : rs2Exec;
-        p_rdAddr   [MEM]   <= MEM_stall ? p_rdAddr [MEM] : p_rdAddr  [EXEC];
-        p_funct3   [MEM]   <= MEM_stall ? p_funct3 [MEM] : p_funct3  [EXEC];
-        p_aluOut   [MEM]   <= MEM_stall ? p_aluOut [MEM] : aluOut;
+        p_rs2      [MEM]   <= MEM_stall  ? p_rs2      [MEM] : rs2Exec;
+        p_rdAddr   [MEM]   <= MEM_stall  ? p_rdAddr   [MEM] : p_rdAddr  [EXEC];
+        p_funct3   [MEM]   <= MEM_stall  ? p_funct3   [MEM] : p_funct3  [EXEC];
+        p_aluOut   [MEM]   <= MEM_stall  ? p_aluOut   [MEM] : aluOut;
+        p_jumpAddr [MEM]   <= MEM_stall  ? p_jumpAddr [MEM] : jumpAddr;
         // --- Writeback ---
         p_aluOut   [WB]    <= p_aluOut  [MEM];
         p_rdAddr   [WB]    <= p_rdAddr  [MEM];
@@ -202,10 +208,10 @@ module drop32 (
 
     // Fetch/Decode
     always @(posedge i_clk) begin
-        PC          <=  i_rst       ?   PC_START    :
-                        FETCH_stall ?   PC          :
-                        pcJump      ?   jumpAddr    :
-                                        PC + 32'd4  ;
+        PC          <=  i_rst       ?   PC_START        :
+                        pcJump      ?   p_jumpAddr[MEM] :
+                        FETCH_stall ?   PC              :
+                                        PC + 32'd4      ;
     end
     generate
         if (ICACHE_LATENCY == 1) begin // BRAM-based I$

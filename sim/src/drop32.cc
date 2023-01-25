@@ -188,7 +188,7 @@ void drop32::dump() {
     bool wFlush         = CPU(this)->WB_flush;
     // Status codes
     bool BRA            = CPU(this)->braOutcome;                // B
-    bool JMP            = CPU(this)->p_jmp[CPU(this)->EXEC];    // J
+    bool JMP            = CPU(this)->p_jmp[CPU(this)->MEM];     // J
     bool LD_REQ         = m_cpu->o_loadReq;                     // L
     bool SD_REQ         = m_cpu->o_storeReq;                    // S
     bool RST            = m_cpu->i_rst;                         // R
@@ -208,7 +208,7 @@ void drop32::dump() {
 }
 // ====================================================================================================================
 bool drop32::end() {
-    bool isEbreak   = CPU(this)->ebreak && !CPU(this)->pcJump;
+    bool isEbreak   = CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump;
     bool isFinished = Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;
     if (isEbreak) {
         // Need to finish draining pipeline here...
