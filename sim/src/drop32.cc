@@ -105,10 +105,10 @@ bool drop32::loadStoreUpdate() {
     if (m_cpu->o_loadReq) { // Load
         m_cpu->i_dataIn = *(int*)&m_mem[m_cpu->o_dataAddr];
     } else { // Store
-        if (CPU(this)->MEMORY_unit->i_funct3 == CPU(this)->MEMORY_unit->S_B_OP) {
+        if (CPU(this)->p_funct3[CPU(this)->MEM] == CPU(this)->S_B_OP) {
             *(int*)&m_mem[m_cpu->o_dataAddr] &= 0xffffff00;
             *(int*)&m_mem[m_cpu->o_dataAddr] |= m_cpu->o_dataOut;
-        } else if (CPU(this)->MEMORY_unit->i_funct3 == CPU(this)->MEMORY_unit->S_H_OP) {
+        } else if (CPU(this)->p_funct3[CPU(this)->MEM] == CPU(this)->S_H_OP) {
             *(int*)&m_mem[m_cpu->o_dataAddr] &= 0xffff0000;
             *(int*)&m_mem[m_cpu->o_dataAddr] |= m_cpu->o_dataOut;
         } else {

@@ -10,17 +10,33 @@ module drop32 (
     output                      o_storeReq, o_loadReq,
     output         [XLEN-1:0]   o_pcOut, o_dataAddr, o_dataOut
 );
+    // ================================================================================================================
     // CPU configs
+    // ================================================================================================================
     parameter         PC_START              /*verilator public*/ = 0;
     parameter         REGFILE_ADDR_WIDTH    /*verilator public*/ = 5;  //  4 for RV32E (otherwise 5)
     parameter         INSTR_WIDTH           /*verilator public*/ = 32; // 16 for RV32C (otherwise 32)
     parameter         XLEN                  /*verilator public*/ = 32;
     parameter         ICACHE_LATENCY        /*verilator public*/ = 0;  // 0 cc: LUT cache, 1 cc: BRAM cache
+    // ================================================================================================================
     // Helper Aliases
-    localparam   [4:0] REG_0                /*verilator public*/ = 5'b00000; // Register x0
-    localparam  [31:0] NOP                  /*verilator public*/ = 32'h13;
+    // ================================================================================================================
+    localparam   [4:0]  REG_0               /*verilator public*/ = 5'b00000; // Register x0
+    localparam  [31:0]  NOP                 /*verilator public*/ = 32'h13;
+    localparam          S_B_OP              /*verilator public*/ = 3'b000;
+    localparam          S_H_OP              /*verilator public*/ = 3'b001;
+    localparam          S_W_OP              /*verilator public*/ = 3'b010;
+    localparam          S_BU_OP             /*verilator public*/ = 3'b100;
+    localparam          S_HU_OP             /*verilator public*/ = 3'b101;
+    localparam          L_B_OP              /*verilator public*/ = 3'b000;
+    localparam          L_H_OP              /*verilator public*/ = 3'b001;
+    localparam          L_W_OP              /*verilator public*/ = 3'b010;
+    localparam          L_BU_OP             /*verilator public*/ = 3'b100;
+    localparam          L_HU_OP             /*verilator public*/ = 3'b101;
 
+    // ================================================================================================================
     // Pipeline regs (p_*)
+    // ================================================================================================================
     localparam  EXEC /*verilator public*/ = 0;
     localparam  MEM  /*verilator public*/ = 1;
     localparam  WB   /*verilator public*/ = 2;
@@ -46,16 +62,20 @@ module drop32 (
     reg             p_jmp       [EXEC:WB] /*verilator public*/;
     reg             p_ebreak    [EXEC:WB] /*verilator public*/;
 
+    // ================================================================================================================
     // Internal regs
+    // ================================================================================================================
     reg  [XLEN-1:0] PC              /*verilator public*/;
     reg  [XLEN-1:0] PCReg           /*verilator public*/;
     reg  [XLEN-1:0] instrReg        /*verilator public*/;
+    reg  [XLEN-1:0] loadData        /*verilator public*/;
 
+    // ================================================================================================================
     // Internal wires
+    // ================================================================================================================
     wire [XLEN-1:0] IMM             /*verilator public*/;
     wire [XLEN-1:0] aluOut          /*verilator public*/;
     wire [XLEN-1:0] jumpAddr        /*verilator public*/;
-    wire [XLEN-1:0] loadData        /*verilator public*/;
     wire [XLEN-1:0] rs1Out          /*verilator public*/;
     wire [XLEN-1:0] rs2Out          /*verilator public*/;
     wire [XLEN-1:0] rs1Exec         /*verilator public*/;
@@ -91,7 +111,9 @@ module drop32 (
     wire            ecall           /*verilator public*/;
     wire            ebreak          /*verilator public*/;
 
+    // ================================================================================================================
     // Control signals
+    // ================================================================================================================
     assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
     assign exec_a   = `CTRL_EXEC_A(ctrlSigs);
     assign exec_b   = `CTRL_EXEC_B(ctrlSigs);
@@ -103,15 +125,21 @@ module drop32 (
     assign ecall    = `CTRL_ECALL(ctrlSigs);
     assign ebreak   = `CTRL_EBREAK(ctrlSigs);
 
+    // ================================================================================================================
     // Branch/jump logic
+    // ================================================================================================================
     assign pcJump       = braOutcome || p_jmp[MEM];
     assign braOutcome   = p_bra[MEM] && p_aluOut[MEM][0]; // [Static predictor]: Assume branch not-taken
 
+    // ================================================================================================================
     // Writeback select and enable logic
+    // ================================================================================================================
     assign WB_result    = p_mem2reg[WB] ? loadData : p_aluOut[WB];
     assign writeRd      = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
 
+    // ================================================================================================================
     // Forwarding logic
+    // ================================================================================================================
     assign RS1_fwd_mem  = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
     assign RS1_fwd_wb   = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
     assign RS2_fwd_mem  = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
@@ -125,7 +153,9 @@ module drop32 (
     assign rdFwdRs1En   = p_reg_w[WB] && (`RS1(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
     assign rdFwdRs2En   = p_reg_w[WB] && (`RS2(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
 
+    // ================================================================================================================
     // Stall and flush logic
+    // ================================================================================================================
     assign load_hazard  = p_mem2reg[EXEC] && ((`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC]));
     assign load_wait    = o_loadReq && ~i_memValid;
     assign FETCH_stall  = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
@@ -136,32 +166,9 @@ module drop32 (
     assign MEM_flush    = i_rst || braOutcome || p_jmp[MEM];
     assign WB_flush     = i_rst || load_wait /* bubble */;
 
-    // Core submodules
-    Execute #(.XLEN(XLEN)) EXECUTE_unit (
-        .i_funct7       (p_funct7[EXEC]),
-        .i_funct3       (p_funct3[EXEC]),
-        .i_aluOp        (p_aluOp[EXEC]),
-        .i_aluSelA      (p_exec_a[EXEC]),
-        .i_aluSelB      (p_exec_b[EXEC]),
-        .i_rs1Exec      (rs1Exec),
-        .i_rs2Exec      (rs2Exec),
-        .i_PC           (p_PC[EXEC]),
-        .i_IMM          (p_IMM[EXEC]),
-        .o_aluOut       (aluOut),
-        .o_addrGenOut   (jumpAddr)
-    );
-    Memory #(.XLEN(XLEN)) MEMORY_unit (
-        .i_funct3       (p_funct3[MEM]),
-        .i_dataIn       (p_rs2[MEM]),
-        .o_dataOut      (o_dataOut)
-    );
-    Writeback #(.XLEN(XLEN)) WRITEBACK_unit (
-        .i_funct3       (p_funct3[WB]),
-        .i_dataIn       (p_readData[WB]),
-        .o_dataOut      (loadData)
-    );
-
+    // ================================================================================================================
     // Pipeline CTRL reg assignments
+    // ================================================================================================================
     always @(posedge i_clk) begin
         // --- Execute ---
         p_aluOp     [EXEC]  <= EXEC_flush ? 4'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
@@ -183,7 +190,9 @@ module drop32 (
         p_reg_w     [WB]    <= WB_flush ? 1'd0 : p_reg_w    [MEM];
         p_mem2reg   [WB]    <= WB_flush ? 1'd0 : p_mem2reg  [MEM];
     end
+    // ================================================================================================================
     // Pipeline DATA reg assignments
+    // ================================================================================================================
     always @(posedge i_clk) begin
         // --- Execute ---
         p_rs1       [EXEC]  <= EXEC_stall ? p_rs1       [EXEC] : rdFwdRs1En ? WB_result : rs1Out;
@@ -208,7 +217,9 @@ module drop32 (
         p_readData  [WB]    <= i_dataIn;
     end
 
-    // Fetch/Decode
+    // ================================================================================================================
+    // [Stage]: Fetch/Decode
+    // ================================================================================================================
     always @(posedge i_clk) begin
         PC          <=  i_rst       ?   PC_START        :
                         pcJump      ?   p_jumpAddr[MEM] :
@@ -272,10 +283,75 @@ module drop32 (
         .o_rs2Data  (rs2Out)
     );
 
+    // ================================================================================================================
+    // [Stage]: Execute
+    // ================================================================================================================
+    // ALU input selects
+    wire [XLEN-1:0] aluSrcA /*verilator public*/;
+    wire [XLEN-1:0] aluSrcB /*verilator public*/;
+    assign aluSrcA  = (p_exec_a[EXEC] == `PC)   ? p_PC[EXEC]  : rs1Exec;
+    assign aluSrcB  = (p_exec_b[EXEC] == `IMM)  ? p_IMM[EXEC] : rs2Exec;
+
+    // ALU/ALU_Control
+    wire [4:0]  aluControl /*verilator public*/;
+    ALU_Control ALU_CTRL_unit (
+        .i_aluOp        (p_aluOp[EXEC]),
+        .i_funct7       (p_funct7[EXEC]),
+        .i_funct3       (p_funct3[EXEC]),
+        .o_aluControl   (aluControl)
+    );
+    ALU #(.XLEN(XLEN)) alu_unit (
+        .i_a      (aluSrcA),
+        .i_b      (aluSrcB),
+        .i_op     (aluControl),
+        .o_result (aluOut)
+    );
+
+    // Generate jump address
+    wire indirJump                  /*verilator public*/;
+    wire [XLEN-1:0] ctrlTransSrcA   /*verilator public*/;
+    wire [XLEN-1:0] jmpResult       /*verilator public*/;
+    assign indirJump        = `ALU_OP_I_JUMP == p_aluOp[EXEC]; // (i.e. JALR)
+    assign ctrlTransSrcA    = indirJump ? rs1Exec : p_PC[EXEC];
+    assign jmpResult        = ctrlTransSrcA + p_IMM[EXEC];
+    assign jumpAddr         = indirJump ? {jmpResult[XLEN-1:1],1'b0} : jmpResult;
+
+    // ================================================================================================================
+    // [Stage]: Memory
+    // ================================================================================================================
+    reg [XLEN-1:0] storeData /*verilator public*/;
+    always @(*) begin
+        case (p_funct3[MEM])
+            S_B_OP  : storeData = {24'd0, p_rs2[MEM][7:0]};
+            S_H_OP  : storeData = {16'd0, p_rs2[MEM][15:0]};
+            S_W_OP  : storeData = p_rs2[MEM];
+            S_BU_OP : storeData = {24'd0, p_rs2[MEM][7:0]};
+            S_HU_OP : storeData = {16'd0, p_rs2[MEM][15:0]};
+            default : storeData = p_rs2[MEM];
+        endcase
+    end
+
+    // ================================================================================================================
+    // [Stage]: Writeback
+    // ================================================================================================================
+    always @(*) begin
+        case (p_funct3[WB])
+            L_B_OP  : loadData = {{24{p_readData[WB][7]}},   p_readData[WB][7:0]};
+            L_H_OP  : loadData = {{16{p_readData[WB][15]}},  p_readData[WB][15:0]};
+            L_W_OP  : loadData = p_readData[WB];
+            L_BU_OP : loadData = {24'd0, p_readData[WB][7:0]};
+            L_HU_OP : loadData = {16'd0, p_readData[WB][15:0]};
+            default : loadData = p_readData[WB];
+        endcase
+    end
+
+    // ================================================================================================================
     // CPU outputs
+    // ================================================================================================================
     assign o_pcOut      = PC;
     assign o_dataAddr   = p_aluOut[MEM];
     assign o_storeReq   = p_mem_w[MEM];
     assign o_loadReq    = p_mem2reg[MEM];
+    assign o_dataOut    = storeData;
 
 endmodule
