@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
     MINIARGPARSE_OPT(help, "h", "help", 0, "Print help and exit.");
     MINIARGPARSE_OPT(dumpLvl, "d", "dumpLevel", 1, "Verbose trace print-level (0-2) [DEFAULT=0].");
     MINIARGPARSE_OPT(simTime, "t", "timeout", 1, "Simulation timeout value [DEFAULT=1000].");
+    MINIARGPARSE_OPT(simVcd, "v", "vcdDump", 1, "Filename for VCD dump [DEFAULT=Disabled].");
 
     // Parse the args
     int unknownOpt = miniargparseParse(argc, argv);
@@ -79,7 +80,7 @@ int main(int argc, char *argv[]) {
     // Instantiate CPU
     drop32 dut = drop32(simTimeVal, atoi(dumpLvl.value));
     LOG_I("Starting simulation...\n\n%s", OUTPUT_LINE);
-    if (!dut.create(new Vdrop32(), NULL))           { LOG_E("Failed to create Vdrop32.\n"); return 1; }
+    if (!dut.create(new Vdrop32(), simVcd.value))   { LOG_E("Failed to create Vdrop32.\n"); return 1; }
     if (!dut.createMemory(memSize, programFile))    { LOG_E("Failed to create memory.\n");  return 1; }
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
