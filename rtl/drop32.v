@@ -46,68 +46,70 @@ module drop32 (
     reg             p_jmp       [EXEC:WB] /*verilator public*/;
     reg             p_ebreak    [EXEC:WB] /*verilator public*/;
 
-    // Internal wires/regs
-    reg  [XLEN-1:0] PC              /*verilator public*/,
-                    PCReg           /*verilator public*/,
-                    instrReg        /*verilator public*/;
-    wire [XLEN-1:0] IMM             /*verilator public*/,
-                    aluOut          /*verilator public*/,
-                    jumpAddr        /*verilator public*/,
-                    loadData        /*verilator public*/,
-                    rs1Out          /*verilator public*/,
-                    rs2Out          /*verilator public*/,
-                    rs1Exec         /*verilator public*/,
-                    rs2Exec         /*verilator public*/,
-                    ctrlSigs        /*verilator public*/,
-                    WB_result       /*verilator public*/;
+    // Internal regs
+    reg  [XLEN-1:0] PC              /*verilator public*/;
+    reg  [XLEN-1:0] PCReg           /*verilator public*/;
+    reg  [XLEN-1:0] instrReg        /*verilator public*/;
+
+    // Internal wires
+    wire [XLEN-1:0] IMM             /*verilator public*/;
+    wire [XLEN-1:0] aluOut          /*verilator public*/;
+    wire [XLEN-1:0] jumpAddr        /*verilator public*/;
+    wire [XLEN-1:0] loadData        /*verilator public*/;
+    wire [XLEN-1:0] rs1Out          /*verilator public*/;
+    wire [XLEN-1:0] rs2Out          /*verilator public*/;
+    wire [XLEN-1:0] rs1Exec         /*verilator public*/;
+    wire [XLEN-1:0] rs2Exec         /*verilator public*/;
+    wire [XLEN-1:0] ctrlSigs        /*verilator public*/;
+    wire [XLEN-1:0] WB_result       /*verilator public*/;
     wire      [3:0] aluOp           /*verilator public*/;
-    wire            exec_a          /*verilator public*/,
-                    exec_b          /*verilator public*/,
-                    mem_w           /*verilator public*/,
-                    reg_w           /*verilator public*/,
-                    mem2reg         /*verilator public*/,
-                    bra             /*verilator public*/,
-                    jmp             /*verilator public*/,
-                    braOutcome      /*verilator public*/,
-                    writeRd         /*verilator public*/,
-                    pcJump          /*verilator public*/,
-                    RS1_fwd_mem     /*verilator public*/,
-                    RS1_fwd_wb      /*verilator public*/,
-                    RS2_fwd_mem     /*verilator public*/,
-                    RS2_fwd_wb      /*verilator public*/,
-                    rdFwdRs1En      /*verilator public*/,
-                    rdFwdRs2En      /*verilator public*/,
-                    load_hazard     /*verilator public*/,
-                    load_wait       /*verilator public*/,
-                    FETCH_stall     /*verilator public*/,
-                    EXEC_stall      /*verilator public*/,
-                    MEM_stall       /*verilator public*/,
-                    FETCH_flush     /*verilator public*/,
-                    EXEC_flush      /*verilator public*/,
-                    MEM_flush       /*verilator public*/,
-                    WB_flush        /*verilator public*/,
-                    ecall           /*verilator public*/,
-                    ebreak          /*verilator public*/;
+    wire            exec_a          /*verilator public*/;
+    wire            exec_b          /*verilator public*/;
+    wire            mem_w           /*verilator public*/;
+    wire            reg_w           /*verilator public*/;
+    wire            mem2reg         /*verilator public*/;
+    wire            bra             /*verilator public*/;
+    wire            jmp             /*verilator public*/;
+    wire            braOutcome      /*verilator public*/;
+    wire            writeRd         /*verilator public*/;
+    wire            pcJump          /*verilator public*/;
+    wire            RS1_fwd_mem     /*verilator public*/;
+    wire            RS1_fwd_wb      /*verilator public*/;
+    wire            RS2_fwd_mem     /*verilator public*/;
+    wire            RS2_fwd_wb      /*verilator public*/;
+    wire            rdFwdRs1En      /*verilator public*/;
+    wire            rdFwdRs2En      /*verilator public*/;
+    wire            load_hazard     /*verilator public*/;
+    wire            load_wait       /*verilator public*/;
+    wire            FETCH_stall     /*verilator public*/;
+    wire            EXEC_stall      /*verilator public*/;
+    wire            MEM_stall       /*verilator public*/;
+    wire            FETCH_flush     /*verilator public*/;
+    wire            EXEC_flush      /*verilator public*/;
+    wire            MEM_flush       /*verilator public*/;
+    wire            WB_flush        /*verilator public*/;
+    wire            ecall           /*verilator public*/;
+    wire            ebreak          /*verilator public*/;
 
     // Control signals
-    assign aluOp            = `CTRL_ALU_OP(ctrlSigs);
-    assign exec_a           = `CTRL_EXEC_A(ctrlSigs);
-    assign exec_b           = `CTRL_EXEC_B(ctrlSigs);
-    assign mem_w            = `CTRL_MEM_W(ctrlSigs);
-    assign reg_w            = `CTRL_REG_W(ctrlSigs);
-    assign mem2reg          = `CTRL_MEM2REG(ctrlSigs);
-    assign bra              = `CTRL_BRA(ctrlSigs);
-    assign jmp              = `CTRL_JMP(ctrlSigs);
-    assign ecall            = `CTRL_ECALL(ctrlSigs);
-    assign ebreak           = `CTRL_EBREAK(ctrlSigs);
+    assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
+    assign exec_a   = `CTRL_EXEC_A(ctrlSigs);
+    assign exec_b   = `CTRL_EXEC_B(ctrlSigs);
+    assign mem_w    = `CTRL_MEM_W(ctrlSigs);
+    assign reg_w    = `CTRL_REG_W(ctrlSigs);
+    assign mem2reg  = `CTRL_MEM2REG(ctrlSigs);
+    assign bra      = `CTRL_BRA(ctrlSigs);
+    assign jmp      = `CTRL_JMP(ctrlSigs);
+    assign ecall    = `CTRL_ECALL(ctrlSigs);
+    assign ebreak   = `CTRL_EBREAK(ctrlSigs);
 
     // Branch/jump logic
-    assign pcJump           = braOutcome || p_jmp[MEM];
-    assign braOutcome       = p_bra[MEM] && p_aluOut[MEM][0]; // [Static predictor]: Assume branch not-taken
+    assign pcJump       = braOutcome || p_jmp[MEM];
+    assign braOutcome   = p_bra[MEM] && p_aluOut[MEM][0]; // [Static predictor]: Assume branch not-taken
 
     // Writeback select and enable logic
-    assign WB_result        = p_mem2reg[WB] ? loadData : p_aluOut[WB];
-    assign writeRd          = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
+    assign WB_result    = p_mem2reg[WB] ? loadData : p_aluOut[WB];
+    assign writeRd      = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
 
     // Forwarding logic
     assign RS1_fwd_mem  = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
@@ -162,48 +164,48 @@ module drop32 (
     // Pipeline CTRL reg assignments
     always @(posedge i_clk) begin
         // --- Execute ---
-        p_aluOp    [EXEC]  <= EXEC_flush ? 4'd0 : EXEC_stall ? p_aluOp   [EXEC] : aluOp;
-        p_mem_w    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_mem_w   [EXEC] : mem_w;
-        p_reg_w    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_reg_w   [EXEC] : writeRd;
-        p_mem2reg  [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_mem2reg [EXEC] : mem2reg;
-        p_exec_a   [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_exec_a  [EXEC] : exec_a;
-        p_exec_b   [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_exec_b  [EXEC] : exec_b;
-        p_bra      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_bra     [EXEC] : bra;
-        p_jmp      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jmp     [EXEC] : jmp;
-        p_ebreak   [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ebreak  [EXEC] : ebreak;
+        p_aluOp     [EXEC]  <= EXEC_flush ? 4'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
+        p_mem_w     [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_mem_w     [EXEC] : mem_w;
+        p_reg_w     [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_reg_w     [EXEC] : writeRd;
+        p_mem2reg   [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_mem2reg   [EXEC] : mem2reg;
+        p_exec_a    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_exec_a    [EXEC] : exec_a;
+        p_exec_b    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_exec_b    [EXEC] : exec_b;
+        p_bra       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_bra       [EXEC] : bra;
+        p_jmp       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jmp       [EXEC] : jmp;
+        p_ebreak    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ebreak    [EXEC] : ebreak;
         // --- Memory ---
-        p_mem_w    [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem_w    [MEM] : p_mem_w   [EXEC];
-        p_reg_w    [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_reg_w    [MEM] : p_reg_w   [EXEC];
-        p_mem2reg  [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem2reg  [MEM] : p_mem2reg [EXEC];
-        p_bra      [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_bra      [MEM] : p_bra     [EXEC];
-        p_jmp      [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_jmp      [MEM] : p_jmp     [EXEC];
+        p_mem_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem_w   [MEM] : p_mem_w     [EXEC];
+        p_reg_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_reg_w   [MEM] : p_reg_w     [EXEC];
+        p_mem2reg   [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem2reg [MEM] : p_mem2reg   [EXEC];
+        p_bra       [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_bra     [MEM] : p_bra       [EXEC];
+        p_jmp       [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_jmp     [MEM] : p_jmp       [EXEC];
         // --- Writeback ---
-        p_reg_w    [WB]    <= WB_flush ? 1'd0 : p_reg_w   [MEM];
-        p_mem2reg  [WB]    <= WB_flush ? 1'd0 : p_mem2reg [MEM];
+        p_reg_w     [WB]    <= WB_flush ? 1'd0 : p_reg_w    [MEM];
+        p_mem2reg   [WB]    <= WB_flush ? 1'd0 : p_mem2reg  [MEM];
     end
     // Pipeline DATA reg assignments
     always @(posedge i_clk) begin
         // --- Execute ---
-        p_rs1      [EXEC]  <= EXEC_stall ? p_rs1     [EXEC] : rdFwdRs1En ? WB_result : rs1Out;
-        p_rs2      [EXEC]  <= EXEC_stall ? p_rs2     [EXEC] : rdFwdRs2En ? WB_result : rs2Out;
-        p_IMM      [EXEC]  <= EXEC_stall ? p_IMM     [EXEC] : IMM;
-        p_PC       [EXEC]  <= EXEC_stall ? p_PC      [EXEC] : PCReg;
-        p_funct7   [EXEC]  <= EXEC_stall ? p_funct7  [EXEC] : `FUNCT7(instrReg);
-        p_funct3   [EXEC]  <= EXEC_stall ? p_funct3  [EXEC] : `FUNCT3(instrReg);
-        p_rs1Addr  [EXEC]  <= EXEC_stall ? p_rs1Addr [EXEC] : `RS1(instrReg);
-        p_rs2Addr  [EXEC]  <= EXEC_stall ? p_rs2Addr [EXEC] : `RS2(instrReg);
-        p_rdAddr   [EXEC]  <= EXEC_stall ? p_rdAddr  [EXEC] : `RD(instrReg);
+        p_rs1       [EXEC]  <= EXEC_stall ? p_rs1       [EXEC] : rdFwdRs1En ? WB_result : rs1Out;
+        p_rs2       [EXEC]  <= EXEC_stall ? p_rs2       [EXEC] : rdFwdRs2En ? WB_result : rs2Out;
+        p_IMM       [EXEC]  <= EXEC_stall ? p_IMM       [EXEC] : IMM;
+        p_PC        [EXEC]  <= EXEC_stall ? p_PC        [EXEC] : PCReg;
+        p_funct7    [EXEC]  <= EXEC_stall ? p_funct7    [EXEC] : `FUNCT7(instrReg);
+        p_funct3    [EXEC]  <= EXEC_stall ? p_funct3    [EXEC] : `FUNCT3(instrReg);
+        p_rs1Addr   [EXEC]  <= EXEC_stall ? p_rs1Addr   [EXEC] : `RS1(instrReg);
+        p_rs2Addr   [EXEC]  <= EXEC_stall ? p_rs2Addr   [EXEC] : `RS2(instrReg);
+        p_rdAddr    [EXEC]  <= EXEC_stall ? p_rdAddr    [EXEC] : `RD(instrReg);
         // --- Memory ---
-        p_rs2      [MEM]   <= MEM_stall  ? p_rs2      [MEM] : rs2Exec;
-        p_rdAddr   [MEM]   <= MEM_stall  ? p_rdAddr   [MEM] : p_rdAddr  [EXEC];
-        p_funct3   [MEM]   <= MEM_stall  ? p_funct3   [MEM] : p_funct3  [EXEC];
-        p_aluOut   [MEM]   <= MEM_stall  ? p_aluOut   [MEM] : aluOut;
-        p_jumpAddr [MEM]   <= MEM_stall  ? p_jumpAddr [MEM] : jumpAddr;
+        p_rs2       [MEM]   <= MEM_stall  ? p_rs2       [MEM] : rs2Exec;
+        p_rdAddr    [MEM]   <= MEM_stall  ? p_rdAddr    [MEM] : p_rdAddr  [EXEC];
+        p_funct3    [MEM]   <= MEM_stall  ? p_funct3    [MEM] : p_funct3  [EXEC];
+        p_aluOut    [MEM]   <= MEM_stall  ? p_aluOut    [MEM] : aluOut;
+        p_jumpAddr  [MEM]   <= MEM_stall  ? p_jumpAddr  [MEM] : jumpAddr;
         // --- Writeback ---
-        p_aluOut   [WB]    <= p_aluOut  [MEM];
-        p_rdAddr   [WB]    <= p_rdAddr  [MEM];
-        p_funct3   [WB]    <= p_funct3  [MEM];
-        p_readData [WB]    <= i_dataIn;
+        p_aluOut    [WB]    <= p_aluOut [MEM];
+        p_rdAddr    [WB]    <= p_rdAddr [MEM];
+        p_funct3    [WB]    <= p_funct3 [MEM];
+        p_readData  [WB]    <= i_dataIn;
     end
 
     // Fetch/Decode
