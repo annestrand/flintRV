@@ -140,7 +140,7 @@ module drop32 (
     // ================================================================================================================
     // Writeback select and enable logic
     // ================================================================================================================
-    assign WB_result    = p_mem2reg[WB] ? loadData : p_aluOut[WB];
+    assign WB_result    = p_mem2reg[WB] ? p_readData[WB] : p_aluOut[WB];
     assign writeRd      = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
 
     // ================================================================================================================
@@ -220,7 +220,7 @@ module drop32 (
         p_aluOut    [WB]    <= p_aluOut [MEM];
         p_rdAddr    [WB]    <= p_rdAddr [MEM];
         p_funct3    [WB]    <= p_funct3 [MEM];
-        p_readData  [WB]    <= i_dataIn;
+        p_readData  [WB]    <= loadData;
     end
 
     // ================================================================================================================
@@ -334,13 +334,13 @@ module drop32 (
     // [Stage]: Writeback
     // ================================================================================================================
     always @(*) begin
-        case (p_funct3[WB])
-            L_B_OP  : loadData = {{24{p_readData[WB][7]}},   p_readData[WB][7:0]};
-            L_H_OP  : loadData = {{16{p_readData[WB][15]}},  p_readData[WB][15:0]};
-            L_W_OP  : loadData = p_readData[WB];
-            L_BU_OP : loadData = {24'd0, p_readData[WB][7:0]};
-            L_HU_OP : loadData = {16'd0, p_readData[WB][15:0]};
-            default : loadData = p_readData[WB];
+        case (p_funct3[MEM])
+            L_B_OP  : loadData = {{24{i_dataIn[7]}},   i_dataIn[7:0]};
+            L_H_OP  : loadData = {{16{i_dataIn[15]}},  i_dataIn[15:0]};
+            L_W_OP  : loadData = i_dataIn;
+            L_BU_OP : loadData = {24'd0, i_dataIn[7:0]};
+            L_HU_OP : loadData = {16'd0, i_dataIn[15:0]};
+            default : loadData = i_dataIn;
         endcase
     end
 
