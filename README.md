@@ -37,10 +37,17 @@ CPU/Functional test runner: `build/Vdrop32_tests`
 
 Submodule unit test runner: `build/Unit_tests`
 
+## Build drop32 core
+There is a convenience script to generate a singular core/CPU RTL file to stdout:
+
+    $ python3 ./scripts/core_gen.py [opts]
+
+Use `-h` to list available options.
+
 ## Build drop32soc
 `drop32soc/` directory provides a very basic example SoC using the drop32 soft-cpu.
 
-The CPU is generated using the `scripts/core_gen.py` utility.
+The CPU is generated using the `scripts/drop32soc_gen.py` utility.
 
 To build Firmware and Generate CPU core for SoC:
 

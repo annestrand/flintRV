@@ -108,10 +108,9 @@ SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 DROP32SOC_SRC          := drop32soc/firmware.s
-DROP32SOC_OPTS         := -if none -pc 0x0 -isa RV32I -name CPU -ilat 1
 DROP32SOC_ELF          := $(DROP32SOC_SRC:%.s=%.elf)
 DROP32SOC_FIRMWARE     := $(DROP32SOC_ELF:%.elf=%.mem)
-DROP32SOC_COREGEN      := drop32soc/core_generated.v
+DROP32SOC_COREGEN      := drop32soc/soc_generated.v
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
@@ -170,7 +169,7 @@ $(OUT_DIR)/vcd:
 
 # drop32soc
 drop32soc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
-	$(PYTHON) scripts/core_gen.py $(DROP32SOC_OPTS) > $@
+	$(PYTHON) scripts/drop32soc_gen.py > $@
 
 drop32soc/%.elf: drop32soc/%.s
 	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
