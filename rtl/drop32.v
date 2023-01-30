@@ -10,17 +10,14 @@ module drop32 (
     output                      o_storeReq, o_loadReq,
     output         [XLEN-1:0]   o_pcOut, o_dataAddr, o_dataOut
 );
-    // ================================================================================================================
     // CPU configs
-    // ================================================================================================================
     parameter         PC_START              /*verilator public*/ = 0;
     parameter         REGFILE_ADDR_WIDTH    /*verilator public*/ = 5;  //  4 for RV32E (otherwise 5)
     parameter         INSTR_WIDTH           /*verilator public*/ = 32; // 16 for RV32C (otherwise 32)
     parameter         XLEN                  /*verilator public*/ = 32;
     parameter         ICACHE_LATENCY        /*verilator public*/ = 0;  // 0 cc: LUT cache, 1 cc: BRAM cache
-    // ================================================================================================================
+
     // Helper Aliases
-    // ================================================================================================================
     localparam   [4:0]  REG_0               /*verilator public*/ = 5'b00000; // Register x0
     localparam  [31:0]  NOP                 /*verilator public*/ = 32'h13;
     localparam          S_B_OP              /*verilator public*/ = 3'b000;
@@ -34,7 +31,6 @@ module drop32 (
     localparam          L_BU_OP             /*verilator public*/ = 3'b100;
     localparam          L_HU_OP             /*verilator public*/ = 3'b101;
 
-    // ================================================================================================================
     // Pipeline regs (p_*)
     localparam  EXEC    /*verilator public*/ = 0;
     localparam  MEM     /*verilator public*/ = 2;
@@ -61,18 +57,14 @@ module drop32 (
     reg             p_jmp       [EXEC:WB] /*verilator public*/;
     reg             p_ebreak    [EXEC:WB] /*verilator public*/;
 
-    // ================================================================================================================
     // Internal regs
-    // ================================================================================================================
     reg  [XLEN-1:0] PC              /*verilator public*/;
     reg  [XLEN-1:0] PCReg           /*verilator public*/;
     reg  [XLEN-1:0] instrReg        /*verilator public*/;
     reg  [XLEN-1:0] loadData        /*verilator public*/;
     reg  [XLEN-1:0] storeData       /*verilator public*/;
 
-    // ================================================================================================================
     // Internal wires
-    // ================================================================================================================
     wire [XLEN-1:0] IMM             /*verilator public*/;
     wire [XLEN-1:0] aluOut          /*verilator public*/;
     wire [XLEN-1:0] jumpAddr        /*verilator public*/;
@@ -117,9 +109,7 @@ module drop32 (
     wire            ecall           /*verilator public*/;
     wire            ebreak          /*verilator public*/;
 
-    // ================================================================================================================
     // Control signals
-    // ================================================================================================================
     assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
     assign exec_a   = `CTRL_EXEC_A(ctrlSigs);
     assign exec_b   = `CTRL_EXEC_B(ctrlSigs);
@@ -131,21 +121,15 @@ module drop32 (
     assign ecall    = `CTRL_ECALL(ctrlSigs);
     assign ebreak   = `CTRL_EBREAK(ctrlSigs);
 
-    // ================================================================================================================
     // Branch/jump logic
-    // ================================================================================================================
     assign pcJump       = braOutcome || p_jmp[MEM];
     assign braOutcome   = p_bra[MEM] && p_aluOut[MEM][0]; // [Static predictor]: Assume branch not-taken
 
-    // ================================================================================================================
     // Writeback select and enable logic
-    // ================================================================================================================
     assign WB_result    = p_mem2reg[WB] ? p_readData[WB] : p_aluOut[WB];
     assign writeRd      = `RD(instrReg) != REG_0 ? reg_w : 1'b0; // Skip regfile write for x0
 
-    // ================================================================================================================
     // Forwarding logic
-    // ================================================================================================================
     assign RS1_fwd_mem  = p_reg_w[MEM] && (p_rs1Addr[EXEC] == p_rdAddr[MEM]);
     assign RS1_fwd_wb   = ~RS1_fwd_mem && p_reg_w[WB] && (p_rs1Addr[EXEC] == p_rdAddr[WB]);
     assign RS2_fwd_mem  = p_reg_w[MEM] && (p_rs2Addr[EXEC] == p_rdAddr[MEM]);
@@ -159,9 +143,7 @@ module drop32 (
     assign rdFwdRs1En   = p_reg_w[WB] && (`RS1(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
     assign rdFwdRs2En   = p_reg_w[WB] && (`RS2(instrReg) == p_rdAddr[WB]); // Bogus read if true, fwd RD[WB]
 
-    // ================================================================================================================
     // Stall and flush logic
-    // ================================================================================================================
     assign load_hazard  = p_mem2reg[EXEC] && ((`RS1(instrReg) == p_rdAddr[EXEC]) || (`RS2(instrReg) == p_rdAddr[EXEC]));
     assign load_wait    = o_loadReq && ~i_memValid;
     assign FETCH_stall  = ~i_ifValid || EXEC_stall || MEM_stall || load_hazard;
@@ -172,11 +154,9 @@ module drop32 (
     assign MEM_flush    = i_rst || braOutcome || p_jmp[MEM];
     assign WB_flush     = i_rst || load_wait /* bubble */;
 
-    // ================================================================================================================
     // Pipeline CTRL reg assignments
-    // ================================================================================================================
     always @(posedge i_clk) begin
-        // --- Execute ------------------------------------------------------------------------------------------------
+        // Execute
         p_aluOp     [EXEC]  <= EXEC_flush ? 4'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
         p_mem_w     [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_mem_w     [EXEC] : mem_w;
         p_reg_w     [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_reg_w     [EXEC] : writeRd;
@@ -186,21 +166,20 @@ module drop32 (
         p_bra       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_bra       [EXEC] : bra;
         p_jmp       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jmp       [EXEC] : jmp;
         p_ebreak    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ebreak    [EXEC] : ebreak;
-        // --- Memory -------------------------------------------------------------------------------------------------
+        // Memory
         p_mem_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem_w   [MEM] : p_mem_w     [EXEC];
         p_reg_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_reg_w   [MEM] : p_reg_w     [EXEC];
         p_mem2reg   [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem2reg [MEM] : p_mem2reg   [EXEC];
         p_bra       [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_bra     [MEM] : p_bra       [EXEC];
         p_jmp       [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_jmp     [MEM] : p_jmp       [EXEC];
-        // --- Writeback ----------------------------------------------------------------------------------------------
+        // Writeback
         p_reg_w     [WB]    <= WB_flush ? 1'd0 : p_reg_w    [MEM];
         p_mem2reg   [WB]    <= WB_flush ? 1'd0 : p_mem2reg  [MEM];
     end
-    // ================================================================================================================
+
     // Pipeline DATA reg assignments
-    // ================================================================================================================
     always @(posedge i_clk) begin
-        // --- Execute ------------------------------------------------------------------------------------------------
+        // Execute
         p_rs1       [EXEC]  <= EXEC_stall ? p_rs1       [EXEC] : rdFwdRs1En ? WB_result : rs1Out;
         p_rs2       [EXEC]  <= EXEC_stall ? p_rs2       [EXEC] : rdFwdRs2En ? WB_result : rs2Out;
         p_IMM       [EXEC]  <= EXEC_stall ? p_IMM       [EXEC] : IMM;
@@ -210,22 +189,20 @@ module drop32 (
         p_rs1Addr   [EXEC]  <= EXEC_stall ? p_rs1Addr   [EXEC] : `RS1(instrReg);
         p_rs2Addr   [EXEC]  <= EXEC_stall ? p_rs2Addr   [EXEC] : `RS2(instrReg);
         p_rdAddr    [EXEC]  <= EXEC_stall ? p_rdAddr    [EXEC] : `RD(instrReg);
-        // --- Memory -------------------------------------------------------------------------------------------------
+        // Memory
         p_rs2       [MEM]   <= MEM_stall  ? p_rs2       [MEM] : rs2Exec;
         p_rdAddr    [MEM]   <= MEM_stall  ? p_rdAddr    [MEM] : p_rdAddr  [EXEC];
         p_funct3    [MEM]   <= MEM_stall  ? p_funct3    [MEM] : p_funct3  [EXEC];
         p_aluOut    [MEM]   <= MEM_stall  ? p_aluOut    [MEM] : aluOut;
         p_jumpAddr  [MEM]   <= MEM_stall  ? p_jumpAddr  [MEM] : jumpAddr;
-        // --- Writeback ----------------------------------------------------------------------------------------------
+        // Writeback
         p_aluOut    [WB]    <= p_aluOut [MEM];
         p_rdAddr    [WB]    <= p_rdAddr [MEM];
         p_funct3    [WB]    <= p_funct3 [MEM];
         p_readData  [WB]    <= loadData;
     end
 
-    // ================================================================================================================
-    // [Stage]: Fetch/Decode
-    // ================================================================================================================
+    // --- [Stage]: Fetch/Decode ---
     always @(posedge i_clk) begin
         PC          <=  i_rst       ?   PC_START        :
                         pcJump      ?   p_jumpAddr[MEM] :
@@ -289,9 +266,7 @@ module drop32 (
         .o_rs2Data  (rs2Out)
     );
 
-    // ================================================================================================================
-    // [Stage]: Execute
-    // ================================================================================================================
+    // --- [Stage]: Execute ---
     // ALU input selects
     assign aluSrcA  = (p_exec_a[EXEC] == `PC)   ? p_PC[EXEC]  : rs1Exec;
     assign aluSrcB  = (p_exec_b[EXEC] == `IMM)  ? p_IMM[EXEC] : rs2Exec;
@@ -316,9 +291,7 @@ module drop32 (
     assign jmpResult        = ctrlTransSrcA + p_IMM[EXEC];
     assign jumpAddr         = indirJump ? {jmpResult[XLEN-1:1],1'b0} : jmpResult;
 
-    // ================================================================================================================
-    // [Stage]: Memory
-    // ================================================================================================================
+    // --- [Stage]: Memory ---
     always @(*) begin
         case (p_funct3[MEM])
             S_B_OP  : storeData = {24'd0, p_rs2[MEM][7:0]};
@@ -330,9 +303,7 @@ module drop32 (
         endcase
     end
 
-    // ================================================================================================================
-    // [Stage]: Writeback
-    // ================================================================================================================
+    // --- [Stage]: Writeback ---
     always @(*) begin
         case (p_funct3[MEM])
             L_B_OP  : loadData = {{24{i_dataIn[7]}},   i_dataIn[7:0]};
@@ -344,9 +315,7 @@ module drop32 (
         endcase
     end
 
-    // ================================================================================================================
     // CPU outputs
-    // ================================================================================================================
     assign o_pcOut      = PC;
     assign o_dataAddr   = p_aluOut[MEM];
     assign o_storeReq   = p_mem_w[MEM];
