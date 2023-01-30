@@ -9,6 +9,7 @@ __pycache__/
 *.out
 *.vcd
 *.map
+*.blif
 *_generated.v
 
 drop32soc/*.sh
