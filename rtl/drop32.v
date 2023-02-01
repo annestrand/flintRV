@@ -33,8 +33,8 @@ module drop32 (
 
     // Pipeline regs (p_*)
     localparam  EXEC    /*verilator public*/ = 0;
-    localparam  MEM     /*verilator public*/ = 2;
-    localparam  WB      /*verilator public*/ = 3;
+    localparam  MEM     /*verilator public*/ = 1;
+    localparam  WB      /*verilator public*/ = 2;
     reg [XLEN-1:0]  p_rs1       [EXEC:WB] /*verilator public*/;
     reg [XLEN-1:0]  p_rs2       [EXEC:WB] /*verilator public*/;
     reg [XLEN-1:0]  p_aluOut    [EXEC:WB] /*verilator public*/;
