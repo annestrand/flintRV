@@ -36,8 +36,8 @@ bool drop32::create(Vdrop32* cpu, const char* traceFile) {
         return false;
     }
     m_cpu = cpu;
-    Verilated::traceEverOn(true);
-    if (m_trace == nullptr) {
+    if (traceFile != nullptr) {
+        Verilated::traceEverOn(true);
         m_trace = new VerilatedVcdC;
         if (m_trace == nullptr) {
             LOG_W("Failed to create drop32 VCD dumper!\n");
@@ -168,12 +168,14 @@ void drop32::reset(int cycles) {
 void drop32::tick(bool enableDump) {
     if (enableDump) { dump(); }
     m_cycles++;
+    this->m_cpu->contextp()->timeInc(1);
     m_cpu->i_clk = 0;
     m_cpu->eval();
-    if(m_trace) { m_trace->dump(10*m_cycles-2); }
+    if(m_trace) { m_trace->dump(this->m_cpu->contextp()->time()); }
+    this->m_cpu->contextp()->timeInc(1);
     m_cpu->i_clk = 1;
     m_cpu->eval();
-    if(m_trace) { m_trace->dump(10*m_cycles); m_trace->flush(); }
+    if(m_trace) { m_trace->dump(this->m_cpu->contextp()->time()); }
 }
 // ====================================================================================================================
 void drop32::dump() {

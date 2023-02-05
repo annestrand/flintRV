@@ -25,7 +25,7 @@ class drop32 {
 public:
     drop32(vluint64_t maxSimTime, int dumpLevel=0);
     ~drop32();
-    bool create(Vdrop32* cpu, const char* traceFile);
+    bool create(Vdrop32* cpu, const char* traceFile=nullptr);
     bool createMemory(size_t memSize);
     bool createMemory(size_t memSize, std::string initHexfile);
     bool createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen);
@@ -39,7 +39,7 @@ public:
     void tick(bool enableDump=true);
     void dump();
     bool end();
-    Vdrop32*             m_cpu;      // Reference to CPU object
+    Vdrop32* m_cpu; // Reference to CPU object
 
 private:
     vluint64_t              m_cycles;
