@@ -3,6 +3,7 @@
 
 # --- BUILD ENV -------------------------------------------------------------------------------------------------------
 ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+OUT_DIR                := build
 ifdef DOCKER
 DOCKER_PREFIX          := docker exec -u user -w /src drop32
 DOCKER_RUNNING         := $(shell docker ps -a -q -f name=drop32)
@@ -10,9 +11,6 @@ else
 DOCKER_PREFIX          :=
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
-
-OUT_DIR                := build
-RTL_SRCS               := $(shell find rtl -type f -name "*.v")
 
 # Find Python Interpreter
 PYTHON:=$(shell command -v python3 2> /dev/null)
@@ -22,6 +20,10 @@ ifeq (, $(PYTHON))
 $(error "Cannot find either 'python3' or 'python' in $$PATH")
 endif
 endif
+
+# --- RTL SOURCES -----------------------------------------------------------------------------------------------------
+RTL_SRCS               := $(shell find rtl -type f -name "*.v")
+RTL_TYPES              := $(RTL_TYPES)
 
 # --- RISCV TOOLCHAIN -------------------------------------------------------------------------------------------------
 ifdef TC_TRIPLE
@@ -152,23 +154,8 @@ clean:
 	rm -rf drop32soc/*_generated.v
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
-$(OUT_DIR):
-	mkdir -p $@
-
-$(OUT_DIR)/sim:
-	mkdir -p $@
-
-$(OUT_DIR)/tests:
-	mkdir -p $@
-
-$(OUT_DIR)/external/riscv_tests:
-	mkdir -p $@
-
-$(OUT_DIR)/vcd:
-	mkdir -p $@
-
 # drop32soc
-drop32soc/%_generated.v: $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh
+drop32soc/%_generated.v: $(RTL_SRCS) $(RTL_TYPES)
 	$(PYTHON) scripts/drop32soc_gen.py > $@
 
 drop32soc/%.elf: drop32soc/%.s
@@ -183,11 +170,11 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 # Simulator (Verilator)
-$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/sim $(OUT_DIR)/vcd
+$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(RTL_TYPES) | $(OUT_DIR)/sim $(OUT_DIR)/vcd
 	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vdrop32 $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 # CPU/Functional tests
-$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(ROOT_DIR)/rtl/types.vh | $(OUT_DIR)/tests $(OUT_DIR)/vcd
+$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(RTL_TYPES) | $(OUT_DIR)/tests $(OUT_DIR)/vcd
 	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vdrop32_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
 
 .SECONDARY:
@@ -221,3 +208,18 @@ $(OUT_DIR)/external/riscv_tests/%.hex: $(OUT_DIR)/external/riscv_tests/%.elf
 
 $(OUT_DIR)/external/riscv_tests/%.inc: $(OUT_DIR)/external/riscv_tests/%.hex
 	xxd -i $< $@
+
+$(OUT_DIR):
+	mkdir -p $@
+
+$(OUT_DIR)/sim:
+	mkdir -p $@
+
+$(OUT_DIR)/tests:
+	mkdir -p $@
+
+$(OUT_DIR)/external/riscv_tests:
+	mkdir -p $@
+
+$(OUT_DIR)/vcd:
+	mkdir -p $@
