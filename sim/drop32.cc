@@ -118,22 +118,22 @@ bool drop32::loadStoreUpdate() {
     return true;
 }
 // ====================================================================================================================
-bool drop32::peekMem(int addr, int& val) {
+bool drop32::peekMem(size_t addr, int& val) {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot 'peek' in NULL memory!\n"); return false; }
     if (addr >= m_memSize) {
-        LOG_E("'Peek' address 0x%x is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", addr, m_memSize);
+        LOG_E("'Peek' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", addr, m_memSize);
         return false;
     }
     val = *(int*)&m_mem[addr];
     return true;
 }
 // ====================================================================================================================
-bool drop32::pokeMem(int addr, int val) {
+bool drop32::pokeMem(size_t addr, int val) {
     // Error check
     if (m_mem == nullptr) { LOG_E("Cannot 'poke' at NULL memory!\n"); return false; }
     if (addr >= m_memSize) {
-        LOG_E("'Poke' address 0x%x is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", addr, m_memSize);
+        LOG_E("'Poke' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n", addr, m_memSize);
         return false;
     }
     *(int*)&m_mem[addr] = val;

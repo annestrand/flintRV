@@ -62,6 +62,8 @@ ICARUS_FLAGS           := -Wall
 ICARUS_FLAGS           += -Irtl
 ICARUS_FLAGS           += -Itests/unit
 
+SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
+
 # --- VERILATOR  ------------------------------------------------------------------------------------------------------
 VFLAGS                 := -Wall
 VFLAGS                 += -Irtl
@@ -77,11 +79,13 @@ VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
 
 # --- SIMULATOR -------------------------------------------------------------------------------------------------------
 SIM_FLAGS              := -Wall
+SIM_FLAGS              += -Werror
 SIM_FLAGS              += -Isim
 SIM_FLAGS              += -Ibuild/verilated
 SIM_FLAGS              += -Iexternal/miniargparse
 SIM_FLAGS              += -I$(VERILATOR_ROOT)/include
 SIM_FLAGS              += -I$(VERILATOR_ROOT)/include/vltstd
+SIM_FLAGS              += -faligned-new
 
 SIM_SRCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.cc" -exec basename {} \;)
 SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/%.o)
@@ -109,6 +113,7 @@ RV32I_TEST_CC_FLAGS    += -Wl,-Ttext 0x0
 RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
 TEST_FLAGS             := -Wall
+TEST_FLAGS             += -Werror
 TEST_FLAGS             += -Isim
 TEST_FLAGS             += -Ibuild/tests
 TEST_FLAGS             += -Ibuild/verilated
@@ -116,8 +121,7 @@ TEST_FLAGS             += -Iexternal/miniargparse
 TEST_FLAGS             += -Ibuild/external/riscv_tests
 TEST_FLAGS             += -I$(VERILATOR_ROOT)/include
 TEST_FLAGS             += -I$(VERILATOR_ROOT)/include/vltstd
-
-SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
+TEST_FLAGS             += -faligned-new
 
 TEST_SRCS              := $(shell find tests/ -type f -name "*.cc")
 TEST_SRCS_BASENAME     := $(notdir $(TEST_SRCS))

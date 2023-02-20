@@ -21,7 +21,7 @@ bool loadMem(std::string filePath, char* mem, ssize_t memLen) {
             fclose(fp);
             return false;
         }
-        size_t ret = fread(mem+i, 1, 1, fp);
+        fread(mem+i, 1, 1, fp);
     }
     return true;
 }

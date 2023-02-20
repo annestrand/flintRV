@@ -31,8 +31,8 @@ public:
     bool createMemory(size_t memSize, unsigned char* initHexarray, unsigned int initHexarrayLen);
     bool instructionUpdate();
     bool loadStoreUpdate();
-    bool peekMem(int addr, int& val);
-    bool pokeMem(int addr, int val);
+    bool peekMem(size_t addr, int& val);
+    bool pokeMem(size_t addr, int val);
     void writeRegfile(int index, int val);
     int readRegfile(int index);
     void reset(int cycles=1);

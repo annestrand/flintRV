@@ -61,7 +61,6 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
     }
 
     constexpr int resultReg     = 31;
-    constexpr int simDoneVal    = -1;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
 
@@ -90,7 +89,6 @@ TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g. ADD
     }
 
     constexpr int resultReg     = 31;
-    constexpr int simDoneVal    = -1;
     dut.m_cpu->i_ifValid        = 1; // Always valid since we assume combinatorial read/write for test memory
     dut.m_cpu->i_memValid       = 1; // Always valid since we assume combinatorial read/write for test memory
 
