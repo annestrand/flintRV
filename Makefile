@@ -12,6 +12,17 @@ DOCKER_PREFIX          :=
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
 
+# Get Verilator info
+VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
+VERILATOR_ROOT         := $(shell verilator -V | grep VERILATOR_ROOT | awk 'NR==2{print $$3}')
+ifeq (, $(VERILATOR_ROOT)) # If VERILATOR_ROOT env is not set, try compiled default(s)
+VERILATOR_ROOT         := $(shell verilator -V | grep VERILATOR_ROOT | awk 'NR==1{print $$3}')
+ifeq (, $(VERILATOR_ROOT))
+$(error \
+	"VERILATOR_ROOT not found! See: https://verilator.org/guide/latest/install.html#eventual-installation-options")
+endif
+endif
+
 # Find Python Interpreter
 PYTHON:=$(shell command -v python3 2> /dev/null)
 ifeq (, $(PYTHON))
@@ -23,6 +34,8 @@ endif
 
 # --- RTL SOURCES -----------------------------------------------------------------------------------------------------
 RTL_SRCS               := $(shell find rtl -type f -name "*.v")
+RTL_SRCS_BASENAMES     := $(notdir $(RTL_SRCS))
+RTL_LIBS               := $(RTL_SRCS_BASENAMES:%.v=$(OUT_DIR)/verilated/V%__ALL.a)
 RTL_TYPES              := $(RTL_TYPES)
 
 # --- RISCV TOOLCHAIN -------------------------------------------------------------------------------------------------
@@ -49,27 +62,32 @@ ICARUS_FLAGS           := -Wall
 ICARUS_FLAGS           += -Irtl
 ICARUS_FLAGS           += -Itests/unit
 
-# --- SIMULATOR (VERILATOR) -------------------------------------------------------------------------------------------
-VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
+# --- VERILATOR  ------------------------------------------------------------------------------------------------------
+VFLAGS                 := -Wall
+VFLAGS                 += -Irtl
+VFLAGS                 += --trace
+VFLAGS                 += -CFLAGS "-g"
+VFLAGS                 += --x-assign unique
+VFLAGS                 += --x-initial unique
 
-SIM_CFLAGS             := -g
-SIM_CFLAGS             += -I$(ROOT_DIR)/sim/src
-SIM_CFLAGS             += -I$(ROOT_DIR)/external/miniargparse
-SIM_CFLAGS             += -DVERILATOR_VER=$(VERILATOR_VER)
+VSRCS                  := $(VERILATOR_ROOT)/include/verilated_vcd_c.cpp
+VSRCS                  += $(VERILATOR_ROOT)/include/verilated.cpp
+VSRCS_BASENAME         := $(notdir $(VSRCS))
+VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
 
+# --- SIMULATOR -------------------------------------------------------------------------------------------------------
 SIM_FLAGS              := -Wall
-SIM_FLAGS              += -Irtl
-SIM_FLAGS              += --trace
-SIM_FLAGS              += -CFLAGS "$(SIM_CFLAGS)"
-SIM_FLAGS              += --x-assign unique
-SIM_FLAGS              += --x-initial unique
-SIM_FLAGS              += --top-module drop32
-SIM_FLAGS              += --exe
+SIM_FLAGS              += -Isim
+SIM_FLAGS              += -Ibuild/verilated
+SIM_FLAGS              += -Iexternal/miniargparse
+SIM_FLAGS              += -I$(VERILATOR_ROOT)/include
+SIM_FLAGS              += -I$(VERILATOR_ROOT)/include/vltstd
 
-VERILATOR_SIM_SRCS     := $(shell find $(ROOT_DIR)/sim/src -type f -name "*.cc" ! -name "main.cc")
+SIM_SRCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.cc" -exec basename {} \;)
+SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/%.o)
+SIM_OBJS_BASE          := $(filter-out build/sim/main.o,$(SIM_OBJS))
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
-CPU_TEST_SRCS          := $(shell find $(ROOT_DIR)/tests/cpu -type f -name "*.cc")
 CPU_ASM_TESTS          := $(shell find tests/cpu/basic -type f -name "*.s" -exec basename {} \;)
 CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" -exec basename {} \;)
 CPU_TEST_HEX           := $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
@@ -90,23 +108,24 @@ RV32I_TEST_CC_FLAGS    += -mabi=ilp32
 RV32I_TEST_CC_FLAGS    += -Wl,-Ttext 0x0
 RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
-CPU_TEST_CFLAGS        := -g
-CPU_TEST_CFLAGS        += -Wall
-CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/sim/src
-CPU_TEST_CFLAGS        += -I$(ROOT_DIR)/build/external/riscv_tests
-CPU_TEST_CFLAGS        += -DVERILATOR_VER=$(VERILATOR_VER)
-
-CPU_TEST_FLAGS         := -Wall
-CPU_TEST_FLAGS         += -Irtl
-CPU_TEST_FLAGS         += --trace
-CPU_TEST_FLAGS         += -CFLAGS "$(CPU_TEST_CFLAGS)"
-CPU_TEST_FLAGS         += -LDFLAGS "$(GTEST_BASEDIR)/libgtest.a -lpthread"
-CPU_TEST_FLAGS         += --x-assign unique
-CPU_TEST_FLAGS         += --x-initial unique
-CPU_TEST_FLAGS         += --top-module drop32
-CPU_TEST_FLAGS         += --exe
+TEST_FLAGS             := -Wall
+TEST_FLAGS             += -Isim
+TEST_FLAGS             += -Ibuild/tests
+TEST_FLAGS             += -Ibuild/verilated
+TEST_FLAGS             += -Iexternal/miniargparse
+TEST_FLAGS             += -Ibuild/external/riscv_tests
+TEST_FLAGS             += -I$(VERILATOR_ROOT)/include
+TEST_FLAGS             += -I$(VERILATOR_ROOT)/include/vltstd
 
 SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
+
+TEST_SRCS              := $(shell find tests/ -type f -name "*.cc")
+TEST_SRCS_BASENAME     := $(notdir $(TEST_SRCS))
+TEST_OBJS              := $(TEST_SRCS_BASENAME:%.cc=$(OUT_DIR)/tests/%.o)
+TEST_OBJS              += $(SIM_OBJS_BASE)
+
+TEST_LIBS              :=  -lpthread
+TEST_LIBS              +=  $(GTEST_BASEDIR)/libgtest.a
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 DROP32SOC_SRC          := drop32soc/firmware.s
@@ -116,26 +135,24 @@ DROP32SOC_COREGEN      := drop32soc/soc_generated.v
 
 # --- PHONY MAKE RECIPES ----------------------------------------------------------------------------------------------
 .PHONY: all
-all: sim tests soc
+all: sim
+all: tests
+all: soc
 
 # Build tests
 .PHONY: tests
-tests: VERILATOR_SIM_SRCS+=$(CPU_TEST_SRCS)
-tests: $(CPU_TEST_INC) $(CPU_TEST_HEX) $(OUT_DIR)/tests/Vdrop32.cpp
-tests: $(RV32I_TEST_INC)
+tests: $(OUT_DIR)/Vdrop32_tests
 tests: $(OUT_DIR)/Unit_tests
-	@$(MAKE) -C $(OUT_DIR)/tests -f Vdrop32.mk
 
-# Build Verilator-based simulator
+# Build simulator
 .PHONY: sim
-sim: VERILATOR_SIM_SRCS+=$(ROOT_DIR)/sim/src/main.cc
-sim: $(OUT_DIR)/sim/Vdrop32.cpp
-sim:
-	@$(MAKE) -C $(OUT_DIR)/sim -f Vdrop32.mk
+sim: $(OUT_DIR)/Vdrop32
 
 # Build drop32soc firmware and generate drop32 core
 .PHONY: soc
-soc: $(DROP32SOC_COREGEN) $(DROP32SOC_ELF) $(DROP32SOC_FIRMWARE)
+soc: $(DROP32SOC_COREGEN)
+soc: $(DROP32SOC_ELF)
+soc: $(DROP32SOC_FIRMWARE)
 
 # Create the docker container (if needed) and start
 .PHONY: docker
@@ -154,7 +171,6 @@ clean:
 	rm -rf drop32soc/*_generated.v
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
-# drop32soc
 drop32soc/%_generated.v: $(RTL_SRCS) $(RTL_TYPES)
 	$(PYTHON) scripts/drop32soc_gen.py > $@
 
@@ -165,17 +181,27 @@ drop32soc/%.mem: drop32soc/%.elf
 	$(DOCKER_PREFIX) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	$(PYTHON) ./scripts/byteswap_memfile.py $@
 
-# Unit tests
 $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
-# Simulator (Verilator)
-$(OUT_DIR)/sim/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(RTL_TYPES) | $(OUT_DIR)/sim $(OUT_DIR)/vcd
-	verilator $(SIM_FLAGS) --Mdir $(OUT_DIR)/sim -o ../Vdrop32 $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+$(OUT_DIR)/verilated/%.o: $(VERILATOR_ROOT)/include/%.cpp
+	$(CXX) -c -o $@ $<
 
-# CPU/Functional tests
-$(OUT_DIR)/tests/%.cpp: $(VERILATOR_SIM_SRCS) $(RTL_SRCS) $(RTL_TYPES) | $(OUT_DIR)/tests $(OUT_DIR)/vcd
-	verilator $(CPU_TEST_FLAGS) --Mdir $(OUT_DIR)/tests -o ../Vdrop32_tests $(VERILATOR_SIM_SRCS) -cc $(RTL_SRCS)
+$(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v | $(OUT_DIR)/verilated
+	verilator $(VFLAGS) --Mdir $(dir $@) -cc $<
+	@$(MAKE) -C $(dir $@) -f V$(basename $(notdir $<)).mk > /dev/null
+
+$(OUT_DIR)/sim/%.o: sim/%.cc | $(RTL_LIBS) $(OUT_DIR)/sim
+	$(CXX) -c -o $@ $(SIM_FLAGS) $<
+
+$(OUT_DIR)/tests/%.o: tests/cpu/%.cc | $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_TEST_INC) $(RTL_LIBS) $(OUT_DIR)/tests
+	$(CXX) -c -o $@ $(TEST_FLAGS) $<
+
+$(OUT_DIR)/Vdrop32: | $(SIM_OBJS) $(VOBJS) $(OUT_DIR)/vcd
+	$(CXX) -o $@ $(SIM_FLAGS) $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS)
+
+$(OUT_DIR)/Vdrop32_tests: | $(TEST_OBJS) $(VOBJS) $(OUT_DIR)/vcd
+	$(CXX) -o $@ $(TEST_FLAGS) $(TEST_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(TEST_LIBS)
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
@@ -210,16 +236,19 @@ $(OUT_DIR)/external/riscv_tests/%.inc: $(OUT_DIR)/external/riscv_tests/%.hex
 	xxd -i $< $@
 
 $(OUT_DIR):
-	mkdir -p $@
+	@mkdir -p $@
 
 $(OUT_DIR)/sim:
-	mkdir -p $@
+	@mkdir -p $@
 
 $(OUT_DIR)/tests:
-	mkdir -p $@
+	@mkdir -p $@
 
 $(OUT_DIR)/external/riscv_tests:
-	mkdir -p $@
+	@mkdir -p $@
 
 $(OUT_DIR)/vcd:
-	mkdir -p $@
+	@mkdir -p $@
+
+$(OUT_DIR)/verilated:
+	@mkdir -p $@
