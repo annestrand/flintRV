@@ -76,6 +76,9 @@ VFLAGS                 += --x-initial unique
 VSRCS                  := $(VERILATOR_ROOT)/include/verilated.cpp
 VSRCS                  += $(VERILATOR_ROOT)/include/verilated_dpi.cpp
 VSRCS                  += $(VERILATOR_ROOT)/include/verilated_vcd_c.cpp
+ifeq ($(SYSTEM), Darwin) # TODO: fix this for non macOS builds
+VSRCS                  += $(VERILATOR_ROOT)/include/verilated_threads.cpp
+endif
 VSRCS_BASENAME         := $(notdir $(VSRCS))
 VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
 
