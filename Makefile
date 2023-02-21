@@ -220,7 +220,7 @@ $(OUT_DIR)/Vdrop32: $(SIM_OBJS) $(VOBJS) $(OUT_DIR)/vcd
 	$(CXX) -o $@ $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(SIM_LDFLAGS)
 
 $(OUT_DIR)/Vdrop32_tests: $(TEST_OBJS) $(VOBJS) $(OUT_DIR)/vcd
-	$(CXX) -o $@ $(TEST_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(OUT_DIR)/verilated/VALU__ALL.a $(VOBJS) $(TEST_LDFLAGS)
+	$(CXX) -o $@ $(TEST_OBJS) $(RTL_LIBS) $(VOBJS) $(TEST_LDFLAGS)
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
