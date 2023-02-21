@@ -216,11 +216,11 @@ $(OUT_DIR)/sim/%.o: sim/%.cc | $(RTL_LIBS) $(OUT_DIR)/sim
 $(OUT_DIR)/tests/%.o: tests/%.cc | $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_TEST_INC) $(RTL_LIBS) $(OUT_DIR)/tests
 	$(CXX) -c -o $@ $(TEST_FLAGS) $<
 
-$(OUT_DIR)/Vdrop32: | $(SIM_OBJS) $(VOBJS) $(OUT_DIR)/vcd
+$(OUT_DIR)/Vdrop32: $(SIM_OBJS) $(VOBJS) $(OUT_DIR)/vcd
 	$(CXX) -o $@ $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(SIM_LDFLAGS)
 
-$(OUT_DIR)/Vdrop32_tests: | $(TEST_OBJS) $(VOBJS) $(OUT_DIR)/vcd
-	$(CXX) -o $@ $(TEST_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(TEST_LDFLAGS)
+$(OUT_DIR)/Vdrop32_tests: $(TEST_OBJS) $(VOBJS) $(OUT_DIR)/vcd
+	$(CXX) -o $@ $(TEST_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(OUT_DIR)/verilated/VALU__ALL.a $(VOBJS) $(TEST_LDFLAGS)
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
