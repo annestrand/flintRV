@@ -11,6 +11,7 @@ else
 DOCKER_PREFIX          :=
 endif
 GTEST_BASEDIR          ?= /usr/local/lib
+SYSTEM                 := $(shell uname -s)
 
 # Get Verilator info
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
@@ -72,20 +73,28 @@ VFLAGS                 += -CFLAGS "-g"
 VFLAGS                 += --x-assign unique
 VFLAGS                 += --x-initial unique
 
-VSRCS                  := $(VERILATOR_ROOT)/include/verilated_vcd_c.cpp
-VSRCS                  += $(VERILATOR_ROOT)/include/verilated.cpp
+VSRCS                  := $(VERILATOR_ROOT)/include/verilated.cpp
+VSRCS                  += $(VERILATOR_ROOT)/include/verilated_dpi.cpp
+VSRCS                  += $(VERILATOR_ROOT)/include/verilated_vcd_c.cpp
+VSRCS                  += $(VERILATOR_ROOT)/include/verilated_threads.cpp
 VSRCS_BASENAME         := $(notdir $(VSRCS))
 VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
 
 # --- SIMULATOR -------------------------------------------------------------------------------------------------------
 SIM_FLAGS              := -Wall
-SIM_FLAGS              += -Werror
 SIM_FLAGS              += -Isim
 SIM_FLAGS              += -Ibuild/verilated
 SIM_FLAGS              += -Iexternal/miniargparse
 SIM_FLAGS              += -I$(VERILATOR_ROOT)/include
 SIM_FLAGS              += -I$(VERILATOR_ROOT)/include/vltstd
 SIM_FLAGS              += -faligned-new
+SIM_FLAGS              += -std=c++14
+
+SIM_LDFLAGS            :=
+ifeq ($(SYSTEM), Darwin)
+# Verilator fix weak symbols on macOS: https://github.com/verilator/verilator/pull/3823
+SIM_LDFLAGS            += -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv
+endif
 
 SIM_SRCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.cc" -exec basename {} \;)
 SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/%.o)
@@ -113,7 +122,6 @@ RV32I_TEST_CC_FLAGS    += -Wl,-Ttext 0x0
 RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
 TEST_FLAGS             := -Wall
-TEST_FLAGS             += -Werror
 TEST_FLAGS             += -Isim
 TEST_FLAGS             += -Ibuild/tests
 TEST_FLAGS             += -Ibuild/verilated
@@ -122,14 +130,19 @@ TEST_FLAGS             += -Ibuild/external/riscv_tests
 TEST_FLAGS             += -I$(VERILATOR_ROOT)/include
 TEST_FLAGS             += -I$(VERILATOR_ROOT)/include/vltstd
 TEST_FLAGS             += -faligned-new
+TEST_FLAGS             += -std=c++14
+
+TEST_LDFLAGS           := -pthread
+TEST_LDFLAGS           += $(GTEST_BASEDIR)/libgtest.a
+ifeq ($(SYSTEM), Darwin)
+# Verilator fix weak symbols on macOS: https://github.com/verilator/verilator/pull/3823
+TEST_LDFLAGS           += -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv
+endif
 
 TEST_SRCS              := $(shell find tests/ -type f -name "*.cc")
 TEST_SRCS_BASENAME     := $(notdir $(TEST_SRCS))
 TEST_OBJS              := $(TEST_SRCS_BASENAME:%.cc=$(OUT_DIR)/tests/%.o)
 TEST_OBJS              += $(SIM_OBJS_BASE)
-
-TEST_LIBS              :=  -lpthread
-TEST_LIBS              +=  $(GTEST_BASEDIR)/libgtest.a
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 DROP32SOC_SRC          := drop32soc/firmware.s
@@ -189,7 +202,7 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 	iverilog $(ICARUS_FLAGS) -o $@ $<
 
 $(OUT_DIR)/verilated/%.o: $(VERILATOR_ROOT)/include/%.cpp
-	$(CXX) -c -o $@ $<
+	$(CXX) -c -o $@ -std=c++14 -I$(VERILATOR_ROOT)/include/vltstd $<
 
 $(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v | $(OUT_DIR)/verilated
 	verilator $(VFLAGS) --Mdir $(dir $@) -cc $<
@@ -202,10 +215,10 @@ $(OUT_DIR)/tests/%.o: tests/cpu/%.cc | $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_T
 	$(CXX) -c -o $@ $(TEST_FLAGS) $<
 
 $(OUT_DIR)/Vdrop32: | $(SIM_OBJS) $(VOBJS) $(OUT_DIR)/vcd
-	$(CXX) -o $@ $(SIM_FLAGS) $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS)
+	$(CXX) -o $@ $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(SIM_LDFLAGS)
 
 $(OUT_DIR)/Vdrop32_tests: | $(TEST_OBJS) $(VOBJS) $(OUT_DIR)/vcd
-	$(CXX) -o $@ $(TEST_FLAGS) $(TEST_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(TEST_LIBS)
+	$(CXX) -o $@ $(TEST_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(TEST_LDFLAGS)
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests

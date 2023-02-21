@@ -6,13 +6,14 @@
 - 4-stage in-order pipelined processor
 - Aimed to be implemented as a soft-cpu for use in FPGAs
 
-## Dependencies ✅
+## Prerequisites ✅
 - GNU Make
 - Python >= 3.6
-- GCC RISC-V compiler/cross-compiler toolchain (testing)
-- Icarus Verilog (testing)
-- Verilator (testing)
-- GoogleTest (testing)
+- C++14 compiler (or greater)
+- Icarus Verilog (**optional**)
+- Verilator (**optional**)
+- GoogleTest (**optional**)
+- GCC RISC-V compiler/cross-compiler toolchain (**optional**)
 
 ## Pre-build ⚒️
 This repo uses git submodules - make sure to pull those first:
@@ -29,6 +30,8 @@ Output dir: `build/Vdrop32`
 See this [README.md](./sim/README.md) for guide.
 
 ## Build Tests 🧪
+Building tests require the above `optional` prerequisites.
+
 To build tests:
 
     $ make tests
