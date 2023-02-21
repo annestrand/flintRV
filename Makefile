@@ -103,8 +103,8 @@ SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/%.o)
 SIM_OBJS_BASE          := $(filter-out build/sim/main.o,$(SIM_OBJS))
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
-CPU_ASM_TESTS          := $(shell find tests/cpu/basic -type f -name "*.s" -exec basename {} \;)
-CPU_C_TESTS            := $(shell find tests/cpu/algorithms -type f -name "*.c" -exec basename {} \;)
+CPU_ASM_TESTS          := $(shell find tests/basic -type f -name "*.s" -exec basename {} \;)
+CPU_C_TESTS            := $(shell find tests/algorithms -type f -name "*.c" -exec basename {} \;)
 CPU_TEST_HEX           := $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
 CPU_TEST_HEX           += $(CPU_C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
 CPU_TEST_INC           := $(CPU_TEST_HEX:%.hex=%.inc)
@@ -213,7 +213,7 @@ $(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v | $(OUT_DIR)/verilated
 $(OUT_DIR)/sim/%.o: sim/%.cc | $(RTL_LIBS) $(OUT_DIR)/sim
 	$(CXX) -c -o $@ $(SIM_FLAGS) $<
 
-$(OUT_DIR)/tests/%.o: tests/cpu/%.cc | $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_TEST_INC) $(RTL_LIBS) $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.o: tests/%.cc | $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_TEST_INC) $(RTL_LIBS) $(OUT_DIR)/tests
 	$(CXX) -c -o $@ $(TEST_FLAGS) $<
 
 $(OUT_DIR)/Vdrop32: | $(SIM_OBJS) $(VOBJS) $(OUT_DIR)/vcd
@@ -227,11 +227,11 @@ $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
 	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
-$(OUT_DIR)/tests/%.elf: tests/cpu/basic/%.s | $(OUT_DIR)/tests
+$(OUT_DIR)/tests/%.elf: tests/basic/%.s | $(OUT_DIR)/tests
 	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
-$(OUT_DIR)/tests/%.elf: tests/cpu/algorithms/%.c
+$(OUT_DIR)/tests/%.elf: tests/algorithms/%.c
 	$(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/drop32.ld,-Map=$@.map -o $@ $<
 
 $(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf
