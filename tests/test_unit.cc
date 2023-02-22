@@ -12,6 +12,8 @@
 
 #include "VALU.h"
 #include "VALU__Syms.h"
+#include "VRegfile.h"
+#include "VRegfile__Syms.h"
 #include "common.hh"
 
 #ifndef VERILATOR_VER
@@ -45,7 +47,7 @@ auto rev_byte_bits = [](unsigned char x) -> unsigned char {
 }
 
 // ====================================================================================================================
-TEST(unit, alu) { // ALU testing
+TEST(unit, alu) {
     std::unique_ptr<VALU> dut(new VALU);
     auto p_alu = dut.get();
 
@@ -102,4 +104,53 @@ TEST(unit, alu) { // ALU testing
             EXPECT_EQ(r, p_alu->o_result) << "ALU operation was: " << i;
         }
     }
+}
+// ====================================================================================================================
+TEST(unit, regfile) {
+    std::unique_ptr<VRegfile> dut(new VRegfile);
+    auto p_regfile = dut.get();
+    constexpr int TEST_DATA_SIZE = 10;
+    uint test_data[TEST_DATA_SIZE] = {
+        0xdeadbeef,
+        0x8badf00d,
+        0x00c0ffee,
+        0xdeadc0de,
+        0xbadf000d,
+        0xdefac8ed,
+        0xcafebabe,
+        0xdeadd00d,
+        0xcafed00d,
+        0xdeadbabe
+    };
+    auto tick = [](VRegfile* regfile, int tick_count=1) {
+        for (int i=0; i<tick_count; ++i) {
+            regfile->i_clk = 0;
+            regfile->eval();
+            regfile->i_clk = 1;
+            regfile->eval();
+        }
+    };
+    p_regfile->i_wrEn = 1;
+    for (int i=0; i<TEST_DATA_SIZE; ++i) {
+        p_regfile->i_rdAddr = i;
+        p_regfile->i_rdData = test_data[i];
+        tick(p_regfile);
+    }
+    p_regfile->i_wrEn = 0;
+    for (int i=0; i<TEST_DATA_SIZE; i++) {
+        p_regfile->i_rs1Addr = i;
+        p_regfile->i_rs2Addr = i;
+        tick(p_regfile);
+        EXPECT_EQ(p_regfile->o_rs1Data, test_data[i]);
+        EXPECT_EQ(p_regfile->o_rs2Data, test_data[i]);
+    }
+    tick(p_regfile);
+    p_regfile->i_wrEn = 1;
+    p_regfile->i_rdAddr = 5;
+    p_regfile->i_rdData = 0xffffffff;
+    p_regfile->i_rs1Addr = 5;
+    p_regfile->i_rs2Addr = 5;
+    tick(p_regfile);
+    EXPECT_EQ(p_regfile->o_rs1Data, 0xffffffff);
+    EXPECT_EQ(p_regfile->o_rs2Data, 0xffffffff);
 }
