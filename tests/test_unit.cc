@@ -16,6 +16,8 @@
 #include "VRegfile__Syms.h"
 #include "VDualPortRam.h"
 #include "VDualPortRam__Syms.h"
+#include "VImmGen.h"
+#include "VImmGen__Syms.h"
 
 #include "utils.hh"
 
@@ -163,5 +165,106 @@ TEST(unit, dualportram) {
         p_dpr->i_rAddr = i;
         tick(p_dpr);
         EXPECT_EQ(p_dpr->o_q, test_data[i]);
+    }
+}
+// ====================================================================================================================
+TEST(unit, immgen) {
+    std::unique_ptr<VImmGen> dut(new VImmGen);
+    auto p_immgen = dut.get();
+    constexpr int UJ_TEST_COUNT     = 1 << 20; // 2**20
+    constexpr int SBI_TEST_COUNT    = 1 << 12; // 2**12
+    // U-type
+    for (int i = 0; i < UJ_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 0, 20) << 12;
+        x |= get_bits(i, 0, 5)  << 7;
+        x |= U_LUI;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, U_IMM(x));
+    }
+    for (int i = 0; i < UJ_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 0, 20) << 12;
+        x |= get_bits(i, 0, 5)  << 7;
+        x |= U_AUIPC;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, U_IMM(x));
+    }
+    // J-type
+    for (int i = 0; i < UJ_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 19, 1) << 31;
+        x |= get_bits(i, 0, 9)  << 21;
+        x |= get_bits(i, 10, 1) << 20;
+        x |= get_bits(i, 11, 8) << 12;
+        x |= get_bits(i, 0, 5)  << 7;
+        x |= J;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, J_IMM(x));
+    }
+    // S-type
+    for (int i = 0; i < SBI_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 19, 1) << 31;
+        x |= get_bits(i, 0, 9)  << 21;
+        x |= get_bits(i, 10, 1) << 20;
+        x |= get_bits(i, 11, 8) << 12;
+        x |= get_bits(i, 0, 5)  << 7;
+        x |= S;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, S_IMM(x));
+    }
+    // B-type
+    for (int i = 0; i < SBI_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 12, 1) << 31;
+        x |= get_bits(i, 5, 6)  << 25;
+        x |= get_bits(i, 0, 5)  << 20;
+        x |= get_bits(i, 0, 5)  << 15;
+        x |= get_bits(i, 0, 3)  << 12;
+        x |= get_bits(i, 1, 4)  << 8;
+        x |= get_bits(i, 11, 1) << 7;
+        x |= B;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, B_IMM(x));
+    }
+    // I-type (Skip R, Fence, and System types)
+    for (int i = 0; i < SBI_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 0, 12) << 20;
+        x |= get_bits(i, 0, 5)  << 15;
+        x |= get_bits(i, 0, 3)  << 12;
+        x |= get_bits(i, 0, 5)  << 7;
+        x |= I_JUMP;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, I_IMM(x));
+    }
+    for (int i = 0; i < SBI_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 0, 12) << 20;
+        x |= get_bits(i, 0, 5)  << 15;
+        x |= get_bits(i, 0, 3)  << 12;
+        x |= get_bits(i, 0, 5)  << 7;
+        x |= I_LOAD;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, I_IMM(x));
+    }
+    for (int i = 0; i < SBI_TEST_COUNT; ++i) {
+        int x = 0;
+        x |= get_bits(i, 0, 12) << 20;
+        x |= get_bits(i, 0, 5)  << 15;
+        x |= get_bits(i, 0, 3)  << 12;
+        x |= get_bits(i, 0, 5)  << 7;
+        x |= I_ARITH;
+        p_immgen->i_instr = x;
+        p_immgen->eval();
+        EXPECT_EQ(p_immgen->o_imm, I_IMM(x));
     }
 }
