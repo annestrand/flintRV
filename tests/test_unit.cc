@@ -14,6 +14,8 @@
 #include "VALU__Syms.h"
 #include "VRegfile.h"
 #include "VRegfile__Syms.h"
+#include "VDualPortRam.h"
+#include "VDualPortRam__Syms.h"
 #include "common.hh"
 
 #ifndef VERILATOR_VER
@@ -153,4 +155,42 @@ TEST(unit, regfile) {
     tick(p_regfile);
     EXPECT_EQ(p_regfile->o_rs1Data, 0xffffffff);
     EXPECT_EQ(p_regfile->o_rs2Data, 0xffffffff);
+}
+// ====================================================================================================================
+TEST(unit, dualportram) {
+    std::unique_ptr<VDualPortRam> dut(new VDualPortRam);
+    auto p_dpr = dut.get();
+    constexpr int TEST_DATA_SIZE = 10;
+    uint test_data[TEST_DATA_SIZE] = {
+        0xdeadbeef,
+        0x8badf00d,
+        0x00c0ffee,
+        0xdeadc0de,
+        0xbadf000d,
+        0xdefac8ed,
+        0xcafebabe,
+        0xdeadd00d,
+        0xcafed00d,
+        0xdeadbabe
+    };
+    auto tick = [](VDualPortRam* dpr, int tick_count=1) {
+        for (int i=0; i<tick_count; ++i) {
+            dpr->i_clk = 0;
+            dpr->eval();
+            dpr->i_clk = 1;
+            dpr->eval();
+        }
+    };
+    p_dpr->i_we = 1;
+    for (int i=0; i<TEST_DATA_SIZE; ++i) {
+        p_dpr->i_wAddr = i;
+        p_dpr->i_dataIn = test_data[i];
+        tick(p_dpr);
+    }
+    p_dpr->i_we = 0;
+    for (int i=0; i<TEST_DATA_SIZE; ++i) {
+        p_dpr->i_rAddr = i;
+        tick(p_dpr);
+        EXPECT_EQ(p_dpr->o_q, test_data[i]);
+    }
 }
