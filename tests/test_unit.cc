@@ -16,37 +16,8 @@
 #include "VRegfile__Syms.h"
 #include "VDualPortRam.h"
 #include "VDualPortRam__Syms.h"
-#include "common.hh"
 
-#ifndef VERILATOR_VER
-#define VERILATOR_VER 4028
-#endif // VERILATOR_VER
-/*
-    NOTE:   Verilator changes its internal-module interface scheme from v4.210 and up (i.e. rootp).
-            Making utility wrapper here to easily handle and access module internals.
-            (As well as keep track of any future-version interface changes)
-*/
-#if VERILATOR_VER >= 4210
-#define DUT(sim) (sim).get()->rootp
-#else
-#define DUT(sim) (sim).get()
-#endif
-
-namespace
-{
-auto rev_byte_bits = [](unsigned char x) -> unsigned char {
-    unsigned char y = 0;
-    y |= (x & 0x01) << 7;
-    y |= (x & 0x02) << 5;
-    y |= (x & 0x04) << 3;
-    y |= (x & 0x08) << 1;
-    y |= (x & 0x10) >> 1;
-    y |= (x & 0x20) >> 3;
-    y |= (x & 0x40) >> 5;
-    y |= (x & 0x80) >> 7;
-    return y;
-};
-}
+#include "utils.hh"
 
 // ====================================================================================================================
 TEST(unit, alu) {

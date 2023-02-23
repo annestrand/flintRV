@@ -11,9 +11,7 @@
 #include "Vdrop32.h"
 #include "Vdrop32__Syms.h"
 
-#ifndef VERILATOR_VER
-#define VERILATOR_VER 4028
-#endif // VERILATOR_VER
+#include "utils.hh"
 
 // Regfile aliases
 typedef enum {
