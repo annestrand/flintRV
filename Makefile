@@ -84,6 +84,7 @@ VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
 
 # --- SIMULATOR -------------------------------------------------------------------------------------------------------
 SIM_FLAGS              := -Wall
+SIM_FLAGS              += -MMD
 SIM_FLAGS              += -Isim
 SIM_FLAGS              += -Ibuild/verilated
 SIM_FLAGS              += -Iexternal/miniargparse
@@ -99,8 +100,11 @@ SIM_LDFLAGS            += -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv
 endif
 
 SIM_SRCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.cc" -exec basename {} \;)
+SIM_INCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.hh")
 SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/%.o)
+SIM_OBJS_D             := $(SIM_OBJS:.o=.d)
 SIM_OBJS_BASE          := $(filter-out build/sim/main.o,$(SIM_OBJS))
+SIM_OBJS_BASE_D        := $(SIM_OBJS_BASE:.o=.d)
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
 CPU_ASM_TESTS          := $(shell find tests/basic -type f -name "*.s" -exec basename {} \;)
@@ -145,6 +149,8 @@ TEST_SRCS              := $(shell find tests/ -type f -name "*.cc")
 TEST_SRCS_BASENAME     := $(notdir $(TEST_SRCS))
 TEST_OBJS              := $(TEST_SRCS_BASENAME:%.cc=$(OUT_DIR)/tests/%.o)
 TEST_OBJS              += $(SIM_OBJS_BASE)
+TEST_OBJS_D            := $(TEST_OBJS:.o=.d)
+ALL_TEST_INC_HEX_SRCS  := $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_TEST_INC)
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 DROP32SOC_SRC          := drop32soc/firmware.s
@@ -206,20 +212,22 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 $(OUT_DIR)/verilated/%.o: $(VERILATOR_ROOT)/include/%.cpp
 	$(CXX) -c -o $@ -std=c++14 -I$(VERILATOR_ROOT)/include/vltstd $<
 
-$(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v | $(OUT_DIR)/verilated
+$(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v rtl/types.vh | $(OUT_DIR)/verilated
 	verilator $(VFLAGS) --Mdir $(dir $@) -cc $<
 	@$(MAKE) -C $(dir $@) -f V$(basename $(notdir $<)).mk > /dev/null
 
-$(OUT_DIR)/sim/%.o: sim/%.cc | $(RTL_LIBS) $(OUT_DIR)/sim
+-include $(SIM_OBJS_D)
+$(OUT_DIR)/sim/%.o: sim/%.cc $(RTL_LIBS) $(RTL_SRCS) $(VOBJS) | $(OUT_DIR)/sim
 	$(CXX) -c -o $@ $(SIM_FLAGS) $<
 
-$(OUT_DIR)/tests/%.o: tests/%.cc | $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_TEST_INC) $(RTL_LIBS) $(OUT_DIR)/tests
+-include $(TEST_OBJS_D)
+$(OUT_DIR)/tests/%.o: tests/%.cc $(ALL_TEST_INC_HEX_SRCS) $(RTL_LIBS) $(RTL_SRCS) $(VOBJS) | $(OUT_DIR)/tests
 	$(CXX) -c -o $@ $(TEST_FLAGS) $<
 
-$(OUT_DIR)/Vdrop32: $(SIM_OBJS) $(VOBJS) $(OUT_DIR)/vcd
+$(OUT_DIR)/Vdrop32: $(SIM_OBJS)
 	$(CXX) -o $@ $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(SIM_LDFLAGS)
 
-$(OUT_DIR)/Vdrop32_tests: $(TEST_OBJS) $(VOBJS) $(OUT_DIR)/vcd
+$(OUT_DIR)/Vdrop32_tests: $(TEST_OBJS) | $(OUT_DIR)/vcd
 	$(CXX) -o $@ $(TEST_OBJS) $(RTL_LIBS) $(VOBJS) $(TEST_LDFLAGS)
 
 .SECONDARY:
