@@ -197,70 +197,89 @@ clean:
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
 drop32soc/%_generated.v: $(RTL_SRCS) $(RTL_TYPES)
-	$(PYTHON) scripts/drop32soc_gen.py > $@
+	@echo "    PY          $(notdir scripts/drop32soc_gen.py)"
+	@$(PYTHON) scripts/drop32soc_gen.py > $@
 
 drop32soc/%.elf: drop32soc/%.s
-	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	@echo "    RV32I_AS    $(notdir $<)"
+	@$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 drop32soc/%.mem: drop32soc/%.elf
-	$(DOCKER_PREFIX) $(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
-	$(PYTHON) ./scripts/byteswap_memfile.py $@
+	@echo "    RV32I_OBJC  $(notdir $<)"
+	@$(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
+	@echo "    PY          $(notdir scripts/byteswap_memfile.py)"
+	@$(PYTHON) ./scripts/byteswap_memfile.py $@
 
 $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
-	iverilog $(ICARUS_FLAGS) -o $@ $<
+	@echo "    IVERILOG    $(notdir $<)"
+	@iverilog $(ICARUS_FLAGS) -o $@ $<
 
 $(OUT_DIR)/verilated/%.o: $(VERILATOR_ROOT)/include/%.cpp
-	$(CXX) -c -o $@ -std=c++14 -I$(VERILATOR_ROOT)/include/vltstd $<
+	@echo "    CXX         $(notdir $<)"
+	@$(CXX) -c -o $@ -std=c++14 -I$(VERILATOR_ROOT)/include/vltstd $<
 
 $(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v rtl/types.vh | $(OUT_DIR)/verilated
-	verilator $(VFLAGS) --Mdir $(dir $@) -cc $<
+	@echo "    VERILATOR   $(notdir $<)"
+	@verilator $(VFLAGS) --Mdir $(dir $@) -cc $<
 	@$(MAKE) -C $(dir $@) -f V$(basename $(notdir $<)).mk > /dev/null
 
 -include $(SIM_OBJS_D)
 $(OUT_DIR)/sim/%.o: sim/%.cc $(RTL_LIBS) $(RTL_SRCS) $(VOBJS) | $(OUT_DIR)/sim
-	$(CXX) -c -o $@ $(SIM_FLAGS) $<
+	@echo "    CXX         $(notdir $<)"
+	@$(CXX) -c -o $@ $(SIM_FLAGS) $<
 
 -include $(TEST_OBJS_D)
 $(OUT_DIR)/tests/%.o: tests/%.cc $(ALL_TEST_INC_HEX_SRCS) $(RTL_LIBS) $(RTL_SRCS) $(VOBJS) | $(OUT_DIR)/tests
-	$(CXX) -c -o $@ $(TEST_FLAGS) $<
+	@echo "    CXX         $(notdir $<)"
+	@$(CXX) -c -o $@ $(TEST_FLAGS) $<
 
 $(OUT_DIR)/Vdrop32: $(SIM_OBJS)
-	$(CXX) -o $@ $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(SIM_LDFLAGS)
+	@echo "    LD          $(notdir $@)"
+	@$(CXX) -o $@ $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(SIM_LDFLAGS)
 
 $(OUT_DIR)/Vdrop32_tests: $(TEST_OBJS) | $(OUT_DIR)/vcd
-	$(CXX) -o $@ $(TEST_OBJS) $(RTL_LIBS) $(VOBJS) $(TEST_LDFLAGS)
+	@echo "    LD          $(notdir $@)"
+	@$(CXX) -o $@ $(TEST_OBJS) $(RTL_LIBS) $(VOBJS) $(TEST_LDFLAGS)
 
 .SECONDARY:
 $(OUT_DIR)/tests/cpu_%.elf: $(OUT_DIR)/tests/cpu_%.s | $(OUT_DIR)/tests
-	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	@echo "    RV32I_AS    $(notdir $<)"
+	@$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/basic/%.s | $(OUT_DIR)/tests
-	$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
+	@echo "    RV32I_AS    $(notdir $<)"
+	@$(RISCV_AS) $(RISCV_AS_FLAGS) -o $@ $<
 
 .SECONDARY:
 $(OUT_DIR)/tests/%.elf: tests/algorithms/%.c
-	$(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/drop32.ld,-Map=$@.map -o $@ $<
+	@echo "    RV32I_CC    $(notdir $<)"
+	@$(RISCV_CC) $(RISCV_CC_FLAGS) -Wl,-Tscripts/drop32.ld,-Map=$@.map -o $@ $<
 
 $(OUT_DIR)/tests/%.hex: $(OUT_DIR)/tests/%.elf
-	$(RISCV_OBJCOPY) -O binary $< $@
+	@echo "    RV32I_OBJC  $(notdir $<)"
+	@$(RISCV_OBJCOPY) -O binary $< $@
 
 $(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex
-	xxd -i $< $@
+	@echo "    XXD         $(notdir $<)"
+	@xxd -i $< $@
 
 # RV32I external tests
 $(OUT_DIR)/external/riscv_tests/%.elf: external/riscv-tests/%.S $(RV32I_TEST_HEADERS) | $(OUT_DIR)/external/riscv_tests
-	$(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ \
+	@echo "    RV32I_CC    $(notdir $<)"
+	@$(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ \
 		-DTEST_FUNC_NAME=$(notdir $(basename $<)) \
 		-DTEST_FUNC_TXT='"$(notdir $(basename $<))"' \
 		-DTEST_FUNC_RET=$(notdir $(basename $<))_ret \
 		$<
 
 $(OUT_DIR)/external/riscv_tests/%.hex: $(OUT_DIR)/external/riscv_tests/%.elf
-	$(RISCV_OBJCOPY) -O binary $< $@
+	@echo "    RV32I_OBJC  $(notdir $<)"
+	@$(RISCV_OBJCOPY) -O binary $< $@
 
 $(OUT_DIR)/external/riscv_tests/%.inc: $(OUT_DIR)/external/riscv_tests/%.hex
-	xxd -i $< $@
+	@echo "    XXD         $(notdir $<)"
+	@xxd -i $< $@
 
 $(OUT_DIR):
 	@mkdir -p $@
