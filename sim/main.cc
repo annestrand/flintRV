@@ -29,7 +29,8 @@ int main(int argc, char *argv[]) {
     MINIARGPARSE_OPT(help, "h", "help", 0, "Print help and exit.");
     MINIARGPARSE_OPT(dumpLvl, "d", "dumpLevel", 1, "Verbose trace print-level (0-2) [DEFAULT=0].");
     MINIARGPARSE_OPT(simTime, "t", "timeout", 1, "Simulation timeout value [DEFAULT=1000].");
-    MINIARGPARSE_OPT(simVcd, "v", "vcdDump", 1, "Filename for VCD dump [DEFAULT=Disabled].");
+    MINIARGPARSE_OPT(simVcd, "V", "vcdDump", 1, "Filename for VCD dump [DEFAULT=Disabled].");
+    MINIARGPARSE_OPT(version, "v", "version", 0, "Prints version and exits");
 
     // Parse the args
     int unknownOpt = miniargparseParse(argc, argv);
@@ -39,9 +40,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Exit early if help was defined
+    // Exit early if help or version was defined
     if (help.infoBits.used) {
         printHelp();
+        return 0;
+    }
+    if (version.infoBits.used) {
+        printf("%s\n", DROP32_VERSION);
         return 0;
     }
 

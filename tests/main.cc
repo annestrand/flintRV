@@ -8,10 +8,22 @@ int g_dumpLevel = 0;
 
 int main(int argc, char *argv[]) {
     // Parse any passed option(s)
-    // | -dump      : Prints disassembled instruction
-    // | -dump-all  : Prints disassembled instruction + CPU state
     for (int i=0; i<argc; ++i) {
         std::string s(argv[i]);
+        if (s.find("-v") != std::string::npos) {
+            printf("%s\n", DROP32_VERSION);
+            return 0;
+        }
+        if (s.find("-h") != std::string::npos) {
+            printf("%s\n",
+                "Vdrop32_tests option(s):\n"
+                "    -h         : Prints help and exits\n"
+                "    -v         : Prints version and exits\n"
+                "    -dump      : Prints disassembled instruction\n"
+                "    -dump-all  : Prints disassembled instruction + CPU state\n"
+            );
+            return 0;
+        }
         if (s.find("-dump") != std::string::npos) {
             g_dumpLevel = g_dumpLevel > 0 ? g_dumpLevel : 1;
         }

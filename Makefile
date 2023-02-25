@@ -13,14 +13,36 @@ endif
 GTEST_BASEDIR          ?= /usr/local/lib
 SYSTEM                 := $(shell uname -s)
 
+# Project metadata
+COMMIT_AT_TAG          := $(shell git tag --points-at HEAD)
+COMMIT_LAST_TAG        := $(shell git describe --tags --abbrev=0)
+COMMIT_SHA             := $(shell git rev-parse --short HEAD)
+COMMIT_DIRTY           := $(shell git diff --stat)
+VERSION_MAJOR          := $(shell echo $(COMMIT_LAST_TAG) | cut -d. -f1 | tr -d 'v')
+VERSION_MINOR          := $(shell echo $(COMMIT_LAST_TAG) | cut -d. -f2)
+ifeq (9, $(VERSION_MINOR))
+NEXT_VERSION_MAJOR     := $(shell x=$$(echo $(VERSION_MAJOR)); echo $$((x+1)))
+NEXT_VERSION_MINOR     := 0
+else
+NEXT_VERSION_MAJOR     := $(VERSION_MAJOR)
+NEXT_VERSION_MINOR     := $(shell x=$$(echo $(VERSION_MINOR)); echo $$((x+1)))
+endif
+ifeq (, $(COMMIT_AT_TAG))
+DROP32_VERSION         := drop32 version $(VERSION_MAJOR).$(VERSION_MINOR) (git sha $(COMMIT_SHA))
+else
+DROP32_VERSION         := drop32 version $(VERSION_MAJOR).$(VERSION_MINOR)
+endif
+ifneq (, $(COMMIT_DIRTY))
+DROP32_VERSION         := $(DROP32_VERSION) (dirty)
+endif
+
 # Get Verilator info
 VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
 VERILATOR_ROOT         := $(shell verilator -V | grep VERILATOR_ROOT | awk 'NR==2{print $$3}')
 ifeq (, $(VERILATOR_ROOT)) # If VERILATOR_ROOT env is not set, try compiled default(s)
 VERILATOR_ROOT         := $(shell verilator -V | grep VERILATOR_ROOT | awk 'NR==1{print $$3}')
 ifeq (, $(VERILATOR_ROOT))
-$(error \
-	"VERILATOR_ROOT not found! See: https://verilator.org/guide/latest/install.html#eventual-installation-options")
+$(error "VERILATOR_ROOT not found! See: https://verilator.org/guide/latest/install.html#eventual-installation-options")
 endif
 endif
 
@@ -85,6 +107,8 @@ VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
 # --- SIMULATOR -------------------------------------------------------------------------------------------------------
 SIM_FLAGS              := -Wall
 SIM_FLAGS              += -MMD
+SIM_FLAGS              += -DVERILATOR_VER=$(VERILATOR_VER)
+SIM_FLAGS              += -DDROP32_VERSION='"$(DROP32_VERSION)"'
 SIM_FLAGS              += -Isim
 SIM_FLAGS              += -Ibuild/verilated
 SIM_FLAGS              += -Iexternal/miniargparse
@@ -128,6 +152,8 @@ RV32I_TEST_CC_FLAGS    += -Wl,-Ttext 0x0
 RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
 TEST_FLAGS             := -Wall
+TEST_FLAGS             += -DVERILATOR_VER=$(VERILATOR_VER)
+TEST_FLAGS             += -DDROP32_VERSION='"$(DROP32_VERSION)"'
 TEST_FLAGS             += -Isim
 TEST_FLAGS             += -Ibuild/tests
 TEST_FLAGS             += -Ibuild/verilated
@@ -194,6 +220,10 @@ clean:
 	rm -rf drop32soc/firmware.mem
 	rm -rf drop32soc/firmware.elf
 	rm -rf drop32soc/*_generated.v
+
+.PHONY: tag
+tag:
+	@echo "v$(NEXT_VERSION_MAJOR).$(NEXT_VERSION_MINOR)"
 
 # --- MAIN MAKE RECIPES -----------------------------------------------------------------------------------------------
 drop32soc/%_generated.v: $(RTL_SRCS) $(RTL_TYPES)
