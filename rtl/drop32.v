@@ -109,18 +109,6 @@ module drop32 (
     wire            ecall           /*verilator public*/;
     wire            ebreak          /*verilator public*/;
 
-    // Control signals
-    assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
-    assign exec_a   = `CTRL_EXEC_A(ctrlSigs);
-    assign exec_b   = `CTRL_EXEC_B(ctrlSigs);
-    assign mem_w    = `CTRL_MEM_W(ctrlSigs);
-    assign reg_w    = `CTRL_REG_W(ctrlSigs);
-    assign mem2reg  = `CTRL_MEM2REG(ctrlSigs);
-    assign bra      = `CTRL_BRA(ctrlSigs);
-    assign jmp      = `CTRL_JMP(ctrlSigs);
-    assign ecall    = `CTRL_ECALL(ctrlSigs);
-    assign ebreak   = `CTRL_EBREAK(ctrlSigs);
-
     // Branch/jump logic
     assign pcJump       = braOutcome || p_jmp[MEM];
     assign braOutcome   = p_bra[MEM] && p_aluOut[MEM][0]; // [Static predictor]: Assume branch not-taken
@@ -248,10 +236,6 @@ module drop32 (
         .i_instr    (instrReg),
         .o_imm      (IMM)
     );
-    ControlUnit #(.XLEN(XLEN)) CTRL_unit (
-        .i_instr    (instrReg),
-        .o_ctrlSigs (ctrlSigs)
-    );
     Regfile #(
         .XLEN       (XLEN),
         .ADDR_WIDTH (REGFILE_ADDR_WIDTH)
@@ -265,6 +249,21 @@ module drop32 (
         .o_rs1Data  (rs1Out),
         .o_rs2Data  (rs2Out)
     );
+    ControlUnit #(.XLEN(XLEN)) CTRL_unit (
+        .i_instr    (instrReg),
+        .o_ctrlSigs (ctrlSigs)
+    );
+    // Control signals
+    assign aluOp    = `CTRL_ALU_OP(ctrlSigs);
+    assign exec_a   = `CTRL_EXEC_A(ctrlSigs);
+    assign exec_b   = `CTRL_EXEC_B(ctrlSigs);
+    assign mem_w    = `CTRL_MEM_W(ctrlSigs);
+    assign reg_w    = `CTRL_REG_W(ctrlSigs);
+    assign mem2reg  = `CTRL_MEM2REG(ctrlSigs);
+    assign bra      = `CTRL_BRA(ctrlSigs);
+    assign jmp      = `CTRL_JMP(ctrlSigs);
+    assign ecall    = `CTRL_ECALL(ctrlSigs);
+    assign ebreak   = `CTRL_EBREAK(ctrlSigs);
 
     // --- [Stage]: Execute ---
     // ALU input selects
