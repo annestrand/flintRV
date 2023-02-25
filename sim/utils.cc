@@ -40,15 +40,15 @@ std::string disassembleRv32i(unsigned int instr) {
         "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11",
         "t3", "t4", "t5", "t6"
     };
-    auto OPCODE     = OPCODE(instr);
-    auto RD         = RD(instr);
-    auto RS1        = RS1(instr);
-    auto RS2        = RS2(instr);
-    auto FUNCT3     = FUNCT3(instr);
-    auto FUNCT7     = FUNCT7(instr);
-    auto SUCC       = SUCC(instr);
-    auto PRED       = PRED(instr);
-    auto FM         = FM(instr);
+    uint OPCODE     = OPCODE(instr);
+    uint RD         = RD(instr);
+    uint RS1        = RS1(instr);
+    uint RS2        = RS2(instr);
+    uint FUNCT3     = FUNCT3(instr);
+    uint FUNCT7     = FUNCT7(instr);
+    uint SUCC       = SUCC(instr);
+    uint PRED       = PRED(instr);
+    uint FM         = FM(instr);
     std::stringstream ss;
     switch (OPCODE) {
         case R       : {

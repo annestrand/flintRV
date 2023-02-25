@@ -49,22 +49,22 @@
 `define ALU_OP_J            4'b1010
 
 // ALU EXEC Types
-`define ALU_EXEC_ADD        5'b0_0000
-`define ALU_EXEC_PASSB      5'b0_0001
-`define ALU_EXEC_ADD4A      5'b0_0010
-`define ALU_EXEC_XOR        5'b0_0011
-`define ALU_EXEC_SRL        5'b0_0100
-`define ALU_EXEC_SRA        5'b0_0101
-`define ALU_EXEC_OR         5'b0_0110
-`define ALU_EXEC_AND        5'b0_0111
-`define ALU_EXEC_SUB        5'b0_1000
-`define ALU_EXEC_SLL        5'b0_1001
-`define ALU_EXEC_EQ         5'b0_1010
-`define ALU_EXEC_NEQ        5'b0_1011
-`define ALU_EXEC_SLT        5'b0_1100
-`define ALU_EXEC_SLTU       5'b0_1101
-`define ALU_EXEC_SGTE       5'b0_1110
-`define ALU_EXEC_SGTEU      5'b0_1111
+`define ALU_EXEC_ADD        5'b00000
+`define ALU_EXEC_PASSB      5'b00001
+`define ALU_EXEC_ADD4A      5'b00010
+`define ALU_EXEC_XOR        5'b00011
+`define ALU_EXEC_SRL        5'b00100
+`define ALU_EXEC_SRA        5'b00101
+`define ALU_EXEC_OR         5'b00110
+`define ALU_EXEC_AND        5'b00111
+`define ALU_EXEC_SUB        5'b01000
+`define ALU_EXEC_SLL        5'b01001
+`define ALU_EXEC_EQ         5'b01010
+`define ALU_EXEC_NEQ        5'b01011
+`define ALU_EXEC_SLT        5'b01100
+`define ALU_EXEC_SLTU       5'b01101
+`define ALU_EXEC_SGTE       5'b01110
+`define ALU_EXEC_SGTEU      5'b01111
 
 // Control signal fields
 `define CTRL_JMP(x)         x[0:0]
@@ -92,7 +92,5 @@
 `define U_LUI_CTRL      { 21'd0, `ALU_OP_U_LUI   , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
 `define U_AUIPC_CTRL    { 21'd0, `ALU_OP_U_AUIPC , `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
 `define J_CTRL          { 21'd0, `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE    }
-
-`define ENDIAN_SWP_32(x)    {x[7:0],x[15:8],x[23:16],x[31:24]}
 
 `endif // TYPES_VH
