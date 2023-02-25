@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Austin Annestrand
+# Copyright (c) 2023 - present, Austin Annestrand
 # Licensed under the MIT License (see LICENSE file).
 
 # --- Jump/Branch tests ---

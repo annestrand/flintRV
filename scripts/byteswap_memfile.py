@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# Copyright (c) 2023 Austin Annestrand
+# Copyright (c) 2023 - present, Austin Annestrand
 # Licensed under the MIT License (see LICENSE file).
 
 import os

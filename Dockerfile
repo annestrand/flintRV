@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Austin Annestrand
+# Copyright (c) 2022 - present, Austin Annestrand
 # Licensed under the MIT License (see LICENSE file).
 
 FROM devbored/riscv-gnu-toolchain:2022.02.25
