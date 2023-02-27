@@ -9,9 +9,9 @@ module DualPortRam (
                                     i_wAddr,
     output reg  [(XLEN-1):0]        o_q
 );
-    parameter XLEN                          /*verilator public*/ = 32;
-    parameter ADDR_WIDTH                    /*verilator public*/ = 5;
-    reg [XLEN-1:0] ram [2**ADDR_WIDTH-1:0]  /*verilator public*/;
+    parameter XLEN       = 32;
+    parameter ADDR_WIDTH = 5;
+    reg [XLEN-1:0] ram [2**ADDR_WIDTH-1:0] /*verilator public*/;
 
     integer i;
     initial begin

@@ -13,8 +13,7 @@ module ControlUnit (
     localparam NOP      = 32'd0;
     localparam I_SYS    = 3;
 
-    reg [10:0] ctrlType /*verilator public*/;
-
+    reg [10:0] ctrlType;
     always @* begin
         // Core control signal defaults
         case (`OPCODE(i_instr))

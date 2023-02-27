@@ -10,31 +10,38 @@ module drop32 (
     output                      o_storeReq, o_loadReq,
     output         [XLEN-1:0]   o_pcOut, o_dataAddr, o_dataOut
 );
+`ifdef verilator
+    `VERILATOR_PARAM_FN(S_B_OP)
+    `VERILATOR_PARAM_FN(S_H_OP)
+    `VERILATOR_PARAM_FN(EXEC)
+    `VERILATOR_PARAM_FN(MEM)
+    `VERILATOR_PARAM_FN(WB)
+`endif
     // CPU configs
-    parameter         PC_START              /*verilator public*/ = 0;
-    parameter         REGFILE_ADDR_WIDTH    /*verilator public*/ = 5;  //  4 for RV32E (otherwise 5)
-    parameter         INSTR_WIDTH           /*verilator public*/ = 32; // 16 for RV32C (otherwise 32)
-    parameter         XLEN                  /*verilator public*/ = 32;
-    parameter         ICACHE_LATENCY        /*verilator public*/ = 0;  // 0 cc: LUT cache, 1 cc: BRAM cache
+    parameter PC_START              = 0;
+    parameter REGFILE_ADDR_WIDTH    = 5;  //  4 for RV32E (otherwise 5)
+    parameter INSTR_WIDTH           = 32; // 16 for RV32C (otherwise 32)
+    parameter XLEN                  = 32;
+    parameter ICACHE_LATENCY        = 0;  // 0 cc: LUT cache, 1 cc: BRAM cache
 
     // Helper Aliases
-    localparam   [4:0]  REG_0               /*verilator public*/ = 5'b00000; // Register x0
-    localparam  [31:0]  NOP                 /*verilator public*/ = 32'h13;
-    localparam          S_B_OP              /*verilator public*/ = 3'b000;
-    localparam          S_H_OP              /*verilator public*/ = 3'b001;
-    localparam          S_W_OP              /*verilator public*/ = 3'b010;
-    localparam          S_BU_OP             /*verilator public*/ = 3'b100;
-    localparam          S_HU_OP             /*verilator public*/ = 3'b101;
-    localparam          L_B_OP              /*verilator public*/ = 3'b000;
-    localparam          L_H_OP              /*verilator public*/ = 3'b001;
-    localparam          L_W_OP              /*verilator public*/ = 3'b010;
-    localparam          L_BU_OP             /*verilator public*/ = 3'b100;
-    localparam          L_HU_OP             /*verilator public*/ = 3'b101;
+    localparam REG_0    = 5'b00000; // Register x0
+    localparam NOP      = 32'h13;
+    localparam S_B_OP   = 3'b000;
+    localparam S_H_OP   = 3'b001;
+    localparam S_W_OP   = 3'b010;
+    localparam S_BU_OP  = 3'b100;
+    localparam S_HU_OP  = 3'b101;
+    localparam L_B_OP   = 3'b000;
+    localparam L_H_OP   = 3'b001;
+    localparam L_W_OP   = 3'b010;
+    localparam L_BU_OP  = 3'b100;
+    localparam L_HU_OP  = 3'b101;
 
     // Pipeline regs (p_*)
-    localparam  EXEC    /*verilator public*/ = 0;
-    localparam  MEM     /*verilator public*/ = 1;
-    localparam  WB      /*verilator public*/ = 2;
+    localparam  EXEC= 0;
+    localparam  MEM = 1;
+    localparam  WB  = 2;
     reg [XLEN-1:0]  p_rs1       [EXEC:WB] /*verilator public*/;
     reg [XLEN-1:0]  p_rs2       [EXEC:WB] /*verilator public*/;
     reg [XLEN-1:0]  p_aluOut    [EXEC:WB] /*verilator public*/;

@@ -13,14 +13,12 @@ module Regfile (
     output  [(XLEN-1):0]        o_rs1Data,
                                 o_rs2Data
 );
-    parameter XLEN          /*verilator public*/ = 32;
-    parameter ADDR_WIDTH    /*verilator public*/ = 5;
+    parameter XLEN       = 32;
+    parameter ADDR_WIDTH = 5;
 
-    reg                 r_fwdRs1En      /*verilator public*/,
-                        r_fwdRs2En      /*verilator public*/;
-    reg  [(XLEN-1):0]   r_rdDataSave    /*verilator public*/;
-    wire [(XLEN-1):0]   w_rs1PortOut    /*verilator public*/,
-                        w_rs2PortOut    /*verilator public*/;
+    reg                 r_fwdRs1En, r_fwdRs2En;
+    reg  [(XLEN-1):0]   r_rdDataSave;
+    wire [(XLEN-1):0]   w_rs1PortOut, w_rs2PortOut;
 
     /*
         NOTE:   Infer 2 copied/synced 32x32 (2048 KBits) BRAMs (i.e. one BRAM per read-port)

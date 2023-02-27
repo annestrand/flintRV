@@ -7,12 +7,12 @@ module ImmGen (
     input       [31:0]      i_instr,
     output reg  [XLEN-1:0]  o_imm
 );
-    parameter   XLEN    /*verilator public*/  = 32;
-    localparam  U_EXT   /*verilator public*/  = XLEN-32;
-    localparam  S_EXT   /*verilator public*/  = XLEN-12;
-    localparam  B_EXT   /*verilator public*/  = XLEN-12;
-    localparam  I_EXT   /*verilator public*/  = XLEN-12;
-    localparam  J_EXT   /*verilator public*/  = XLEN-20;
+    parameter   XLEN  = 32;
+    localparam  U_EXT = XLEN-32;
+    localparam  S_EXT = XLEN-12;
+    localparam  B_EXT = XLEN-12;
+    localparam  I_EXT = XLEN-12;
+    localparam  J_EXT = XLEN-20;
 
     always @* begin
         case (`OPCODE(i_instr))

@@ -12,31 +12,22 @@ module ALU (
 `ifdef verilator
     `VERILATOR_DEF_WRAP(`ALU_EXEC_OPS)
 `endif
-    parameter   XLEN                    /*verilator public*/ = 32;
-    localparam  ALU_OP_WIDTH            /*verilator public*/ = 5;
+    parameter   XLEN = 32;
+    localparam  ALU_OP_WIDTH = 5;
 
-    wire            SLT                 /*verilator public*/;
-    wire            SLTU                /*verilator public*/;
-    wire [XLEN-1:0] B_in                /*verilator public*/;
-    wire            SUB                 /*verilator public*/;
-    wire            cflag               /*verilator public*/;
-    wire [XLEN-1:0] ALU_ADDER_result    /*verilator public*/;
-    wire [XLEN-1:0] ALU_XOR_result      /*verilator public*/;
-    wire [XLEN-1:0] CONST_4             /*verilator public*/;
-
-    assign ALU_XOR_result   = i_a ^ i_b;
-    assign CONST_4          = {{(XLEN-3){1'b0}}, 3'd4};
-    assign SUB              = ~i_op[4] && i_op[3]; // Encoding 01000 - 01111 of ALU exec/op to SUB on adder unit
-    assign B_in             = i_op == `ALU_EXEC_ADD4A ? CONST_4 : SUB ? ~i_b : i_b;
-    assign SLT              = $signed(i_a) < $signed(i_b);
-    assign SLTU             = i_a < i_b;
-
-    // Add/Sub logic
-    assign {cflag, ALU_ADDER_result[XLEN-1:0]} = i_a + B_in + {{(XLEN){1'b0}}, SUB};
+    /* verilator lint_off UNUSEDSIGNAL */
+    wire [XLEN:0] ALU_ADDER_result  = i_a + B_in + {{(XLEN){1'b0}}, SUB}; // TODO: Fixme
+    /* verilator lint_on UNUSEDSIGNAL  */
+    wire [XLEN-1:0] B_in            = i_op == `ALU_EXEC_ADD4A ? CONST_4 : SUB ? ~i_b : i_b;
+    wire [XLEN-1:0] ALU_XOR_result  = i_a ^ i_b;
+    wire [XLEN-1:0] CONST_4         = {{(XLEN-3){1'b0}}, 3'd4};
+    wire SUB                        = ~i_op[4] && i_op[3]; // Encoding 01000-01111 of ALU exec/op to SUB on adder unit
+    wire SLT                        = $signed(i_a) < $signed(i_b);
+    wire SLTU                       = i_a < i_b;
 
     always @(*) begin
         case (i_op)
-            default         : o_result = ALU_ADDER_result;
+            default         : o_result = ALU_ADDER_result[31:0];
             `ALU_EXEC_AND   : o_result = i_a & i_b;
             `ALU_EXEC_OR    : o_result = i_a | i_b;
             `ALU_EXEC_XOR   : o_result = ALU_XOR_result;

@@ -40,6 +40,15 @@
       return get_``name;                        \
       endfunction
 
+`define VERILATOR_PARAM_FN(name)                \
+    function integer get_``name;                \
+      /*verilator public*/                      \
+      /* verilator lint_off WIDTH */            \
+      integer get_``name = name;                \
+      /* verilator lint_on WIDTH */             \
+      return get_``name;                        \
+      endfunction
+
 `define VERILATOR_DEF_WRAP(x)                   \
     `define VERILATOR_DEF                       \
     x                                           \
