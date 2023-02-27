@@ -4,14 +4,14 @@
 `include "types.vh"
 
 module Regfile (
-    input                       i_clk       /*verilator public*/,
-                                i_wrEn      /*verilator public*/,
-    input   [(ADDR_WIDTH-1):0]  i_rs1Addr   /*verilator public*/,
-                                i_rs2Addr   /*verilator public*/,
-                                i_rdAddr    /*verilator public*/,
-    input   [(XLEN-1):0]        i_rdData    /*verilator public*/,
-    output  [(XLEN-1):0]        o_rs1Data   /*verilator public*/,
-                                o_rs2Data   /*verilator public*/
+    input                       i_clk,
+                                i_wrEn,
+    input   [(ADDR_WIDTH-1):0]  i_rs1Addr,
+                                i_rs2Addr,
+                                i_rdAddr,
+    input   [(XLEN-1):0]        i_rdData,
+    output  [(XLEN-1):0]        o_rs1Data,
+                                o_rs2Data
 );
     parameter XLEN          /*verilator public*/ = 32;
     parameter ADDR_WIDTH    /*verilator public*/ = 5;

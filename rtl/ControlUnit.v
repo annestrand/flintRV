@@ -4,8 +4,10 @@
 `include "types.vh"
 
 module ControlUnit (
-    input       [XLEN-1:0]  i_instr     /*verilator public*/,
-    output  reg [XLEN-1:0]  o_ctrlSigs  /*verilator public*/
+    /* verilator lint_off UNUSEDSIGNAL */
+    input       [XLEN-1:0]  i_instr,    // TODO: Fixme
+    /* verilator lint_on UNUSEDSIGNAL  */
+    output  reg [XLEN-1:0]  o_ctrlSigs
 );
     parameter XLEN      = 32;
     localparam NOP      = 32'd0;

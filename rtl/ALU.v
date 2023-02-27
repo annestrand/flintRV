@@ -4,13 +4,16 @@
 `include "types.vh"
 
 module ALU (
-  input         [XLEN-1:0]          i_a         /*verilator public*/,
-                                    i_b         /*verilator public*/,
-  input         [ALU_OP_WIDTH-1:0]  i_op        /*verilator public*/,
-  output reg    [XLEN-1:0]          o_result    /*verilator public*/
+  input         [XLEN-1:0]          i_a,
+                                    i_b,
+  input         [ALU_OP_WIDTH-1:0]  i_op,
+  output reg    [XLEN-1:0]          o_result
 );
-    parameter   XLEN            /*verilator public*/ = 32;
-    localparam  ALU_OP_WIDTH    /*verilator public*/ = 5;
+`ifdef verilator
+    `VERILATOR_DEF_WRAP(`ALU_EXEC_OPS)
+`endif
+    parameter   XLEN                    /*verilator public*/ = 32;
+    localparam  ALU_OP_WIDTH            /*verilator public*/ = 5;
 
     wire            SLT                 /*verilator public*/;
     wire            SLTU                /*verilator public*/;

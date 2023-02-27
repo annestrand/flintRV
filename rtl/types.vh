@@ -4,19 +4,6 @@
 `ifndef TYPES_VH
 `define TYPES_VH
 
-// RV32I Opcode types
-`define R                   7'b0110011
-`define I_JUMP              7'b1100111
-`define I_LOAD              7'b0000011
-`define I_ARITH             7'b0010011
-`define I_SYS               7'b1110011
-`define I_FENCE             7'b0001111
-`define S                   7'b0100011
-`define B                   7'b1100011
-`define U_LUI               7'b0110111
-`define U_AUIPC             7'b0010111
-`define J                   7'b1101111
-
 // Instruction fields
 `define OPCODE(x)           x[6:0]
 `define RD(x)               x[11:7]
@@ -25,46 +12,6 @@
 `define RS2(x)              x[24:20]
 `define FUNCT7(x)           x[31:25]
 `define IMM_11_0(x)         x[31:20]
-
-// EXEC operand select
-`define REG                 1'b0
-`define PC                  1'b1    // Operand A
-`define IMM                 1'b1    // Operand B
-
-// Bool bit macros
-`define TRUE                1'b1
-`define FALSE               1'b0
-
-// ALU OP
-`define ALU_OP_R            4'b0000
-`define ALU_OP_I_JUMP       4'b0001
-`define ALU_OP_I_LOAD       4'b0010
-`define ALU_OP_I_ARITH      4'b0011
-`define ALU_OP_I_SYS        4'b0100
-`define ALU_OP_I_FENCE      4'b0101
-`define ALU_OP_S            4'b0110
-`define ALU_OP_B            4'b0111
-`define ALU_OP_U_LUI        4'b1000
-`define ALU_OP_U_AUIPC      4'b1001
-`define ALU_OP_J            4'b1010
-
-// ALU EXEC Types
-`define ALU_EXEC_ADD        5'b00000
-`define ALU_EXEC_PASSB      5'b00001
-`define ALU_EXEC_ADD4A      5'b00010
-`define ALU_EXEC_XOR        5'b00011
-`define ALU_EXEC_SRL        5'b00100
-`define ALU_EXEC_SRA        5'b00101
-`define ALU_EXEC_OR         5'b00110
-`define ALU_EXEC_AND        5'b00111
-`define ALU_EXEC_SUB        5'b01000
-`define ALU_EXEC_SLL        5'b01001
-`define ALU_EXEC_EQ         5'b01010
-`define ALU_EXEC_NEQ        5'b01011
-`define ALU_EXEC_SLT        5'b01100
-`define ALU_EXEC_SLTU       5'b01101
-`define ALU_EXEC_SGTE       5'b01110
-`define ALU_EXEC_SGTEU      5'b01111
 
 // Control signal fields
 `define CTRL_JMP(x)         x[0:0]
@@ -77,6 +24,98 @@
 `define CTRL_ALU_OP(x)      x[10:7]
 `define CTRL_ECALL(x)       x[11:11]
 `define CTRL_EBREAK(x)      x[12:12]
+
+`define VERILATOR_SIGNAL_FN(x, width)           \
+   function [width-1:0] get_``x;                \
+      /*verilator public*/                      \
+      get_``x = x;                              \
+   endfunction
+
+`define VERILATOR_TYPE_FN(name, value)          \
+    function integer get_``name;                \
+      /*verilator public*/                      \
+      /* verilator lint_off WIDTH */            \
+      integer get_``name = value;               \
+      /* verilator lint_on WIDTH */             \
+      return get_``name;                        \
+      endfunction
+
+`define VERILATOR_DEF_WRAP(x)                   \
+    `define VERILATOR_DEF                       \
+    x                                           \
+    `undef VERILATOR_DEF
+
+`define TYPE_DEFINE(name, value)                \
+    `ifdef VERILATOR_DEF                        \
+        `VERILATOR_TYPE_FN(name, value)         \
+    `else                                       \
+        `define name value                      \
+    `endif
+
+// RV32I Opcode types
+`define OPCODE_TYPES                            \
+    `TYPE_DEFINE(R,         7'b0110011)         \
+    `TYPE_DEFINE(I_JUMP,    7'b1100111)         \
+    `TYPE_DEFINE(I_LOAD,    7'b0000011)         \
+    `TYPE_DEFINE(I_ARITH,   7'b0010011)         \
+    `TYPE_DEFINE(I_SYS,     7'b1110011)         \
+    `TYPE_DEFINE(I_FENCE,   7'b0001111)         \
+    `TYPE_DEFINE(S,         7'b0100011)         \
+    `TYPE_DEFINE(B,         7'b1100011)         \
+    `TYPE_DEFINE(U_LUI,     7'b0110111)         \
+    `TYPE_DEFINE(U_AUIPC,   7'b0010111)         \
+    `TYPE_DEFINE(J,         7'b1101111)
+
+// EXEC operand select
+`define EXEC_OPERAND_SEL                        \
+    `TYPE_DEFINE(REG,   1'b0)                   \
+    `TYPE_DEFINE(PC,    1'b1)                   \
+    `TYPE_DEFINE(IMM,   1'b1)
+
+// Bool bit macros
+`define BOOL_BITS                               \
+    `TYPE_DEFINE(TRUE,  1'b1)                   \
+    `TYPE_DEFINE(FALSE, 1'b0)
+
+// ALU CTRL OPS
+`define ALU_CTRL_OPS                            \
+    `TYPE_DEFINE(ALU_OP_R,          4'b0000)    \
+    `TYPE_DEFINE(ALU_OP_I_JUMP,     4'b0001)    \
+    `TYPE_DEFINE(ALU_OP_I_LOAD,     4'b0010)    \
+    `TYPE_DEFINE(ALU_OP_I_ARITH,    4'b0011)    \
+    `TYPE_DEFINE(ALU_OP_I_SYS,      4'b0100)    \
+    `TYPE_DEFINE(ALU_OP_I_FENCE,    4'b0101)    \
+    `TYPE_DEFINE(ALU_OP_S,          4'b0110)    \
+    `TYPE_DEFINE(ALU_OP_B,          4'b0111)    \
+    `TYPE_DEFINE(ALU_OP_U_LUI,      4'b1000)    \
+    `TYPE_DEFINE(ALU_OP_U_AUIPC,    4'b1001)    \
+    `TYPE_DEFINE(ALU_OP_J,          4'b1010)
+
+// ALU EXEC OPS
+`define ALU_EXEC_OPS                            \
+    `TYPE_DEFINE(ALU_EXEC_ADD,      5'b00000)   \
+    `TYPE_DEFINE(ALU_EXEC_PASSB,    5'b00001)   \
+    `TYPE_DEFINE(ALU_EXEC_ADD4A,    5'b00010)   \
+    `TYPE_DEFINE(ALU_EXEC_XOR,      5'b00011)   \
+    `TYPE_DEFINE(ALU_EXEC_SRL,      5'b00100)   \
+    `TYPE_DEFINE(ALU_EXEC_SRA,      5'b00101)   \
+    `TYPE_DEFINE(ALU_EXEC_OR,       5'b00110)   \
+    `TYPE_DEFINE(ALU_EXEC_AND,      5'b00111)   \
+    `TYPE_DEFINE(ALU_EXEC_SUB,      5'b01000)   \
+    `TYPE_DEFINE(ALU_EXEC_SLL,      5'b01001)   \
+    `TYPE_DEFINE(ALU_EXEC_EQ,       5'b01010)   \
+    `TYPE_DEFINE(ALU_EXEC_NEQ,      5'b01011)   \
+    `TYPE_DEFINE(ALU_EXEC_SLT,      5'b01100)   \
+    `TYPE_DEFINE(ALU_EXEC_SLTU,     5'b01101)   \
+    `TYPE_DEFINE(ALU_EXEC_SGTE,     5'b01110)   \
+    `TYPE_DEFINE(ALU_EXEC_SGTEU,    5'b01111)
+
+// Define all above TYPE_DEFINE's
+`BOOL_BITS
+`OPCODE_TYPES
+`ALU_CTRL_OPS
+`ALU_EXEC_OPS
+`EXEC_OPERAND_SEL
 
 // Core control unit signal defaults
 // _________________________________________________________________________________________________________________

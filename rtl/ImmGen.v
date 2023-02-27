@@ -4,8 +4,8 @@
 `include "types.vh"
 
 module ImmGen (
-    input       [31:0]      i_instr /*verilator public*/,
-    output reg  [XLEN-1:0]  o_imm   /*verilator public*/
+    input       [31:0]      i_instr,
+    output reg  [XLEN-1:0]  o_imm
 );
     parameter   XLEN    /*verilator public*/  = 32;
     localparam  U_EXT   /*verilator public*/  = XLEN-32;
