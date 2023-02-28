@@ -11,7 +11,7 @@
 - Python >= 3.6
 - C++14 compiler (or greater)
 - Icarus Verilog (**optional**)
-- Verilator (**optional**)
+- Verilator >= 4.028 (**optional**)
 - GoogleTest (**optional**)
 - GCC RISC-V compiler/cross-compiler toolchain (**optional**)
 
