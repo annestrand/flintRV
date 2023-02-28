@@ -26,13 +26,13 @@
 `define CTRL_EBREAK(x)      x[12:12]
 
 `define VERILATOR_SIGNAL_FN(x, width)           \
-   function static [width-1:0] get_``x;         \
+   function automatic [width-1:0] get_``x;      \
       /*verilator public*/                      \
       get_``x = x;                              \
    endfunction
 
 `define VERILATOR_TYPE_FN(name)                 \
-    function static integer get_``name;         \
+    function automatic integer get_``name;      \
       /*verilator public*/                      \
       /* verilator lint_off WIDTH */            \
       integer get_``name = `name;               \
@@ -41,7 +41,7 @@
       endfunction
 
 `define VERILATOR_PARAM_FN(name)                \
-    function static integer get_``name;         \
+    function automatic integer get_``name;      \
       /*verilator public*/                      \
       /* verilator lint_off WIDTH */            \
       integer get_``name = name;                \

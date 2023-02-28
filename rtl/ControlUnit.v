@@ -4,9 +4,9 @@
 `include "types.vh"
 
 module ControlUnit (
-    /* verilator lint_off UNUSEDSIGNAL */
-    input       [XLEN-1:0]  i_instr,    // TODO: Fixme
-    /* verilator lint_on UNUSEDSIGNAL  */
+    /* verilator lint_off UNUSED */
+    input       [XLEN-1:0]  i_instr, // TODO: %Warning-UNUSED: Bits of signal are not used: 'i_instr'[19:7]
+    /* verilator lint_on UNUSED  */
     output  reg [XLEN-1:0]  o_ctrlSigs
 );
     parameter XLEN      = 32;

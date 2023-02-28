@@ -4,9 +4,9 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+#include <atomic>
 #include <iostream>
 #include <algorithm>
-#include <gtest/gtest.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
@@ -166,16 +166,15 @@ void drop32::reset(int cycles) {
 }
 // ====================================================================================================================
 void drop32::tick(bool enableDump) {
+    static std::atomic<vluint64_t> global_time{0};
     if (enableDump) { dump(); }
-    m_cycles++;
-    this->m_cpu->contextp()->timeInc(1);
     m_cpu->i_clk = 0;
     m_cpu->eval();
-    if(m_trace) { m_trace->dump(this->m_cpu->contextp()->time()); }
-    this->m_cpu->contextp()->timeInc(1);
+    if(m_trace) { m_trace->dump(global_time++); }
     m_cpu->i_clk = 1;
     m_cpu->eval();
-    if(m_trace) { m_trace->dump(this->m_cpu->contextp()->time()); }
+    if(m_trace) { m_trace->dump(global_time++); }
+    m_cycles++;
 }
 // ====================================================================================================================
 void drop32::dump() {

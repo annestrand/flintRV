@@ -37,10 +37,10 @@ DROP32_VERSION         := $(DROP32_VERSION) (dirty)
 endif
 
 # Get Verilator info
-VERILATOR_VER          := $(shell verilator --version | awk '{print $$2}' | sed 's/\.//')
-VERILATOR_ROOT         := $(shell verilator -V | grep VERILATOR_ROOT | awk 'NR==2{print $$3}')
+VERILATOR_VER          := $(shell verilator --version 2> /dev/null | awk '{print $$2}' | sed 's/\.//')
+VERILATOR_ROOT         := $(shell verilator -V 2> /dev/null | grep VERILATOR_ROOT | awk 'NR==2{print $$3}')
 ifeq (, $(VERILATOR_ROOT)) # If VERILATOR_ROOT env is not set, try compiled default(s)
-VERILATOR_ROOT         := $(shell verilator -V | grep VERILATOR_ROOT | awk 'NR==1{print $$3}')
+VERILATOR_ROOT         := $(shell verilator -V 2> /dev/null | grep VERILATOR_ROOT | awk 'NR==1{print $$3}')
 ifeq (, $(VERILATOR_ROOT))
 $(error "VERILATOR_ROOT not found! See: https://verilator.org/guide/latest/install.html#eventual-installation-options")
 endif

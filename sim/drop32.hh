@@ -6,7 +6,6 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 
 #include "Vdrop32.h"
 #include "Vdrop32__Syms.h"

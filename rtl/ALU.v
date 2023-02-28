@@ -15,9 +15,10 @@ module ALU (
     parameter   XLEN = 32;
     localparam  ALU_OP_WIDTH = 5;
 
-    /* verilator lint_off UNUSEDSIGNAL */
-    wire [XLEN:0] ALU_ADDER_result  = i_a + B_in + {{(XLEN){1'b0}}, SUB}; // TODO: Fixme
-    /* verilator lint_on UNUSEDSIGNAL  */
+    /* verilator lint_off UNUSED */
+    // TODO: Bits of signal are not used: 'ALU_ADDER_result'[32]
+    wire [XLEN:0] ALU_ADDER_result  = i_a + B_in + {{(XLEN){1'b0}}, SUB};
+    /* verilator lint_on UNUSED */
     wire [XLEN-1:0] B_in            = i_op == `ALU_EXEC_ADD4A ? CONST_4 : SUB ? ~i_b : i_b;
     wire [XLEN-1:0] ALU_XOR_result  = i_a ^ i_b;
     wire [XLEN-1:0] CONST_4         = {{(XLEN-3){1'b0}}, 3'd4};
