@@ -10,7 +10,6 @@
 - GNU Make
 - Python >= 3.6
 - C++14 compiler (or greater)
-- Icarus Verilog (**optional**)
 - Verilator >= 4.028 (**optional**)
 - GoogleTest (**optional**)
 - GCC RISC-V compiler/cross-compiler toolchain (**optional**)
@@ -36,9 +35,7 @@ To build tests:
 
     $ make tests
 
-CPU/Functional test runner: `build/Vdrop32_tests`
-
-Submodule unit test runner: `build/Unit_tests`
+Test runner: `build/Vdrop32_tests`
 
 ## Build drop32 core
 There is a convenience script to generate a singular core/CPU RTL file to stdout:

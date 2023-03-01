@@ -10,6 +10,7 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
+// Units
 #include "VALU.h"
 #include "VALU__Syms.h"
 #include "VRegfile.h"
@@ -20,6 +21,8 @@
 #include "VImmGen__Syms.h"
 #include "VALU_Control.h"
 #include "VALU_Control__Syms.h"
+#include "VControlUnit.h"
+#include "VControlUnit__Syms.h"
 
 #include "utils.hh"
 #include "types.hh"
@@ -323,4 +326,37 @@ TEST(unit, alu_control) {
         p_alu_ctrl->eval();
         EXPECT_EQ((uint)p_alu_ctrl->o_aluControl, alu_exec);
     }
+}
+// ====================================================================================================================
+TEST(unit, ctrl_unit) {
+    std::unique_ptr<VControlUnit> dut(new VControlUnit);
+    auto p_ctrl = dut.get();
+    constexpr int TEST_COUNT = 1 << 7; // 2**7
+
+    for (int i=0; i<TEST_COUNT; ++i) {
+        uint opcode     = OPCODE(i);
+        uint ctrl_sigs  = 0;
+        switch (opcode) {
+            case R: ctrl_sigs = p_ctrl->ControlUnit->R_CTRL; break;
+            case I_JUMP: ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL; break;
+            case I_LOAD: ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL; break;
+            case I_ARITH: ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL; break;
+            case I_FENCE: ctrl_sigs = p_ctrl->ControlUnit->I_FENCE_CTRL; break;
+            case S: ctrl_sigs = p_ctrl->ControlUnit->S_CTRL; break;
+            case B: ctrl_sigs = p_ctrl->ControlUnit->B_CTRL; break;
+            case U_LUI: ctrl_sigs = p_ctrl->ControlUnit->U_LUI_CTRL; break;
+            case U_AUIPC: ctrl_sigs = p_ctrl->ControlUnit->U_AUIPC_CTRL; break;
+            case J: ctrl_sigs = p_ctrl->ControlUnit->J_CTRL; break;
+            case I_SYS: ctrl_sigs = p_ctrl->ControlUnit->I_SYS_CTRL | 1 << 11; break;
+            default: break;
+        }
+        p_ctrl->i_instr = i;
+        p_ctrl->eval();
+        EXPECT_EQ(p_ctrl->o_ctrlSigs, ctrl_sigs);
+    }
+    // Check for ebreak case
+    p_ctrl->i_instr = (1 << 20) | I_SYS;
+    p_ctrl->eval();
+    bool ebreak = p_ctrl->o_ctrlSigs & (1 << 12);
+    EXPECT_EQ(ebreak, true);
 }

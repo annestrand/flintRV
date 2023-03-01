@@ -80,13 +80,6 @@ RISCV_CC_FLAGS         += -Wl,--section-start=.text=0x0
 RISCV_AS_FLAGS         := -march=rv32i
 RISCV_AS_FLAGS         += -mabi=ilp32
 
-# --- IVERILOG --------------------------------------------------------------------------------------------------------
-ICARUS_FLAGS           := -Wall
-ICARUS_FLAGS           += -Irtl
-ICARUS_FLAGS           += -Itests/unit
-
-SUB_SRCS               := $(shell find tests/unit -type f -name "*.v")
-
 # --- VERILATOR  ------------------------------------------------------------------------------------------------------
 VFLAGS                 := -Wall
 VFLAGS                 += -Irtl
@@ -195,7 +188,6 @@ all: soc
 # Build tests
 .PHONY: tests
 tests: $(OUT_DIR)/Vdrop32_tests
-tests: $(OUT_DIR)/Unit_tests
 
 # Build simulator
 .PHONY: sim
@@ -241,10 +233,6 @@ drop32soc/%.mem: drop32soc/%.elf
 	@$(RISCV_OBJCOPY) -O verilog --verilog-data-width=4 $< $@
 	@echo "    PY          $(notdir scripts/byteswap_memfile.py)"
 	@$(PYTHON) ./scripts/byteswap_memfile.py $@
-
-$(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
-	@echo "    IVERILOG    $(notdir $<)"
-	@iverilog $(ICARUS_FLAGS) -o $@ $<
 
 $(OUT_DIR)/verilated/types.hh: rtl/types.vh | $(OUT_DIR)/verilated
 	@echo "    VH2HH       $(notdir $<)"
