@@ -18,6 +18,8 @@
 #include "VDualPortRam__Syms.h"
 #include "VImmGen.h"
 #include "VImmGen__Syms.h"
+#include "VALU_Control.h"
+#include "VALU_Control__Syms.h"
 
 #include "utils.hh"
 #include "types.hh"
@@ -250,5 +252,75 @@ TEST(unit, immgen) {
         p_immgen->i_instr = x;
         p_immgen->eval();
         EXPECT_EQ(p_immgen->o_imm, I_IMM(x));
+    }
+}
+// ====================================================================================================================
+TEST(unit, alu_control) {
+    std::unique_ptr<VALU_Control> dut(new VALU_Control);
+    auto p_alu_ctrl = dut.get();
+    constexpr int TEST_COUNT = 1 << 14; // 2**14
+
+    for (int i=0; i<TEST_COUNT; ++i) {
+        uint alu_exec   = ALU_EXEC_ADD;
+        auto bits3      = get_bits(i, 0, 3);
+        auto bits7      = get_bits(i, 3, 7);
+        auto bits4      = get_bits(i, 7, 4);
+        switch (bits4) {
+            case ALU_OP_R:
+                if (bits7 == 0b0100000) {
+                    switch (bits3) {
+                        case 0b000: alu_exec = ALU_EXEC_SUB; break;
+                        case 0b101: alu_exec = ALU_EXEC_SRA;
+                        default: alu_exec = ALU_EXEC_SRL;
+                    }
+                } else if (bits7 == 0b0000000) {
+                    switch (bits3) {
+                        case 0b001: alu_exec = ALU_EXEC_SLL; break;
+                        case 0b010: alu_exec = ALU_EXEC_SLT; break;
+                        case 0b011: alu_exec = ALU_EXEC_SLTU; break;
+                        case 0b100: alu_exec = ALU_EXEC_XOR; break;
+                        case 0b101: alu_exec = ALU_EXEC_SRL; break;
+                        case 0b110: alu_exec = ALU_EXEC_OR; break;
+                        case 0b111: alu_exec = ALU_EXEC_AND; break;
+                        default: break;
+                    }
+                } break;
+            case ALU_OP_I_ARITH:
+                if (bits7 == 0b0100000 && bits3 == 0b101) {
+                    alu_exec = ALU_EXEC_SRA;
+                } else if (bits7 == 0b0000000) {
+                    switch (bits3) {
+                        case 0b001: alu_exec = ALU_EXEC_SLL; break;
+                        case 0b101: alu_exec = ALU_EXEC_SRL; break;
+                        default: break;
+                    }
+                } else {
+                    switch (bits3) {
+                        case 0b010: alu_exec = ALU_EXEC_SLT; break;
+                        case 0b011: alu_exec = ALU_EXEC_SLTU; break;
+                        case 0b100: alu_exec = ALU_EXEC_XOR; break;
+                        case 0b110: alu_exec = ALU_EXEC_OR; break;
+                        case 0b111: alu_exec = ALU_EXEC_AND; break;
+                    }
+                } break;
+            case ALU_OP_B:
+                switch (bits3) {
+                    case 0b000: alu_exec = ALU_EXEC_EQ; break;
+                    case 0b001: alu_exec = ALU_EXEC_NEQ; break;
+                    case 0b100: alu_exec = ALU_EXEC_SLT; break;
+                    case 0b110: alu_exec = ALU_EXEC_SLTU; break;
+                    case 0b101: alu_exec = ALU_EXEC_SGTE; break;
+                    case 0b111: alu_exec = ALU_EXEC_SGTEU; break;
+                } break;
+            case ALU_OP_J: alu_exec = ALU_EXEC_ADD4A; break;
+            case ALU_OP_U_LUI: alu_exec = ALU_EXEC_PASSB; break;
+            case ALU_OP_I_JUMP: alu_exec = ALU_EXEC_ADD4A; break;
+            default: break;
+        }
+        p_alu_ctrl->i_aluOp = bits4;
+        p_alu_ctrl->i_funct7 = bits7;
+        p_alu_ctrl->i_funct3 = bits3;
+        p_alu_ctrl->eval();
+        EXPECT_EQ((uint)p_alu_ctrl->o_aluControl, alu_exec);
     }
 }

@@ -153,6 +153,7 @@ RV32I_TEST_CC_FLAGS    += -Wl,-Ttext 0x0
 RV32I_TEST_CC_FLAGS    += -Wl,--no-relax
 
 TEST_FLAGS             := -Wall
+TEST_FLAGS             += -g
 TEST_FLAGS             += -DVERILATOR_VER=$(VERILATOR_VER)
 TEST_FLAGS             += -DDROP32_VERSION='"$(DROP32_VERSION)"'
 TEST_FLAGS             += -Isim
