@@ -9,9 +9,6 @@ module ALU (
   input         [ALU_OP_WIDTH-1:0]  i_op,
   output reg    [XLEN-1:0]          o_result
 );
-`ifdef verilator
-    `VERILATOR_ALU_EXEC_DEF
-`endif
     parameter   XLEN = 32;
     localparam  ALU_OP_WIDTH = 5;
 

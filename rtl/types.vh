@@ -4,7 +4,7 @@
 `ifndef TYPES_VH
 `define TYPES_VH
 
-// Instruction fields
+// Instruction fields       x[a:b]
 `define OPCODE(x)           x[6:0]
 `define RD(x)               x[11:7]
 `define FUNCT3(x)           x[14:12]
@@ -13,7 +13,7 @@
 `define FUNCT7(x)           x[31:25]
 `define IMM_11_0(x)         x[31:20]
 
-// Control signal fields
+// Control signal fields    x[a:b]
 `define CTRL_JMP(x)         x[0:0]
 `define CTRL_BRA(x)         x[1:1]
 `define CTRL_MEM2REG(x)     x[2:2]
@@ -24,30 +24,6 @@
 `define CTRL_ALU_OP(x)      x[10:7]
 `define CTRL_ECALL(x)       x[11:11]
 `define CTRL_EBREAK(x)      x[12:12]
-
-`define VERILATOR_SIGNAL_FN(x, width)           \
-   function automatic [width-1:0] get_``x;      \
-      /*verilator public*/                      \
-      get_``x = x;                              \
-   endfunction
-
-`define VERILATOR_TYPE_FN(name)                 \
-    function automatic integer get_``name;      \
-      /*verilator public*/                      \
-      /* verilator lint_off WIDTH */            \
-      integer get_``name = `name;               \
-      /* verilator lint_on WIDTH */             \
-      return get_``name;                        \
-      endfunction
-
-`define VERILATOR_PARAM_FN(name)                \
-    function automatic integer get_``name;      \
-      /*verilator public*/                      \
-      /* verilator lint_off WIDTH */            \
-      integer get_``name = name;                \
-      /* verilator lint_on WIDTH */             \
-      return get_``name;                        \
-      endfunction
 
 // RV32I Opcode types
 `define R                   7'b0110011
@@ -64,8 +40,8 @@
 
 // EXEC operand select
 `define REG                 1'b0
-`define PC                  1'b1    // Operand A
-`define IMM                 1'b1    // Operand B
+`define PC                  1'b1
+`define IMM                 1'b1
 
 // Bool bit macros
 `define TRUE                1'b1
@@ -102,40 +78,7 @@
 `define ALU_EXEC_SGTE       5'b01110
 `define ALU_EXEC_SGTEU      5'b01111
 
-// TODO: Fixme
-`define VERILATOR_OPCODE_DEF    \
-    `VERILATOR_TYPE_FN(R      ) \
-    `VERILATOR_TYPE_FN(I_JUMP ) \
-    `VERILATOR_TYPE_FN(I_LOAD ) \
-    `VERILATOR_TYPE_FN(I_ARITH) \
-    `VERILATOR_TYPE_FN(I_SYS  ) \
-    `VERILATOR_TYPE_FN(I_FENCE) \
-    `VERILATOR_TYPE_FN(S      ) \
-    `VERILATOR_TYPE_FN(B      ) \
-    `VERILATOR_TYPE_FN(U_LUI  ) \
-    `VERILATOR_TYPE_FN(U_AUIPC) \
-    `VERILATOR_TYPE_FN(J      )
-`define VERILATOR_ALU_EXEC_DEF        \
-    `VERILATOR_TYPE_FN(ALU_EXEC_ADD  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_PASSB)\
-    `VERILATOR_TYPE_FN(ALU_EXEC_ADD4A)\
-    `VERILATOR_TYPE_FN(ALU_EXEC_XOR  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SRL  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SRA  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_OR   )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_AND  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SUB  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SLL  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_EQ   )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_NEQ  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SLT  )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SLTU )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SGTE )\
-    `VERILATOR_TYPE_FN(ALU_EXEC_SGTEU)
-
-// Core control unit signal defaults
-// _________________________________________________________________________________________________________________
-//                             | ALU_OP          | EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP      |
+// Ctrl unit defaults   {      | ALU_OP          | EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP      }
 `define R_CTRL          { 21'd0, `ALU_OP_R       , `REG   , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
 `define I_JUMP_CTRL     { 21'd0, `ALU_OP_I_JUMP  , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE    }
 `define I_LOAD_CTRL     { 21'd0, `ALU_OP_I_LOAD  , `REG   , `IMM   , `FALSE , `TRUE  , `TRUE   , `FALSE  , `FALSE   }
@@ -148,4 +91,4 @@
 `define U_AUIPC_CTRL    { 21'd0, `ALU_OP_U_AUIPC , `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
 `define J_CTRL          { 21'd0, `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE    }
 
-`endif // TYPES_VH
+`endif /* TYPES_VH */

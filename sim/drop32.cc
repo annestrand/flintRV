@@ -105,10 +105,10 @@ bool drop32::loadStoreUpdate() {
     if (m_cpu->o_loadReq) { // Load
         m_cpu->i_dataIn = *(int*)&m_mem[m_cpu->o_dataAddr];
     } else { // Store
-        if (CPU(this)->p_funct3[CPU(this)->get_MEM()] == CPU(this)->get_S_B_OP()) {
+        if (CPU(this)->p_funct3[CPU(this)->MEM] == CPU(this)->S_B_OP) {
             *(int*)&m_mem[m_cpu->o_dataAddr] &= 0xffffff00;
             *(int*)&m_mem[m_cpu->o_dataAddr] |= m_cpu->o_dataOut;
-        } else if (CPU(this)->p_funct3[CPU(this)->get_MEM()] == CPU(this)->get_S_H_OP()) {
+        } else if (CPU(this)->p_funct3[CPU(this)->MEM] == CPU(this)->S_H_OP) {
             *(int*)&m_mem[m_cpu->o_dataAddr] &= 0xffff0000;
             *(int*)&m_mem[m_cpu->o_dataAddr] |= m_cpu->o_dataOut;
         } else {
@@ -188,13 +188,13 @@ void drop32::dump() {
     bool mFlush         = CPU(this)->MEM_flush;
     bool wFlush         = CPU(this)->WB_flush;
     // Status codes
-    bool BRA            = CPU(this)->braOutcome;                    // B
-    bool JMP            = CPU(this)->p_jmp[CPU(this)->get_MEM()];   // J
-    bool LD_REQ         = m_cpu->o_loadReq;                         // L
-    bool SD_REQ         = m_cpu->o_storeReq;                        // S
-    bool RST            = m_cpu->i_rst;                             // R
-    bool iValid         = m_cpu->i_ifValid;                         // I
-    bool mValid         = m_cpu->i_memValid;                        // M
+    bool BRA            = CPU(this)->braOutcome;            // B
+    bool JMP            = CPU(this)->p_jmp[CPU(this)->MEM]; // J
+    bool LD_REQ         = m_cpu->o_loadReq;                 // L
+    bool SD_REQ         = m_cpu->o_storeReq;                // S
+    bool RST            = m_cpu->i_rst;                     // R
+    bool iValid         = m_cpu->i_ifValid;                 // I
+    bool mValid         = m_cpu->i_memValid;                // M
     // Dump disassembled instruction
     printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr, instr.c_str());
     if (m_dump < 2) { printf("\n"); return; }
@@ -209,7 +209,7 @@ void drop32::dump() {
 }
 // ====================================================================================================================
 bool drop32::end() {
-    bool isEbreak   = CPU(this)->p_ebreak[CPU(this)->get_EXEC()] && !CPU(this)->pcJump;
+    bool isEbreak   = CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump;
     bool isFinished = Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;
     if (isEbreak) {
         // Need to finish draining pipeline here...

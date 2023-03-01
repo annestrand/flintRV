@@ -103,6 +103,7 @@ VSRCS                  += $(VERILATOR_ROOT)/include/verilated_threads.cpp
 endif
 VSRCS_BASENAME         := $(notdir $(VSRCS))
 VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
+VTYPES                 := $(OUT_DIR)/verilated/types.hh
 
 # --- SIMULATOR -------------------------------------------------------------------------------------------------------
 SIM_FLAGS              := -Wall
@@ -244,11 +245,15 @@ $(OUT_DIR)/Unit_tests: tests/unit/main_tb.v $(SUB_SRCS) $(RTL_SRCS) | $(OUT_DIR)
 	@echo "    IVERILOG    $(notdir $<)"
 	@iverilog $(ICARUS_FLAGS) -o $@ $<
 
+$(OUT_DIR)/verilated/types.hh: rtl/types.vh | $(OUT_DIR)/verilated
+	@echo "    VH2HH       $(notdir $<)"
+	@sed 's/`/#/g' $< | sed "s/[0-9]*'/0/g" | awk '!/{/' | awk '!/x\[/' > $@
+
 $(OUT_DIR)/verilated/%.o: $(VERILATOR_ROOT)/include/%.cpp
 	@echo "    CXX         $(notdir $<)"
 	@$(CXX) -c -o $@ -std=c++14 -I$(VERILATOR_ROOT)/include/vltstd $<
 
-$(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v rtl/types.vh | $(OUT_DIR)/verilated
+$(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v rtl/types.vh $(VTYPES) | $(OUT_DIR)/verilated
 	@echo "    VERILATOR   $(notdir $<)"
 	@verilator $(VFLAGS) --Mdir $(dir $@) -cc $<
 	@$(MAKE) -C $(dir $@) -f V$(basename $(notdir $<)).mk > /dev/null

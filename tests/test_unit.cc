@@ -20,6 +20,7 @@
 #include "VImmGen__Syms.h"
 
 #include "utils.hh"
+#include "types.hh"
 
 // ====================================================================================================================
 TEST(unit, alu) {
@@ -28,21 +29,6 @@ TEST(unit, alu) {
 
     double TEST_OP_RANGE        = 1 << 5; // 2**5
     double TEST_RANGE           = 1 << 8; // 2**8
-    const uint ALU_EXEC_OR      = p_alu->ALU->get_ALU_EXEC_OR();
-    const uint ALU_EXEC_EQ      = p_alu->ALU->get_ALU_EXEC_EQ();
-    const uint ALU_EXEC_XOR     = p_alu->ALU->get_ALU_EXEC_XOR();
-    const uint ALU_EXEC_SRL     = p_alu->ALU->get_ALU_EXEC_SRL();
-    const uint ALU_EXEC_SRA     = p_alu->ALU->get_ALU_EXEC_SRA();
-    const uint ALU_EXEC_AND     = p_alu->ALU->get_ALU_EXEC_AND();
-    const uint ALU_EXEC_SUB     = p_alu->ALU->get_ALU_EXEC_SUB();
-    const uint ALU_EXEC_SLL     = p_alu->ALU->get_ALU_EXEC_SLL();
-    const uint ALU_EXEC_NEQ     = p_alu->ALU->get_ALU_EXEC_NEQ();
-    const uint ALU_EXEC_SLT     = p_alu->ALU->get_ALU_EXEC_SLT();
-    const uint ALU_EXEC_SLTU    = p_alu->ALU->get_ALU_EXEC_SLTU();
-    const uint ALU_EXEC_SGTE    = p_alu->ALU->get_ALU_EXEC_SGTE();
-    const uint ALU_EXEC_PASSB   = p_alu->ALU->get_ALU_EXEC_PASSB();
-    const uint ALU_EXEC_ADD4A   = p_alu->ALU->get_ALU_EXEC_ADD4A();
-    const uint ALU_EXEC_SGTEU   = p_alu->ALU->get_ALU_EXEC_SGTEU();
 
     for (int i=0; i<TEST_OP_RANGE; ++i) {
         p_alu->i_op = i;
@@ -53,25 +39,27 @@ TEST(unit, alu) {
             p_alu->i_a = (x << 24) | (x << 16) | (x << 8) | x;
             p_alu->i_b = (y << 24) | (y << 16) | (y << 8) | y;
             dut.get()->eval();
-            if      (p_alu->i_op == ALU_EXEC_PASSB) { r = p_alu->i_b;                                           }
-            else if (p_alu->i_op == ALU_EXEC_ADD4A) { r = p_alu->i_a + 4;                                       }
-            else if (p_alu->i_op == ALU_EXEC_XOR  ) { r = p_alu->i_a ^ p_alu->i_b;                              }
-            else if (p_alu->i_op == ALU_EXEC_SRL  ) { r = p_alu->i_a >> p_alu->i_b;                             }
-            else if (p_alu->i_op == ALU_EXEC_SRA  ) { r = static_cast<signed int>(p_alu->i_a) >> p_alu->i_b;    }
-            else if (p_alu->i_op == ALU_EXEC_OR   ) { r = p_alu->i_a | p_alu->i_b;                              }
-            else if (p_alu->i_op == ALU_EXEC_AND  ) { r = p_alu->i_a & p_alu->i_b;                              }
-            else if (p_alu->i_op == ALU_EXEC_SUB  ) { r = p_alu->i_a - p_alu->i_b;                              }
-            else if (p_alu->i_op == ALU_EXEC_SLL  ) { r = p_alu->i_a << p_alu->i_b;                             }
-            else if (p_alu->i_op == ALU_EXEC_EQ   ) { r = p_alu->i_a == p_alu->i_b;                             }
-            else if (p_alu->i_op == ALU_EXEC_NEQ  ) { r = p_alu->i_a != p_alu->i_b;                             }
-            else if (p_alu->i_op == ALU_EXEC_SLT  ) {
-                r = static_cast<signed int>(p_alu->i_a) < static_cast<signed int>(p_alu->i_b);
+            switch (p_alu->i_op) {
+                case ALU_EXEC_PASSB : r = p_alu->i_b;                                           break;
+                case ALU_EXEC_ADD4A : r = p_alu->i_a + 4;                                       break;
+                case ALU_EXEC_XOR   : r = p_alu->i_a ^ p_alu->i_b;                              break;
+                case ALU_EXEC_SRL   : r = p_alu->i_a >> p_alu->i_b;                             break;
+                case ALU_EXEC_SRA   : r = static_cast<signed int>(p_alu->i_a) >> p_alu->i_b;    break;
+                case ALU_EXEC_OR    : r = p_alu->i_a | p_alu->i_b;                              break;
+                case ALU_EXEC_AND   : r = p_alu->i_a & p_alu->i_b;                              break;
+                case ALU_EXEC_SUB   : r = p_alu->i_a - p_alu->i_b;                              break;
+                case ALU_EXEC_SLL   : r = p_alu->i_a << p_alu->i_b;                             break;
+                case ALU_EXEC_EQ    : r = p_alu->i_a == p_alu->i_b;                             break;
+                case ALU_EXEC_NEQ   : r = p_alu->i_a != p_alu->i_b;                             break;
+                case ALU_EXEC_SLT   : r = static_cast<signed int>(p_alu->i_a) <
+                                            static_cast<signed int>(p_alu->i_b);                break;
+                case ALU_EXEC_SLTU  : r = p_alu->i_a < p_alu->i_b;                              break;
+                case ALU_EXEC_SGTE  : r = static_cast<signed int>(p_alu->i_a) >=
+                                            static_cast<signed int>(p_alu->i_b);                break;
+                case ALU_EXEC_SGTEU : r = p_alu->i_a >= p_alu->i_b;                             break;
+                case ALU_EXEC_ADD   :
+                default             : r = p_alu->i_a + p_alu->i_b;
             }
-            else if (p_alu->i_op == ALU_EXEC_SLTU ) { r = p_alu->i_a < p_alu->i_b;                              }
-            else if (p_alu->i_op == ALU_EXEC_SGTE ) {
-                r = static_cast<signed int>(p_alu->i_a) >= static_cast<signed int>(p_alu->i_b);                 }
-            else if (p_alu->i_op == ALU_EXEC_SGTEU) { r = p_alu->i_a >= p_alu->i_b;                             }
-            else                                    { r = p_alu->i_a + p_alu->i_b; /* Default == ADD */         }
             EXPECT_EQ(r, p_alu->o_result) << "ALU operation was: " << i;
         }
     }
