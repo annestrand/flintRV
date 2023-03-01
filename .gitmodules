@@ -1,3 +1,3 @@
 [submodule "external/miniargparse"]
 	path = external/miniargparse
-	url = https://github.com/devbored/miniargparse.git
+	url = https://github.com/annestranda/miniargparse.git
