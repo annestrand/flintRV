@@ -1,6 +1,6 @@
 # drop32
 
-**D**evbored's **R**ISC-V **O**pen-sourced **P**rocessor (drop32)
+**D**rop32 **R**ISC-V **O**pen-sourced **P**rocessor
 
 - RV32I ISA
 - 4-stage in-order pipelined processor
