@@ -332,23 +332,23 @@ TEST(unit, ctrl_unit) {
     std::unique_ptr<VControlUnit> dut(new VControlUnit);
     auto p_ctrl = dut.get();
     constexpr int TEST_COUNT = 1 << 7; // 2**7
-    uint INVALID = p_ctrl->ControlUnit->INVALID;
-    uint SYSTEM_CTRL = p_ctrl->ControlUnit->ECALL;
-    uint FENCE_CTRL = p_ctrl->ControlUnit->FENCE_CTRL;
+    uint INVALID = p_ctrl->ControlUnit->INVALID | ALU_OP_R << 7;
+    uint SYSTEM_CTRL = p_ctrl->ControlUnit->ECALL | ALU_OP_SYS << 7;
+    uint FENCE_CTRL = p_ctrl->ControlUnit->FENCE_CTRL | ALU_OP_FENCE << 7;
 
     for (int i=0; i<TEST_COUNT; ++i) {
         uint cm_addr    = i;
         uint ctrl_sigs  = 0;
         switch (get_bits(cm_addr, 0, 5)) {
-            case OP: ctrl_sigs = p_ctrl->ControlUnit->R_CTRL; break;
-            case JALR: ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL; break;
-            case LOAD: ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL; break;
-            case OP_IMM: ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL; break;
-            case STORE: ctrl_sigs = p_ctrl->ControlUnit->S_CTRL; break;
-            case BRANCH: ctrl_sigs = p_ctrl->ControlUnit->B_CTRL; break;
-            case LUI: ctrl_sigs = p_ctrl->ControlUnit->LUI_CTRL; break;
-            case AUIPC: ctrl_sigs = p_ctrl->ControlUnit->AUIPC_CTRL; break;
-            case JAL: ctrl_sigs = p_ctrl->ControlUnit->J_CTRL; break;
+            case OP: ctrl_sigs = p_ctrl->ControlUnit->R_CTRL | ALU_OP_R << 7; break;
+            case JALR: ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL | ALU_OP_I_JUMP << 7; break;
+            case LOAD: ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL | ALU_OP_I_LOAD << 7; break;
+            case OP_IMM: ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL | ALU_OP_I_ARITH << 7; break;
+            case STORE: ctrl_sigs = p_ctrl->ControlUnit->S_CTRL | ALU_OP_S << 7; break;
+            case BRANCH: ctrl_sigs = p_ctrl->ControlUnit->B_CTRL | ALU_OP_B << 7; break;
+            case LUI: ctrl_sigs = p_ctrl->ControlUnit->LUI_CTRL | ALU_OP_LUI << 7; break;
+            case AUIPC: ctrl_sigs = p_ctrl->ControlUnit->AUIPC_CTRL | ALU_OP_AUIPC << 7; break;
+            case JAL: ctrl_sigs = p_ctrl->ControlUnit->J_CTRL | ALU_OP_J << 7; break;
             case SYSTEM: ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? SYSTEM_CTRL : INVALID; break;
             case MISC_MEM: ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? FENCE_CTRL : INVALID; break;
             default: ctrl_sigs = p_ctrl->ControlUnit->INVALID;

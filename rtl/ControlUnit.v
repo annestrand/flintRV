@@ -9,60 +9,60 @@ module ControlUnit (
     output      [12:0]      o_ctrlSigs
 );
     localparam
-    //  Main ctrl sigs:       { ALU_OP          | EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP    }
-        R_CTRL          `VP=  { `ALU_OP_R       , `REG   , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
-        S_CTRL          `VP=  { `ALU_OP_S       , `REG   , `IMM   , `TRUE  , `FALSE , `FALSE  , `FALSE  , `FALSE },
-        B_CTRL          `VP=  { `ALU_OP_B       , `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `TRUE   , `FALSE },
-        J_CTRL          `VP=  { `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  },
-        LUI_CTRL        `VP=  { `ALU_OP_LUI     , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
-        AUIPC_CTRL      `VP=  { `ALU_OP_AUIPC   , `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
-        FENCE_CTRL      `VP=  { `ALU_OP_FENCE   , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE },
-        SYSTEM_CTRL     `VP=  { `ALU_OP_SYS     , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE },
-        I_JUMP_CTRL     `VP=  { `ALU_OP_I_JUMP  , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  },
-        I_LOAD_CTRL     `VP=  { `ALU_OP_I_LOAD  , `REG   , `IMM   , `FALSE , `TRUE  , `TRUE   , `FALSE  , `FALSE },
-        I_ARITH_CTRL    `VP=  { `ALU_OP_I_ARITH , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
-        INVALID_CTRL    `VP=  { `ALU_OP_R       , `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE };
+    //  Format ctrl sigs:     { EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP    }
+        R_CTRL          `VP=  { `REG   , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
+        S_CTRL          `VP=  { `REG   , `IMM   , `TRUE  , `FALSE , `FALSE  , `FALSE  , `FALSE },
+        B_CTRL          `VP=  { `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `TRUE   , `FALSE },
+        J_CTRL          `VP=  { `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  },
+        LUI_CTRL        `VP=  { `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
+        AUIPC_CTRL      `VP=  { `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
+        FENCE_CTRL      `VP=  { `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE },
+        SYSTEM_CTRL     `VP=  { `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE },
+        I_JUMP_CTRL     `VP=  { `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE  },
+        I_LOAD_CTRL     `VP=  { `REG   , `IMM   , `FALSE , `TRUE  , `TRUE   , `FALSE  , `FALSE },
+        I_ARITH_CTRL    `VP=  { `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE },
+        INVALID_CTRL    `VP=  { `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE };
 
     // Control Memory values
     localparam
-    //  Instr:         {  BRK  |  SYS  | CTRL          }
-        LUI     `VP=   { `FALSE, `FALSE, LUI_CTRL      },
-        AUIPC   `VP=   { `FALSE, `FALSE, AUIPC_CTRL    },
-        JAL     `VP=   { `FALSE, `FALSE, J_CTRL        },
-        JALR    `VP=   { `FALSE, `FALSE, I_JUMP_CTRL   },
-        BEQ     `VP=   { `FALSE, `FALSE, B_CTRL        },
-        BNE     `VP=   { `FALSE, `FALSE, B_CTRL        },
-        BLT     `VP=   { `FALSE, `FALSE, B_CTRL        },
-        BGE     `VP=   { `FALSE, `FALSE, B_CTRL        },
-        BLTU    `VP=   { `FALSE, `FALSE, B_CTRL        },
-        BGEU    `VP=   { `FALSE, `FALSE, B_CTRL        },
-        LB      `VP=   { `FALSE, `FALSE, I_LOAD_CTRL   },
-        LH      `VP=   { `FALSE, `FALSE, I_LOAD_CTRL   },
-        LW      `VP=   { `FALSE, `FALSE, I_LOAD_CTRL   },
-        LBU     `VP=   { `FALSE, `FALSE, I_LOAD_CTRL   },
-        LHU     `VP=   { `FALSE, `FALSE, I_LOAD_CTRL   },
-        SB      `VP=   { `FALSE, `FALSE, S_CTRL        },
-        SH      `VP=   { `FALSE, `FALSE, S_CTRL        },
-        SW      `VP=   { `FALSE, `FALSE, S_CTRL        },
-        ADDI    `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  },
-        SLTI    `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  },
-        SLTIU   `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  },
-        XORI    `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  },
-        ORI     `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  },
-        ANDI    `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  },
-        SLLI    `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  },
-        SRxI    `VP=   { `FALSE, `FALSE, I_ARITH_CTRL  }, // (i.e. SRAI and SRLI)
-        ADDSUB  `VP=   { `FALSE, `FALSE, R_CTRL        }, // (i.e. ADD and SUB)
-        SLL     `VP=   { `FALSE, `FALSE, R_CTRL        },
-        SLT     `VP=   { `FALSE, `FALSE, R_CTRL        },
-        SLTU    `VP=   { `FALSE, `FALSE, R_CTRL        },
-        XOR     `VP=   { `FALSE, `FALSE, R_CTRL        },
-        SRx     `VP=   { `FALSE, `FALSE, R_CTRL        }, // (i.e. SRL and SRA)
-        OR      `VP=   { `FALSE, `FALSE, R_CTRL        },
-        AND     `VP=   { `FALSE, `FALSE, R_CTRL        },
-        FENCE   `VP=   { `FALSE, `FALSE, FENCE_CTRL    },
-        ECALL   `VP=   { `FALSE, `TRUE , SYSTEM_CTRL   },
-        INVALID `VP=   { `TRUE , `FALSE, INVALID_CTRL  };
+    //  Instr:         {  BRK  |  SYS  |  ALU_OP        | FMT_CTRL      }
+        LUI     `VP=   { `FALSE, `FALSE, `ALU_OP_LUI    , LUI_CTRL      },
+        AUIPC   `VP=   { `FALSE, `FALSE, `ALU_OP_AUIPC  , AUIPC_CTRL    },
+        JAL     `VP=   { `FALSE, `FALSE, `ALU_OP_J      , J_CTRL        },
+        JALR    `VP=   { `FALSE, `FALSE, `ALU_OP_I_JUMP , I_JUMP_CTRL   },
+        BEQ     `VP=   { `FALSE, `FALSE, `ALU_OP_B      , B_CTRL        },
+        BNE     `VP=   { `FALSE, `FALSE, `ALU_OP_B      , B_CTRL        },
+        BLT     `VP=   { `FALSE, `FALSE, `ALU_OP_B      , B_CTRL        },
+        BGE     `VP=   { `FALSE, `FALSE, `ALU_OP_B      , B_CTRL        },
+        BLTU    `VP=   { `FALSE, `FALSE, `ALU_OP_B      , B_CTRL        },
+        BGEU    `VP=   { `FALSE, `FALSE, `ALU_OP_B      , B_CTRL        },
+        LB      `VP=   { `FALSE, `FALSE, `ALU_OP_I_LOAD , I_LOAD_CTRL   },
+        LH      `VP=   { `FALSE, `FALSE, `ALU_OP_I_LOAD , I_LOAD_CTRL   },
+        LW      `VP=   { `FALSE, `FALSE, `ALU_OP_I_LOAD , I_LOAD_CTRL   },
+        LBU     `VP=   { `FALSE, `FALSE, `ALU_OP_I_LOAD , I_LOAD_CTRL   },
+        LHU     `VP=   { `FALSE, `FALSE, `ALU_OP_I_LOAD , I_LOAD_CTRL   },
+        SB      `VP=   { `FALSE, `FALSE, `ALU_OP_S      , S_CTRL        },
+        SH      `VP=   { `FALSE, `FALSE, `ALU_OP_S      , S_CTRL        },
+        SW      `VP=   { `FALSE, `FALSE, `ALU_OP_S      , S_CTRL        },
+        ADDI    `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  },
+        SLTI    `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  },
+        SLTIU   `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  },
+        XORI    `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  },
+        ORI     `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  },
+        ANDI    `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  },
+        SLLI    `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  },
+        SRxI    `VP=   { `FALSE, `FALSE, `ALU_OP_I_ARITH, I_ARITH_CTRL  }, // (i.e. SRAI and SRLI)
+        ADDSUB  `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        }, // (i.e. ADD and SUB)
+        SLL     `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        },
+        SLT     `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        },
+        SLTU    `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        },
+        XOR     `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        },
+        SRx     `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        }, // (i.e. SRL and SRA)
+        OR      `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        },
+        AND     `VP=   { `FALSE, `FALSE, `ALU_OP_R      , R_CTRL        },
+        FENCE   `VP=   { `FALSE, `FALSE, `ALU_OP_FENCE  , FENCE_CTRL    },
+        ECALL   `VP=   { `FALSE, `TRUE , `ALU_OP_SYS    , SYSTEM_CTRL   },
+        INVALID `VP=   { `TRUE , `FALSE, `ALU_OP_R      , INVALID_CTRL  };
 
     reg[12:0] cm_out;
     reg[12:0] funct_cm_out;
