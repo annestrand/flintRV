@@ -1,6 +1,8 @@
 // Copyright (c) 2022 - present, Austin Annestrand.
 // Licensed under the MIT License (see LICENSE file).
 
+`include "types.vh"
+
 module DualPortRam (
     input                           i_clk,
                                     i_we,
@@ -11,7 +13,7 @@ module DualPortRam (
 );
     parameter XLEN       = 32;
     parameter ADDR_WIDTH = 5;
-    reg [XLEN-1:0] ram [2**ADDR_WIDTH-1:0] /*verilator public*/;
+    reg [XLEN-1:0] ram [2**ADDR_WIDTH-1:0] `VP;
 
     integer i;
     initial begin

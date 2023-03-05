@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
                 # Remove unwanted items from final file
                 src_code = re.sub(r"`include .*\n\n", "", src_code)
-                src_code = re.sub(r"/\*verilator public\*/", "", src_code)
+                src_code = re.sub(r"`VP", "   ", src_code)
                 src_code = re.sub(r"// Copyright.*" + (r"\n.*" * 2) + r"\n", "", src_code)
 
                 print(src_code)
