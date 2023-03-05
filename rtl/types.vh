@@ -4,7 +4,13 @@
 `ifndef TYPES_VH
 `define TYPES_VH
 
-// Major opcode map (RV32I):
+/*
+    Major opcode map (RV32I):
+    Taken from:
+        “The RISC-V Instruction Set Manual, Volume I: User-Level ISA, Document Version 20191213”,
+        Editors Andrew Waterman and Krste Asanovi´c, RISC-V Foundation, December 2019.
+        (Table 24.1: RISC-V base opcode map, inst[1:0]=11)
+*/
 // _____________________________________________________________________________________________________________
 // inst[4:2]    | 000    | 001      | 010      | 011      | 100    | 101      | 110            | 111   | (> 32b)
 // inst[6:5] 00 | LOAD   | LOAD-FP  | custom-0 | MISC-MEM | OP-IMM | AUIPC    | OP-IMM-32      | 48b   |
