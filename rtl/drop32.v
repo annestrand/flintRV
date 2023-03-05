@@ -19,6 +19,7 @@ module drop32 (
 
     // Helper Aliases
     localparam REG_0   /*verilator public*/ = 5'b00000; // Register x0
+    localparam EBREAK  /*verilator public*/ = 20;
     localparam NOP     /*verilator public*/ = 32'h13;
     localparam S_B_OP  /*verilator public*/ = 3'b000;
     localparam S_H_OP  /*verilator public*/ = 3'b001;
@@ -72,7 +73,7 @@ module drop32 (
     wire [XLEN-1:0] rs2Out          /*verilator public*/;
     wire [XLEN-1:0] rs1Exec         /*verilator public*/;
     wire [XLEN-1:0] rs2Exec         /*verilator public*/;
-    wire [XLEN-1:0] ctrlSigs        /*verilator public*/;
+    wire [12:0] ctrlSigs            /*verilator public*/;
     wire [XLEN-1:0] WB_result       /*verilator public*/;
     wire [XLEN-1:0] aluSrcA         /*verilator public*/;
     wire [XLEN-1:0] aluSrcB         /*verilator public*/;
@@ -249,8 +250,9 @@ module drop32 (
         .o_rs1Data  (rs1Out),
         .o_rs2Data  (rs2Out)
     );
-    ControlUnit #(.XLEN(XLEN)) CTRL_unit (
-        .i_instr    (instrReg),
+    ControlUnit CTRL_unit (
+        .i_opcode   (`OPCODE_RV32(instrReg)),
+        .i_funct3   (`FUNCT3(instrReg)),
         .o_ctrlSigs (ctrlSigs)
     );
     // Control signals
@@ -263,7 +265,7 @@ module drop32 (
     assign bra      = `CTRL_BRA(ctrlSigs);
     assign jmp      = `CTRL_JMP(ctrlSigs);
     assign ecall    = `CTRL_ECALL(ctrlSigs);
-    assign ebreak   = `CTRL_EBREAK(ctrlSigs);
+    assign ebreak   = `CTRL_EBREAK(ctrlSigs) || (ecall & instrReg[EBREAK]);
 
     // --- [Stage]: Execute ---
     // ALU input selects

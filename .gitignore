@@ -10,9 +10,11 @@ __pycache__/
 *.vcd
 *.map
 *.blif
+*.log
 *_generated.v
 
 drop32soc/*.sh
 drop32soc/*.pcf
 drop32soc/*.asc
+drop32soc/*.bin
 drop32soc/*.json

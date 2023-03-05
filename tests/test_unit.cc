@@ -316,7 +316,7 @@ TEST(unit, alu_control) {
                     case 0b111: alu_exec = ALU_EXEC_SGTEU; break;
                 } break;
             case ALU_OP_J: alu_exec = ALU_EXEC_ADD4A; break;
-            case ALU_OP_U_LUI: alu_exec = ALU_EXEC_PASSB; break;
+            case ALU_OP_LUI: alu_exec = ALU_EXEC_PASSB; break;
             case ALU_OP_I_JUMP: alu_exec = ALU_EXEC_ADD4A; break;
             default: break;
         }
@@ -332,31 +332,30 @@ TEST(unit, ctrl_unit) {
     std::unique_ptr<VControlUnit> dut(new VControlUnit);
     auto p_ctrl = dut.get();
     constexpr int TEST_COUNT = 1 << 7; // 2**7
+    uint INVALID = p_ctrl->ControlUnit->INVALID;
+    uint SYSTEM_CTRL = p_ctrl->ControlUnit->ECALL;
+    uint FENCE_CTRL = p_ctrl->ControlUnit->FENCE_CTRL;
 
     for (int i=0; i<TEST_COUNT; ++i) {
-        uint opcode     = OPCODE(i);
+        uint cm_addr    = i;
         uint ctrl_sigs  = 0;
-        switch (opcode) {
-            case R: ctrl_sigs = p_ctrl->ControlUnit->R_CTRL; break;
-            case I_JUMP: ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL; break;
-            case I_LOAD: ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL; break;
-            case I_ARITH: ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL; break;
-            case I_FENCE: ctrl_sigs = p_ctrl->ControlUnit->I_FENCE_CTRL; break;
-            case S: ctrl_sigs = p_ctrl->ControlUnit->S_CTRL; break;
-            case B: ctrl_sigs = p_ctrl->ControlUnit->B_CTRL; break;
-            case U_LUI: ctrl_sigs = p_ctrl->ControlUnit->U_LUI_CTRL; break;
-            case U_AUIPC: ctrl_sigs = p_ctrl->ControlUnit->U_AUIPC_CTRL; break;
-            case J: ctrl_sigs = p_ctrl->ControlUnit->J_CTRL; break;
-            case I_SYS: ctrl_sigs = p_ctrl->ControlUnit->I_SYS_CTRL | 1 << 11; break;
-            default: break;
+        switch (get_bits(cm_addr, 0, 5)) {
+            case OP: ctrl_sigs = p_ctrl->ControlUnit->R_CTRL; break;
+            case JALR: ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL; break;
+            case LOAD: ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL; break;
+            case OP_IMM: ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL; break;
+            case STORE: ctrl_sigs = p_ctrl->ControlUnit->S_CTRL; break;
+            case BRANCH: ctrl_sigs = p_ctrl->ControlUnit->B_CTRL; break;
+            case LUI: ctrl_sigs = p_ctrl->ControlUnit->LUI_CTRL; break;
+            case AUIPC: ctrl_sigs = p_ctrl->ControlUnit->AUIPC_CTRL; break;
+            case JAL: ctrl_sigs = p_ctrl->ControlUnit->J_CTRL; break;
+            case SYSTEM: ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? SYSTEM_CTRL : INVALID; break;
+            case MISC_MEM: ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? FENCE_CTRL : INVALID; break;
+            default: ctrl_sigs = p_ctrl->ControlUnit->INVALID;
         }
-        p_ctrl->i_instr = i;
+        p_ctrl->i_opcode = get_bits(i, 0, 5);
+        p_ctrl->i_funct3 = get_bits(i, 6, 3);
         p_ctrl->eval();
         EXPECT_EQ(p_ctrl->o_ctrlSigs, ctrl_sigs);
     }
-    // Check for ebreak case
-    p_ctrl->i_instr = (1 << 20) | I_SYS;
-    p_ctrl->eval();
-    bool ebreak = p_ctrl->o_ctrlSigs & (1 << 12);
-    EXPECT_EQ(ebreak, true);
 }

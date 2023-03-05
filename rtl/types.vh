@@ -4,8 +4,52 @@
 `ifndef TYPES_VH
 `define TYPES_VH
 
+// Major opcode map (RV32I):
+// _____________________________________________________________________________________________________________
+// inst[4:2]    | 000    | 001      | 010      | 011      | 100    | 101      | 110            | 111   | (> 32b)
+// inst[6:5] 00 | LOAD   | LOAD-FP  | custom-0 | MISC-MEM | OP-IMM | AUIPC    | OP-IMM-32      | 48b   |
+//           01 | STORE  | STORE-FP | custom-1 | AMO      | OP     | LUI      | OP-32          | 64b   |
+//           10 | MADD   | MSUB     | NMSUB    | NMADD    | OP-FP  | reserved | custom-2/rv128 | 48b   |
+//           11 | BRANCH | JALR     | reserved | JAL      | SYSTEM | reserved | custom-3/rv128 | ≥ 80b |
+// _____________________________________________________________________________________________________________
+// NOTE: Lower 2 bits of RV32 instruction is unused - reserved for compressed (RV32C) instruction encoding
+// ----------------------------------
+`define LOAD                5'b00000
+`define LOAD_FP             5'b00001
+`define CUSTOM_0            5'b00010 // Free space
+`define MISC_MEM            5'b00011
+`define OP_IMM              5'b00100
+`define AUIPC               5'b00101
+`define OP_IMM_32           5'b00110
+// ----------------------------------
+`define STORE               5'b01000
+`define STORE_FP            5'b01001
+`define CUSTOM_1            5'b01010 // Free space
+`define AMO                 5'b01011
+`define OP                  5'b01100
+`define LUI                 5'b01101
+`define OP_32               5'b01110
+// ----------------------------------
+`define MADD                5'b10000
+`define MSUB                5'b10001
+`define NMSUB               5'b10010
+`define NMADD               5'b10011
+`define OP_FP               5'b10100
+`define RESERVED_1          5'b10101
+`define CUSTOM_2            5'b10110 // Free space (NOTE: This space is only available if NOT using RV128)
+// ----------------------------------
+`define BRANCH              5'b11000
+`define JALR                5'b11001
+`define RESERVED_2          5'b11010
+`define JAL                 5'b11011
+`define SYSTEM              5'b11100
+`define RESERVED_3          5'b11101
+`define CUSTOM_3            5'b11110 // Free space (NOTE: This space is only available if NOT using RV128)
+// ----------------------------------
+
 // Instruction fields       x[a:b]
 `define OPCODE(x)           x[6:0]
+`define OPCODE_RV32(x)      x[6:2]
 `define RD(x)               x[11:7]
 `define FUNCT3(x)           x[14:12]
 `define RS1(x)              x[19:15]
@@ -52,12 +96,12 @@
 `define ALU_OP_I_JUMP       4'b0001
 `define ALU_OP_I_LOAD       4'b0010
 `define ALU_OP_I_ARITH      4'b0011
-`define ALU_OP_I_SYS        4'b0100
-`define ALU_OP_I_FENCE      4'b0101
+`define ALU_OP_SYS          4'b0100
+`define ALU_OP_FENCE        4'b0101
 `define ALU_OP_S            4'b0110
 `define ALU_OP_B            4'b0111
-`define ALU_OP_U_LUI        4'b1000
-`define ALU_OP_U_AUIPC      4'b1001
+`define ALU_OP_LUI          4'b1000
+`define ALU_OP_AUIPC        4'b1001
 `define ALU_OP_J            4'b1010
 
 // ALU EXEC Types
@@ -78,17 +122,6 @@
 `define ALU_EXEC_SGTE       5'b01110
 `define ALU_EXEC_SGTEU      5'b01111
 
-// Ctrl unit defaults   {      | ALU_OP          | EXEC_A | EXEC_B | MEM_W  | REG_W  | MEM2REG | BRA     | JMP      }
-`define R_CTRL          { 21'd0, `ALU_OP_R       , `REG   , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
-`define I_JUMP_CTRL     { 21'd0, `ALU_OP_I_JUMP  , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE    }
-`define I_LOAD_CTRL     { 21'd0, `ALU_OP_I_LOAD  , `REG   , `IMM   , `FALSE , `TRUE  , `TRUE   , `FALSE  , `FALSE   }
-`define I_ARITH_CTRL    { 21'd0, `ALU_OP_I_ARITH , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
-`define I_SYS_CTRL      { 21'd0, `ALU_OP_I_SYS   , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE   }
-`define I_FENCE_CTRL    { 21'd0, `ALU_OP_I_FENCE , `REG   , `IMM   , `FALSE , `FALSE , `FALSE  , `FALSE  , `FALSE   }
-`define S_CTRL          { 21'd0, `ALU_OP_S       , `REG   , `IMM   , `TRUE  , `FALSE , `FALSE  , `FALSE  , `FALSE   }
-`define B_CTRL          { 21'd0, `ALU_OP_B       , `REG   , `REG   , `FALSE , `FALSE , `FALSE  , `TRUE   , `FALSE   }
-`define U_LUI_CTRL      { 21'd0, `ALU_OP_U_LUI   , `REG   , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
-`define U_AUIPC_CTRL    { 21'd0, `ALU_OP_U_AUIPC , `PC    , `IMM   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `FALSE   }
-`define J_CTRL          { 21'd0, `ALU_OP_J       , `PC    , `REG   , `FALSE , `TRUE  , `FALSE  , `FALSE  , `TRUE    }
+`define VP /*verilator public*/
 
 `endif /* TYPES_VH */

@@ -13,7 +13,7 @@ module ALU_Control (
         case (i_aluOp)
             `ALU_OP_J           ,
             `ALU_OP_I_JUMP      : o_aluControl = `ALU_EXEC_ADD4A;
-            `ALU_OP_U_LUI       : o_aluControl = `ALU_EXEC_PASSB;
+            `ALU_OP_LUI         : o_aluControl = `ALU_EXEC_PASSB;
             `ALU_OP_B           : case (i_funct3)
                 3'b000          : o_aluControl = `ALU_EXEC_EQ;
                 3'b001          : o_aluControl = `ALU_EXEC_NEQ;
