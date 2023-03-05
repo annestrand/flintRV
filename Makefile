@@ -125,11 +125,11 @@ SIM_OBJS_BASE          := $(filter-out build/sim/main.o,$(SIM_OBJS))
 SIM_OBJS_BASE_D        := $(SIM_OBJS_BASE:.o=.d)
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
-CPU_ASM_TESTS          := $(shell find tests/basic -type f -name "*.s" -exec basename {} \;)
-CPU_C_TESTS            := $(shell find tests/algorithms -type f -name "*.c" -exec basename {} \;)
-CPU_TEST_HEX           := $(CPU_ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
-CPU_TEST_HEX           += $(CPU_C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
-CPU_TEST_INC           := $(CPU_TEST_HEX:%.hex=%.inc)
+ASM_TESTS              := $(shell find tests/basic -type f -name "*.s" -exec basename {} \;)
+C_TESTS                := $(shell find tests/algorithms -type f -name "*.c" -exec basename {} \;)
+TEST_HEX               := $(ASM_TESTS:%.s=$(OUT_DIR)/tests/%.hex)
+TEST_HEX               += $(C_TESTS:%.c=$(OUT_DIR)/tests/%.hex)
+TEST_INC               := $(TEST_HEX:%.hex=%.inc)
 
 # External riscv tests
 RV32I_TEST_STR         := -name "*.S" ! -name "rem*" ! -name "mul*" ! -name "div*"
@@ -171,7 +171,7 @@ TEST_SRCS_BASENAME     := $(notdir $(TEST_SRCS))
 TEST_OBJS              := $(TEST_SRCS_BASENAME:%.cc=$(OUT_DIR)/tests/%.o)
 TEST_OBJS              += $(SIM_OBJS_BASE)
 TEST_OBJS_D            := $(TEST_OBJS:.o=.d)
-ALL_TEST_INC_HEX_SRCS  := $(CPU_TEST_INC) $(CPU_TEST_HEX) $(RV32I_TEST_INC)
+ALL_TEST_INC_HEX_SRCS  := $(TEST_INC) $(TEST_HEX) $(RV32I_TEST_INC)
 
 # --- SOC SOURCES -----------------------------------------------------------------------------------------------------
 DROP32SOC_SRC          := drop32soc/firmware.s
@@ -236,7 +236,9 @@ drop32soc/%.mem: drop32soc/%.elf
 
 $(OUT_DIR)/verilated/types.hh: rtl/types.vh | $(OUT_DIR)/verilated
 	@echo "    VH2HH       $(notdir $<)"
-	@sed 's/`/#/g' $< | sed "s/[0-9]*'/0/g" | awk '!/{/' | awk '!/x\[/' > $@
+	@sed 's/`/#/g' $< | 	\
+	sed "s/[0-9]*'/0/g" | 	\
+	awk '!/{/' | awk '!/x\[/' > $@
 
 $(OUT_DIR)/verilated/%.o: $(VERILATOR_ROOT)/include/%.cpp
 	@echo "    CXX         $(notdir $<)"
@@ -291,10 +293,10 @@ $(OUT_DIR)/tests/%.inc: $(OUT_DIR)/tests/%.hex
 # RV32I external tests
 $(OUT_DIR)/external/riscv_tests/%.elf: external/riscv-tests/%.S $(RV32I_TEST_HEADERS) | $(OUT_DIR)/external/riscv_tests
 	@echo "    RV32I_CC    $(notdir $<)"
-	@$(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ \
-		-DTEST_FUNC_NAME=$(notdir $(basename $<)) \
-		-DTEST_FUNC_TXT='"$(notdir $(basename $<))"' \
-		-DTEST_FUNC_RET=$(notdir $(basename $<))_ret \
+	@$(RISCV_CC) $(RV32I_TEST_CC_FLAGS) -o $@ 			\
+		-DTEST_FUNC_NAME=$(notdir $(basename $<)) 		\
+		-DTEST_FUNC_TXT='"$(notdir $(basename $<))"'	\
+		-DTEST_FUNC_RET=$(notdir $(basename $<))_ret 	\
 		$<
 
 $(OUT_DIR)/external/riscv_tests/%.hex: $(OUT_DIR)/external/riscv_tests/%.elf
