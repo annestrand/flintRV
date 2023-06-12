@@ -15,7 +15,7 @@ module drop32 (
     parameter PC_START              = 0;
     parameter INSTR_WIDTH           = 32; // 16 for RV32C (otherwise 32)
     parameter ICACHE_LATENCY        = 0;  // 0 cc: LUT cache, 1 cc: BRAM cache
-    parameter REGFILE_ADDR_WIDTH    = 5;  //  4 for RV32E (otherwise 5)
+    parameter REGFILE_ADDR_WIDTH    = 5;  // 4 for RV32E (otherwise 5)
 
     // Helper Aliases
     localparam REG_0    `VP= 5'b00000; // Register x0
@@ -47,7 +47,7 @@ module drop32 (
     reg      [4:0]  p_rs1Addr   [EXEC:WB]   `VP;
     reg      [4:0]  p_rs2Addr   [EXEC:WB]   `VP;
     reg      [4:0]  p_rdAddr    [EXEC:WB]   `VP;
-    reg      [3:0]  p_aluOp     [EXEC:WB]   `VP;
+    reg      [4:0]  p_aluOp     [EXEC:WB]   `VP;
     reg      [2:0]  p_funct3    [EXEC:WB]   `VP;
     reg             p_mem_w     [EXEC:WB]   `VP;
     reg             p_reg_w     [EXEC:WB]   `VP;
@@ -57,9 +57,10 @@ module drop32 (
     reg             p_bra       [EXEC:WB]   `VP;
     reg             p_jmp       [EXEC:WB]   `VP;
     reg             p_ebreak    [EXEC:WB]   `VP;
+    reg             p_jalr      [EXEC:WB]   `VP;
 
     // Internal regs
-    reg  [XLEN-1:0] PC                      `VP;
+    reg  [XLEN-1:0] PC;
     reg  [XLEN-1:0] PCReg                   `VP;
     reg  [XLEN-1:0] instrReg                `VP;
     reg  [XLEN-1:0] loadData                `VP;
@@ -77,10 +78,8 @@ module drop32 (
     wire [XLEN-1:0] aluSrcB                 `VP;
     wire [XLEN-1:0] ctrlTransSrcA           `VP;
     wire [XLEN-1:0] jmpResult               `VP;
-    wire     [12:0] ctrlSigs                `VP;
-    wire      [4:0] aluControl              `VP;
-    wire      [3:0] aluOp                   `VP;
-    wire            indirJump               `VP;
+    wire     [13:0] ctrlSigs                `VP;
+    wire      [4:0] aluOp                   `VP;
     wire            exec_a                  `VP;
     wire            exec_b                  `VP;
     wire            mem_w                   `VP;
@@ -145,7 +144,7 @@ module drop32 (
     // Pipeline CTRL reg assignments
     always @(posedge i_clk) begin
         // Execute
-        p_aluOp     [EXEC]  <= EXEC_flush ? 4'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
+        p_aluOp     [EXEC]  <= EXEC_flush ? 5'd0 : EXEC_stall ? p_aluOp     [EXEC] : aluOp;
         p_mem_w     [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_mem_w     [EXEC] : mem_w;
         p_reg_w     [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_reg_w     [EXEC] : writeRd;
         p_mem2reg   [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_mem2reg   [EXEC] : mem2reg;
@@ -154,6 +153,7 @@ module drop32 (
         p_bra       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_bra       [EXEC] : bra;
         p_jmp       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jmp       [EXEC] : jmp;
         p_ebreak    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ebreak    [EXEC] : ebreak;
+        p_jalr      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jalr      [EXEC] : `JALR == `OPCODE_RV32(instrReg);
         // Memory
         p_mem_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem_w   [MEM] : p_mem_w     [EXEC];
         p_reg_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_reg_w   [MEM] : p_reg_w     [EXEC];
@@ -252,6 +252,7 @@ module drop32 (
     ControlUnit CTRL_unit (
         .i_opcode   (`OPCODE_RV32(instrReg)),
         .i_funct3   (`FUNCT3(instrReg)),
+        .i_funct7   (`FUNCT7(instrReg)),
         .o_ctrlSigs (ctrlSigs)
     );
     // Control signals
@@ -267,29 +268,19 @@ module drop32 (
     assign ebreak   = `CTRL_EBREAK(ctrlSigs) || (ecall & instrReg[EBREAK]);
 
     // --- [Stage]: Execute ---
-    // ALU input selects
+    // ALU
     assign aluSrcA  = (p_exec_a[EXEC] == `PC)   ? p_PC[EXEC]  : rs1Exec;
     assign aluSrcB  = (p_exec_b[EXEC] == `IMM)  ? p_IMM[EXEC] : rs2Exec;
-
-    // ALU/ALU_Control
-    ALU_Control ALU_CTRL_unit (
-        .i_aluOp        (p_aluOp[EXEC]),
-        .i_funct7       (p_funct7[EXEC]),
-        .i_funct3       (p_funct3[EXEC]),
-        .o_aluControl   (aluControl)
-    );
     ALU #(.XLEN(XLEN)) alu_unit (
         .i_a      (aluSrcA),
         .i_b      (aluSrcB),
-        .i_op     (aluControl),
+        .i_op     (p_aluOp[EXEC]),
         .o_result (aluOut)
     );
-
     // Generate jump address
-    assign indirJump        = `ALU_OP_I_JUMP == p_aluOp[EXEC]; // (i.e. JALR)
-    assign ctrlTransSrcA    = indirJump ? rs1Exec : p_PC[EXEC];
+    assign ctrlTransSrcA    = p_jalr[EXEC] ? rs1Exec : p_PC[EXEC];
     assign jmpResult        = ctrlTransSrcA + p_IMM[EXEC];
-    assign jumpAddr         = indirJump ? {jmpResult[XLEN-1:1],1'b0} : jmpResult;
+    assign jumpAddr         = p_jalr[EXEC] ? {jmpResult[XLEN-1:1],1'b0} : jmpResult;
 
     // --- [Stage]: Memory ---
     always @(*) begin

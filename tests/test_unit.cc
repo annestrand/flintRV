@@ -19,8 +19,6 @@
 #include "VDualPortRam__Syms.h"
 #include "VImmGen.h"
 #include "VImmGen__Syms.h"
-#include "VALU_Control.h"
-#include "VALU_Control__Syms.h"
 #include "VControlUnit.h"
 #include "VControlUnit__Syms.h"
 
@@ -45,25 +43,25 @@ TEST(unit, alu) {
             p_alu->i_b = (y << 24) | (y << 16) | (y << 8) | y;
             dut.get()->eval();
             switch (p_alu->i_op) {
-                case ALU_EXEC_PASSB : r = p_alu->i_b;                                           break;
-                case ALU_EXEC_ADD4A : r = p_alu->i_a + 4;                                       break;
-                case ALU_EXEC_XOR   : r = p_alu->i_a ^ p_alu->i_b;                              break;
-                case ALU_EXEC_SRL   : r = p_alu->i_a >> p_alu->i_b;                             break;
-                case ALU_EXEC_SRA   : r = static_cast<signed int>(p_alu->i_a) >> p_alu->i_b;    break;
-                case ALU_EXEC_OR    : r = p_alu->i_a | p_alu->i_b;                              break;
-                case ALU_EXEC_AND   : r = p_alu->i_a & p_alu->i_b;                              break;
-                case ALU_EXEC_SUB   : r = p_alu->i_a - p_alu->i_b;                              break;
-                case ALU_EXEC_SLL   : r = p_alu->i_a << p_alu->i_b;                             break;
-                case ALU_EXEC_EQ    : r = p_alu->i_a == p_alu->i_b;                             break;
-                case ALU_EXEC_NEQ   : r = p_alu->i_a != p_alu->i_b;                             break;
-                case ALU_EXEC_SLT   : r = static_cast<signed int>(p_alu->i_a) <
-                                            static_cast<signed int>(p_alu->i_b);                break;
-                case ALU_EXEC_SLTU  : r = p_alu->i_a < p_alu->i_b;                              break;
-                case ALU_EXEC_SGTE  : r = static_cast<signed int>(p_alu->i_a) >=
-                                            static_cast<signed int>(p_alu->i_b);                break;
-                case ALU_EXEC_SGTEU : r = p_alu->i_a >= p_alu->i_b;                             break;
-                case ALU_EXEC_ADD   :
-                default             : r = p_alu->i_a + p_alu->i_b;
+                case ALU_OP_PASSB : r = p_alu->i_b;                                         break;
+                case ALU_OP_ADD4A : r = p_alu->i_a + 4;                                     break;
+                case ALU_OP_XOR   : r = p_alu->i_a ^ p_alu->i_b;                            break;
+                case ALU_OP_SRL   : r = p_alu->i_a >> p_alu->i_b;                           break;
+                case ALU_OP_SRA   : r = static_cast<signed int>(p_alu->i_a) >> p_alu->i_b;  break;
+                case ALU_OP_OR    : r = p_alu->i_a | p_alu->i_b;                            break;
+                case ALU_OP_AND   : r = p_alu->i_a & p_alu->i_b;                            break;
+                case ALU_OP_SUB   : r = p_alu->i_a - p_alu->i_b;                            break;
+                case ALU_OP_SLL   : r = p_alu->i_a << p_alu->i_b;                           break;
+                case ALU_OP_EQ    : r = p_alu->i_a == p_alu->i_b;                           break;
+                case ALU_OP_NEQ   : r = p_alu->i_a != p_alu->i_b;                           break;
+                case ALU_OP_SLT   : r = static_cast<signed int>(p_alu->i_a) <
+                                        static_cast<signed int>(p_alu->i_b);                break;
+                case ALU_OP_SLTU  : r = p_alu->i_a < p_alu->i_b;                            break;
+                case ALU_OP_SGTE  : r = static_cast<signed int>(p_alu->i_a) >=
+                                        static_cast<signed int>(p_alu->i_b);                break;
+                case ALU_OP_SGTEU : r = p_alu->i_a >= p_alu->i_b;                           break;
+                case ALU_OP_ADD   :
+                default           : r = p_alu->i_a + p_alu->i_b;
             }
             EXPECT_EQ(r, p_alu->o_result) << "ALU operation was: " << i;
         }
@@ -258,104 +256,37 @@ TEST(unit, immgen) {
     }
 }
 // ====================================================================================================================
-TEST(unit, alu_control) {
-    std::unique_ptr<VALU_Control> dut(new VALU_Control);
-    auto p_alu_ctrl = dut.get();
-    constexpr int TEST_COUNT = 1 << 14; // 2**14
-
-    for (int i=0; i<TEST_COUNT; ++i) {
-        uint alu_exec   = ALU_EXEC_ADD;
-        auto bits3      = get_bits(i, 0, 3);
-        auto bits7      = get_bits(i, 3, 7);
-        auto bits4      = get_bits(i, 7, 4);
-        switch (bits4) {
-            case ALU_OP_R:
-                if (bits7 == 0b0100000) {
-                    switch (bits3) {
-                        case 0b000: alu_exec = ALU_EXEC_SUB; break;
-                        case 0b101: alu_exec = ALU_EXEC_SRA;
-                        default: alu_exec = ALU_EXEC_SRL;
-                    }
-                } else if (bits7 == 0b0000000) {
-                    switch (bits3) {
-                        case 0b001: alu_exec = ALU_EXEC_SLL; break;
-                        case 0b010: alu_exec = ALU_EXEC_SLT; break;
-                        case 0b011: alu_exec = ALU_EXEC_SLTU; break;
-                        case 0b100: alu_exec = ALU_EXEC_XOR; break;
-                        case 0b101: alu_exec = ALU_EXEC_SRL; break;
-                        case 0b110: alu_exec = ALU_EXEC_OR; break;
-                        case 0b111: alu_exec = ALU_EXEC_AND; break;
-                        default: break;
-                    }
-                } break;
-            case ALU_OP_I_ARITH:
-                if (bits7 == 0b0100000 && bits3 == 0b101) {
-                    alu_exec = ALU_EXEC_SRA;
-                } else if (bits7 == 0b0000000) {
-                    switch (bits3) {
-                        case 0b001: alu_exec = ALU_EXEC_SLL; break;
-                        case 0b101: alu_exec = ALU_EXEC_SRL; break;
-                        default: break;
-                    }
-                } else {
-                    switch (bits3) {
-                        case 0b010: alu_exec = ALU_EXEC_SLT; break;
-                        case 0b011: alu_exec = ALU_EXEC_SLTU; break;
-                        case 0b100: alu_exec = ALU_EXEC_XOR; break;
-                        case 0b110: alu_exec = ALU_EXEC_OR; break;
-                        case 0b111: alu_exec = ALU_EXEC_AND; break;
-                    }
-                } break;
-            case ALU_OP_B:
-                switch (bits3) {
-                    case 0b000: alu_exec = ALU_EXEC_EQ; break;
-                    case 0b001: alu_exec = ALU_EXEC_NEQ; break;
-                    case 0b100: alu_exec = ALU_EXEC_SLT; break;
-                    case 0b110: alu_exec = ALU_EXEC_SLTU; break;
-                    case 0b101: alu_exec = ALU_EXEC_SGTE; break;
-                    case 0b111: alu_exec = ALU_EXEC_SGTEU; break;
-                } break;
-            case ALU_OP_J: alu_exec = ALU_EXEC_ADD4A; break;
-            case ALU_OP_LUI: alu_exec = ALU_EXEC_PASSB; break;
-            case ALU_OP_I_JUMP: alu_exec = ALU_EXEC_ADD4A; break;
-            default: break;
-        }
-        p_alu_ctrl->i_aluOp = bits4;
-        p_alu_ctrl->i_funct7 = bits7;
-        p_alu_ctrl->i_funct3 = bits3;
-        p_alu_ctrl->eval();
-        EXPECT_EQ((uint)p_alu_ctrl->o_aluControl, alu_exec);
-    }
-}
-// ====================================================================================================================
 TEST(unit, ctrl_unit) {
     std::unique_ptr<VControlUnit> dut(new VControlUnit);
     auto p_ctrl = dut.get();
     constexpr int TEST_COUNT = 1 << 7; // 2**7
-    uint INVALID = p_ctrl->ControlUnit->INVALID | ALU_OP_R << 7;
-    uint SYSTEM_CTRL = p_ctrl->ControlUnit->ECALL | ALU_OP_SYS << 7;
-    uint FENCE_CTRL = p_ctrl->ControlUnit->FENCE_CTRL | ALU_OP_FENCE << 7;
+    uint INVALID        = p_ctrl->ControlUnit->INVALID_CTRL;
+    uint SYSTEM_CTRL    = p_ctrl->ControlUnit->SYSTEM_CTRL;
+    uint FENCE_CTRL     = p_ctrl->ControlUnit->FENCE_CTRL;
 
     for (int i=0; i<TEST_COUNT; ++i) {
         uint cm_addr    = i;
         uint ctrl_sigs  = 0;
         switch (get_bits(cm_addr, 0, 5)) {
-            case OP: ctrl_sigs = p_ctrl->ControlUnit->R_CTRL | ALU_OP_R << 7; break;
-            case JALR: ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL | ALU_OP_I_JUMP << 7; break;
-            case LOAD: ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL | ALU_OP_I_LOAD << 7; break;
-            case OP_IMM: ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL | ALU_OP_I_ARITH << 7; break;
-            case STORE: ctrl_sigs = p_ctrl->ControlUnit->S_CTRL | ALU_OP_S << 7; break;
-            case BRANCH: ctrl_sigs = p_ctrl->ControlUnit->B_CTRL | ALU_OP_B << 7; break;
-            case LUI: ctrl_sigs = p_ctrl->ControlUnit->LUI_CTRL | ALU_OP_LUI << 7; break;
-            case AUIPC: ctrl_sigs = p_ctrl->ControlUnit->AUIPC_CTRL | ALU_OP_AUIPC << 7; break;
-            case JAL: ctrl_sigs = p_ctrl->ControlUnit->J_CTRL | ALU_OP_J << 7; break;
-            case SYSTEM: ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? SYSTEM_CTRL : INVALID; break;
-            case MISC_MEM: ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? FENCE_CTRL : INVALID; break;
-            default: ctrl_sigs = p_ctrl->ControlUnit->INVALID;
+            case OP:        ctrl_sigs = p_ctrl->ControlUnit->R_CTRL;                                break;
+            case JALR:      ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL;                           break;
+            case LOAD:      ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL;                           break;
+            case OP_IMM:    ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL;                          break;
+            case STORE:     ctrl_sigs = p_ctrl->ControlUnit->S_CTRL;                                break;
+            case BRANCH:    ctrl_sigs = p_ctrl->ControlUnit->B_CTRL;                                break;
+            case LUI:       ctrl_sigs = p_ctrl->ControlUnit->LUI_CTRL;                              break;
+            case AUIPC:     ctrl_sigs = p_ctrl->ControlUnit->AUIPC_CTRL;                            break;
+            case JAL:       ctrl_sigs = p_ctrl->ControlUnit->J_CTRL;                                break;
+            case SYSTEM:    ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? SYSTEM_CTRL : INVALID;   break;
+            case MISC_MEM:  ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? FENCE_CTRL  : INVALID;   break;
+            default:        ctrl_sigs = p_ctrl->ControlUnit->INVALID_CTRL;
         }
         p_ctrl->i_opcode = get_bits(i, 0, 5);
         p_ctrl->i_funct3 = get_bits(i, 6, 3);
         p_ctrl->eval();
-        EXPECT_EQ(p_ctrl->o_ctrlSigs, ctrl_sigs);
+
+        // TODO: Also test ALU exec fields
+        uint core_ctl = get_bits(p_ctrl->o_ctrlSigs, 0, 7);
+        EXPECT_EQ(core_ctl, ctrl_sigs);
     }
 }

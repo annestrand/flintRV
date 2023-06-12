@@ -71,9 +71,9 @@
 `define CTRL_MEM_W(x)       x[4:4]
 `define CTRL_EXEC_B(x)      x[5:5]
 `define CTRL_EXEC_A(x)      x[6:6]
-`define CTRL_ALU_OP(x)      x[10:7]
-`define CTRL_ECALL(x)       x[11:11]
-`define CTRL_EBREAK(x)      x[12:12]
+`define CTRL_ALU_OP(x)      x[11:7]
+`define CTRL_ECALL(x)       x[12:12]
+`define CTRL_EBREAK(x)      x[13:13]
 
 // RV32I Opcode types
 `define R                   7'b0110011
@@ -97,36 +97,23 @@
 `define TRUE                1'b1
 `define FALSE               1'b0
 
-// ALU OP
-`define ALU_OP_R            4'b0000
-`define ALU_OP_I_JUMP       4'b0001
-`define ALU_OP_I_LOAD       4'b0010
-`define ALU_OP_I_ARITH      4'b0011
-`define ALU_OP_SYS          4'b0100
-`define ALU_OP_FENCE        4'b0101
-`define ALU_OP_S            4'b0110
-`define ALU_OP_B            4'b0111
-`define ALU_OP_LUI          4'b1000
-`define ALU_OP_AUIPC        4'b1001
-`define ALU_OP_J            4'b1010
-
 // ALU EXEC Types
-`define ALU_EXEC_ADD        5'b00000
-`define ALU_EXEC_PASSB      5'b00001
-`define ALU_EXEC_ADD4A      5'b00010
-`define ALU_EXEC_XOR        5'b00011
-`define ALU_EXEC_SRL        5'b00100
-`define ALU_EXEC_SRA        5'b00101
-`define ALU_EXEC_OR         5'b00110
-`define ALU_EXEC_AND        5'b00111
-`define ALU_EXEC_SUB        5'b01000
-`define ALU_EXEC_SLL        5'b01001
-`define ALU_EXEC_EQ         5'b01010
-`define ALU_EXEC_NEQ        5'b01011
-`define ALU_EXEC_SLT        5'b01100
-`define ALU_EXEC_SLTU       5'b01101
-`define ALU_EXEC_SGTE       5'b01110
-`define ALU_EXEC_SGTEU      5'b01111
+`define ALU_OP_ADD          5'b00000
+`define ALU_OP_PASSB        5'b00001
+`define ALU_OP_ADD4A        5'b00010
+`define ALU_OP_XOR          5'b00011
+`define ALU_OP_SRL          5'b00100
+`define ALU_OP_SRA          5'b00101
+`define ALU_OP_OR           5'b00110
+`define ALU_OP_AND          5'b00111
+`define ALU_OP_SUB          5'b01000
+`define ALU_OP_SLL          5'b01001
+`define ALU_OP_EQ           5'b01010
+`define ALU_OP_NEQ          5'b01011
+`define ALU_OP_SLT          5'b01100
+`define ALU_OP_SLTU         5'b01101
+`define ALU_OP_SGTE         5'b01110
+`define ALU_OP_SGTEU        5'b01111
 
 `define VP /*verilator public*/
 
