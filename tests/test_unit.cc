@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
+
+#include <cstdint>
+
 #include <gtest/gtest.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
@@ -72,7 +75,7 @@ TEST(unit, regfile) {
     std::unique_ptr<VRegfile> dut(new VRegfile);
     auto p_regfile = dut.get();
     constexpr int TEST_DATA_SIZE = 10;
-    uint test_data[TEST_DATA_SIZE] = {
+    uint32_t test_data[TEST_DATA_SIZE] = {
         0xdeadbeef,
         0x8badf00d,
         0x00c0ffee,
@@ -121,7 +124,7 @@ TEST(unit, dualportram) {
     std::unique_ptr<VDualPortRam> dut(new VDualPortRam);
     auto p_dpr = dut.get();
     constexpr int TEST_DATA_SIZE = 10;
-    uint test_data[TEST_DATA_SIZE] = {
+    uint32_t test_data[TEST_DATA_SIZE] = {
         0xdeadbeef,
         0x8badf00d,
         0x00c0ffee,
@@ -260,13 +263,13 @@ TEST(unit, ctrl_unit) {
     std::unique_ptr<VControlUnit> dut(new VControlUnit);
     auto p_ctrl = dut.get();
     constexpr int TEST_COUNT = 1 << 7; // 2**7
-    uint INVALID        = p_ctrl->ControlUnit->INVALID_CTRL;
-    uint SYSTEM_CTRL    = p_ctrl->ControlUnit->SYSTEM_CTRL;
-    uint FENCE_CTRL     = p_ctrl->ControlUnit->FENCE_CTRL;
+    uint32_t INVALID        = p_ctrl->ControlUnit->INVALID_CTRL;
+    uint32_t SYSTEM_CTRL    = p_ctrl->ControlUnit->SYSTEM_CTRL;
+    uint32_t FENCE_CTRL     = p_ctrl->ControlUnit->FENCE_CTRL;
 
     for (int i=0; i<TEST_COUNT; ++i) {
-        uint cm_addr    = i;
-        uint ctrl_sigs  = 0;
+        uint32_t cm_addr    = i;
+        uint32_t ctrl_sigs  = 0;
         switch (get_bits(cm_addr, 0, 5)) {
             case OP:        ctrl_sigs = p_ctrl->ControlUnit->R_CTRL;                                break;
             case JALR:      ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL;                           break;
@@ -286,7 +289,7 @@ TEST(unit, ctrl_unit) {
         p_ctrl->eval();
 
         // TODO: Also test ALU exec fields
-        uint core_ctl = get_bits(p_ctrl->o_ctrlSigs, 0, 7);
+        uint32_t core_ctl = get_bits(p_ctrl->o_ctrlSigs, 0, 7);
         EXPECT_EQ(core_ctl, ctrl_sigs);
     }
 }
