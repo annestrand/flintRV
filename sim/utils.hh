@@ -8,10 +8,6 @@
 #include <string>
 #include <vector>
 
-#ifndef VERILATOR_VER
-#define VERILATOR_VER 4028
-#endif // VERILATOR_VER
-
 #define HEX_DECODE_ASCII(in) strtol(in, NULL, 16)
 #define INT_DECODE_ASCII(in) strtol(in, NULL, 10)
 
