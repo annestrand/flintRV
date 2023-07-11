@@ -18,3 +18,4 @@ drop32soc/*.pcf
 drop32soc/*.asc
 drop32soc/*.bin
 drop32soc/*.json
+.DS_Store

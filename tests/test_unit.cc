@@ -28,6 +28,12 @@
 #include "utils.hh"
 #include "types.hh"
 
+#if VERILATOR_VER >= 4210
+#define UNIT(sim) (sim)->rootp
+#else
+#define UNIT(sim) (sim)
+#endif
+
 // ====================================================================================================================
 TEST(unit, alu) {
     std::unique_ptr<VALU> dut(new VALU);
@@ -259,37 +265,89 @@ TEST(unit, immgen) {
     }
 }
 // ====================================================================================================================
-TEST(unit, ctrl_unit) {
+TEST(unit, ctrl_unit_rv32i) {
     std::unique_ptr<VControlUnit> dut(new VControlUnit);
     auto p_ctrl = dut.get();
-    constexpr int TEST_COUNT = 1 << 7; // 2**7
-    uint32_t INVALID        = p_ctrl->ControlUnit->INVALID_CTRL;
-    uint32_t SYSTEM_CTRL    = p_ctrl->ControlUnit->SYSTEM_CTRL;
-    uint32_t FENCE_CTRL     = p_ctrl->ControlUnit->FENCE_CTRL;
+    auto CTRL = UNIT(p_ctrl)->ControlUnit;
+    constexpr int TEST_COUNT = 1 << 8; // 2**8
 
-    for (int i=0; i<TEST_COUNT; ++i) {
-        uint32_t cm_addr    = i;
-        uint32_t ctrl_sigs  = 0;
-        switch (get_bits(cm_addr, 0, 5)) {
-            case OP:        ctrl_sigs = p_ctrl->ControlUnit->R_CTRL;                                break;
-            case JALR:      ctrl_sigs = p_ctrl->ControlUnit->I_JUMP_CTRL;                           break;
-            case LOAD:      ctrl_sigs = p_ctrl->ControlUnit->I_LOAD_CTRL;                           break;
-            case OP_IMM:    ctrl_sigs = p_ctrl->ControlUnit->I_ARITH_CTRL;                          break;
-            case STORE:     ctrl_sigs = p_ctrl->ControlUnit->S_CTRL;                                break;
-            case BRANCH:    ctrl_sigs = p_ctrl->ControlUnit->B_CTRL;                                break;
-            case LUI:       ctrl_sigs = p_ctrl->ControlUnit->LUI_CTRL;                              break;
-            case AUIPC:     ctrl_sigs = p_ctrl->ControlUnit->AUIPC_CTRL;                            break;
-            case JAL:       ctrl_sigs = p_ctrl->ControlUnit->J_CTRL;                                break;
-            case SYSTEM:    ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? SYSTEM_CTRL : INVALID;   break;
-            case MISC_MEM:  ctrl_sigs = get_bits(cm_addr, 6, 3) == 0b000 ? FENCE_CTRL  : INVALID;   break;
-            default:        ctrl_sigs = p_ctrl->ControlUnit->INVALID_CTRL;
+    // Ugly macro conflicts
+    constexpr uint32_t LUI_ = LUI;
+    constexpr uint32_t AUIPC_ = AUIPC;
+    constexpr uint32_t JAL_ = JAL;
+    constexpr uint32_t JALR_ = JALR;
+#undef LUI
+#undef AUIPC
+#undef JAL
+#undef JALR
+
+    for (int instr=0; instr<TEST_COUNT; ++instr) {
+        p_ctrl->i_opcode = get_bits(instr, 0, 5);
+        p_ctrl->i_funct3 = get_bits(instr, 6, 3);
+        p_ctrl->i_funct7 = get_bits(instr, 17, 7);
+        // Select instr op table
+        uint32_t ctl_gold = 0;
+        uint32_t tbl_addr = 0;
+        if (p_ctrl->i_opcode == OP) { // R Type
+            tbl_addr = p_ctrl->i_funct3;
+            switch(tbl_addr) {
+                case 0b000: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SUB : CTRL->ADD;       break;
+                case 0b001: ctl_gold = CTRL->SLL;                                                   break;
+                case 0b010: ctl_gold = CTRL->SLT;                                                   break;
+                case 0b011: ctl_gold = CTRL->SLTU;                                                  break;
+                case 0b100: ctl_gold = CTRL->XOR;                                                   break;
+                case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRA : CTRL->SRL;       break;
+                case 0b110: ctl_gold = CTRL->OR;                                                    break;
+                case 0b111: ctl_gold = CTRL->AND;                                                   break;
+                default:    ctl_gold = CTRL->INVALID;
+            }
+        } else { // I,J,U,B Type
+            tbl_addr = p_ctrl->i_funct3 << 5 | p_ctrl->i_opcode;
+            switch (p_ctrl->i_opcode) {
+                case LOAD: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->LB;                                                break;
+                    case 0b001: ctl_gold = CTRL->LH;                                                break;
+                    case 0b010: ctl_gold = CTRL->LW;                                                break;
+                    case 0b100: ctl_gold = CTRL->LBU;                                               break;
+                    case 0b101: ctl_gold = CTRL->LHU;                                               break;
+                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                } break;
+                case STORE: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->SB;                                                break;
+                    case 0b001: ctl_gold = CTRL->SH;                                                break;
+                    case 0b010: ctl_gold = CTRL->SW;                                                break;
+                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                } break;
+                case BRANCH: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->BEQ;                                               break;
+                    case 0b001: ctl_gold = CTRL->BNE;                                               break;
+                    case 0b100: ctl_gold = CTRL->BLT;                                               break;
+                    case 0b101: ctl_gold = CTRL->BGE;                                               break;
+                    case 0b110: ctl_gold = CTRL->BLTU;                                              break;
+                    case 0b111: ctl_gold = CTRL->BGEU;                                              break;
+                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                } break;
+                case OP_IMM: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->ADDI;                                              break;
+                    case 0b010: ctl_gold = CTRL->SLTI;                                              break;
+                    case 0b011: ctl_gold = CTRL->SLTIU;                                             break;
+                    case 0b100: ctl_gold = CTRL->XORI;                                              break;
+                    case 0b110: ctl_gold = CTRL->ORI;                                               break;
+                    case 0b111: ctl_gold = CTRL->ANDI;                                              break;
+                    case 0b001: ctl_gold = CTRL->SLLI;                                              break;
+                    case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRAI : CTRL->SRLI; break;
+                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                } break;
+                case SYSTEM:    ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->ECALL : CTRL->INVALID; break;
+                case MISC_MEM:  ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->FENCE : CTRL->INVALID; break;
+                case LUI_:      ctl_gold = CTRL->LUI;                                               break;
+                case AUIPC_:    ctl_gold = CTRL->AUIPC;                                             break;
+                case JAL_:      ctl_gold = CTRL->JAL;                                               break;
+                case JALR_:     ctl_gold = CTRL->JALR;                                              break;
+                default:        ctl_gold = CTRL->INVALID;
+            }
         }
-        p_ctrl->i_opcode = get_bits(i, 0, 5);
-        p_ctrl->i_funct3 = get_bits(i, 6, 3);
         p_ctrl->eval();
-
-        // TODO: Also test ALU exec fields
-        uint32_t core_ctl = get_bits(p_ctrl->o_ctrlSigs, 0, 7);
-        EXPECT_EQ(core_ctl, ctrl_sigs);
+        EXPECT_EQ(p_ctrl->o_ctrlSigs, ctl_gold);
     }
 }
