@@ -62,8 +62,8 @@ auto rev_byte_bits = [](unsigned char x) -> unsigned char {
 #define FM(x)           get_bits(x, 28, 4)
 
 // Get immediate value from instruction (x)
-#define I_IMM(x)        (((int)IMM_11_0(x) << 20) >> 20)
-#define S_IMM(x)        (((int)(IMM_4_0(x) | IMM_11_5(x) << 5) << 20) >> 20)
+#define I_IMM(x)        ((int)IMM_11_0(x) << 20) >> 20
+#define S_IMM(x)        ((int)(IMM_4_0(x) | IMM_11_5(x) << 5) << 20) >> 20
 #define B_IMM(x)        (int)((IMM_4_1(x) | IMM_10_5(x) << 4 | IMM_11_B(x) << 10 | IMM_12(x) << 11) << 20) >> 19
 #define U_IMM(x)        IMM_31_12(x) << 12
 #define J_IMM(x)        (int)((IMM_10_1(x) | IMM_11_J(x) << 10 | IMM_19_12(x) << 11 | IMM_20(x) << 19) << 12) >> 11

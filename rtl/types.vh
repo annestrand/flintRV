@@ -18,7 +18,7 @@
 //           10 | MADD   | MSUB     | NMSUB    | NMADD    | OP-FP  | reserved | custom-2/rv128 | 48b   |
 //           11 | BRANCH | JALR     | reserved | JAL      | SYSTEM | reserved | custom-3/rv128 | ≥ 80b |
 // _____________________________________________________________________________________________________________
-// NOTE: Lower 2 bits of RV32 instruction is unused - reserved for compressed (RV32C) instruction encoding
+// NOTE: Lower 2 bits of RV32 instruction "instr[1:0]" is unused - reserved for compressed (RV32C) instruction encoding
 // ----------------------------------
 `define LOAD                5'b00000
 `define LOAD_FP             5'b00001
@@ -97,7 +97,7 @@
 `define TRUE                1'b1
 `define FALSE               1'b0
 
-// ALU EXEC Types
+// ALU Operation Types
 `define ALU_OP_ADD          5'b00000
 `define ALU_OP_PASSB        5'b00001
 `define ALU_OP_ADD4A        5'b00010
