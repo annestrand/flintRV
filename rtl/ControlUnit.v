@@ -76,34 +76,34 @@ module ControlUnit (
     // Control Unit decoding
     always @(*) begin
         casez ({i_funct3, i_opcode})
-            {3'b???, `LUI}      : cm_out = LUI;
-            {3'b???, `AUIPC}    : cm_out = AUIPC;
-            {3'b???, `JAL}      : cm_out = JAL;
-            {3'b???, `JALR}     : cm_out = JALR;
-            {3'b000, `LOAD}     : cm_out = LB;
-            {3'b001, `LOAD}     : cm_out = LH;
-            {3'b010, `LOAD}     : cm_out = LW;
-            {3'b100, `LOAD}     : cm_out = LBU;
-            {3'b101, `LOAD}     : cm_out = LHU;
-            {3'b000, `STORE}    : cm_out = SB;
-            {3'b001, `STORE}    : cm_out = SH;
-            {3'b010, `STORE}    : cm_out = SW;
-            {3'b000, `BRANCH}   : cm_out = BEQ;
-            {3'b001, `BRANCH}   : cm_out = BNE;
-            {3'b100, `BRANCH}   : cm_out = BLT;
-            {3'b101, `BRANCH}   : cm_out = BGE;
-            {3'b110, `BRANCH}   : cm_out = BLTU;
-            {3'b111, `BRANCH}   : cm_out = BGEU;
-            {3'b000, `OP_IMM}   : cm_out = ADDI;
-            {3'b010, `OP_IMM}   : cm_out = SLTI;
-            {3'b011, `OP_IMM}   : cm_out = SLTIU;
-            {3'b100, `OP_IMM}   : cm_out = XORI;
-            {3'b110, `OP_IMM}   : cm_out = ORI;
-            {3'b111, `OP_IMM}   : cm_out = ANDI;
-            {3'b001, `OP_IMM}   : cm_out = SLLI;
-            {3'b101, `OP_IMM}   : cm_out = i_funct7[5] ? SRAI : SRLI;
-            {3'b000, `SYSTEM}   : cm_out = ECALL;
-            {3'b000, `MISC_MEM} : cm_out = FENCE;
+            {3'b???, `OP_MAP_LUI}       : cm_out = LUI;
+            {3'b???, `OP_MAP_AUIPC}     : cm_out = AUIPC;
+            {3'b???, `OP_MAP_JAL}       : cm_out = JAL;
+            {3'b???, `OP_MAP_JALR}      : cm_out = JALR;
+            {3'b000, `OP_MAP_LOAD}      : cm_out = LB;
+            {3'b001, `OP_MAP_LOAD}      : cm_out = LH;
+            {3'b010, `OP_MAP_LOAD}      : cm_out = LW;
+            {3'b100, `OP_MAP_LOAD}      : cm_out = LBU;
+            {3'b101, `OP_MAP_LOAD}      : cm_out = LHU;
+            {3'b000, `OP_MAP_STORE}     : cm_out = SB;
+            {3'b001, `OP_MAP_STORE}     : cm_out = SH;
+            {3'b010, `OP_MAP_STORE}     : cm_out = SW;
+            {3'b000, `OP_MAP_BRANCH}    : cm_out = BEQ;
+            {3'b001, `OP_MAP_BRANCH}    : cm_out = BNE;
+            {3'b100, `OP_MAP_BRANCH}    : cm_out = BLT;
+            {3'b101, `OP_MAP_BRANCH}    : cm_out = BGE;
+            {3'b110, `OP_MAP_BRANCH}    : cm_out = BLTU;
+            {3'b111, `OP_MAP_BRANCH}    : cm_out = BGEU;
+            {3'b000, `OP_MAP_OP_IMM}    : cm_out = ADDI;
+            {3'b010, `OP_MAP_OP_IMM}    : cm_out = SLTI;
+            {3'b011, `OP_MAP_OP_IMM}    : cm_out = SLTIU;
+            {3'b100, `OP_MAP_OP_IMM}    : cm_out = XORI;
+            {3'b110, `OP_MAP_OP_IMM}    : cm_out = ORI;
+            {3'b111, `OP_MAP_OP_IMM}    : cm_out = ANDI;
+            {3'b001, `OP_MAP_OP_IMM}    : cm_out = SLLI;
+            {3'b101, `OP_MAP_OP_IMM}    : cm_out = i_funct7[5] ? SRAI : SRLI;
+            {3'b000, `OP_MAP_SYSTEM}    : cm_out = ECALL;
+            {3'b000, `OP_MAP_MISC_MEM}  : cm_out = FENCE;
             default             : cm_out = INVALID;
         endcase
         // Funct Control Unit decoding
@@ -121,7 +121,7 @@ module ControlUnit (
     end
 
     // Output logic
-    wire fcm_sel        = i_opcode == `OP; // (i.e. RV32I R-type)
+    wire fcm_sel        = i_opcode == `OP_MAP_OP; // (i.e. RV32I R-type)
     assign o_ctrlSigs   = fcm_sel ? funct_cm_out : cm_out;
 
 endmodule

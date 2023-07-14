@@ -271,16 +271,6 @@ TEST(unit, ctrl_unit_rv32i) {
     auto CTRL = UNIT(p_ctrl)->ControlUnit;
     constexpr int TEST_COUNT = 1 << 8; // 2**8
 
-    // Ugly macro conflicts
-    constexpr uint32_t LUI_ = LUI;
-    constexpr uint32_t AUIPC_ = AUIPC;
-    constexpr uint32_t JAL_ = JAL;
-    constexpr uint32_t JALR_ = JALR;
-#undef LUI
-#undef AUIPC
-#undef JAL
-#undef JALR
-
     for (int instr=0; instr<TEST_COUNT; ++instr) {
         p_ctrl->i_opcode = get_bits(instr, 0, 5);
         p_ctrl->i_funct3 = get_bits(instr, 6, 3);
@@ -288,63 +278,63 @@ TEST(unit, ctrl_unit_rv32i) {
         // Select instr op table
         uint32_t ctl_gold = 0;
         uint32_t tbl_addr = 0;
-        if (p_ctrl->i_opcode == OP) { // R Type
+        if (p_ctrl->i_opcode == OP_MAP_OP) { // R Type
             tbl_addr = p_ctrl->i_funct3;
             switch(tbl_addr) {
-                case 0b000: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SUB : CTRL->ADD;       break;
-                case 0b001: ctl_gold = CTRL->SLL;                                                   break;
-                case 0b010: ctl_gold = CTRL->SLT;                                                   break;
-                case 0b011: ctl_gold = CTRL->SLTU;                                                  break;
-                case 0b100: ctl_gold = CTRL->XOR;                                                   break;
-                case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRA : CTRL->SRL;       break;
-                case 0b110: ctl_gold = CTRL->OR;                                                    break;
-                case 0b111: ctl_gold = CTRL->AND;                                                   break;
+                case 0b000: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SUB : CTRL->ADD;               break;
+                case 0b001: ctl_gold = CTRL->SLL;                                                           break;
+                case 0b010: ctl_gold = CTRL->SLT;                                                           break;
+                case 0b011: ctl_gold = CTRL->SLTU;                                                          break;
+                case 0b100: ctl_gold = CTRL->XOR;                                                           break;
+                case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRA : CTRL->SRL;               break;
+                case 0b110: ctl_gold = CTRL->OR;                                                            break;
+                case 0b111: ctl_gold = CTRL->AND;                                                           break;
                 default:    ctl_gold = CTRL->INVALID;
             }
         } else { // I,J,U,B Type
             tbl_addr = p_ctrl->i_funct3 << 5 | p_ctrl->i_opcode;
             switch (p_ctrl->i_opcode) {
-                case LOAD: switch (p_ctrl->i_funct3) {
-                    case 0b000: ctl_gold = CTRL->LB;                                                break;
-                    case 0b001: ctl_gold = CTRL->LH;                                                break;
-                    case 0b010: ctl_gold = CTRL->LW;                                                break;
-                    case 0b100: ctl_gold = CTRL->LBU;                                               break;
-                    case 0b101: ctl_gold = CTRL->LHU;                                               break;
-                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                case OP_MAP_LOAD: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->LB;                                                        break;
+                    case 0b001: ctl_gold = CTRL->LH;                                                        break;
+                    case 0b010: ctl_gold = CTRL->LW;                                                        break;
+                    case 0b100: ctl_gold = CTRL->LBU;                                                       break;
+                    case 0b101: ctl_gold = CTRL->LHU;                                                       break;
+                    default:    ctl_gold = CTRL->INVALID;                                                   break;
                 } break;
-                case STORE: switch (p_ctrl->i_funct3) {
-                    case 0b000: ctl_gold = CTRL->SB;                                                break;
-                    case 0b001: ctl_gold = CTRL->SH;                                                break;
-                    case 0b010: ctl_gold = CTRL->SW;                                                break;
-                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                case OP_MAP_STORE: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->SB;                                                        break;
+                    case 0b001: ctl_gold = CTRL->SH;                                                        break;
+                    case 0b010: ctl_gold = CTRL->SW;                                                        break;
+                    default:    ctl_gold = CTRL->INVALID;                                                   break;
                 } break;
-                case BRANCH: switch (p_ctrl->i_funct3) {
-                    case 0b000: ctl_gold = CTRL->BEQ;                                               break;
-                    case 0b001: ctl_gold = CTRL->BNE;                                               break;
-                    case 0b100: ctl_gold = CTRL->BLT;                                               break;
-                    case 0b101: ctl_gold = CTRL->BGE;                                               break;
-                    case 0b110: ctl_gold = CTRL->BLTU;                                              break;
-                    case 0b111: ctl_gold = CTRL->BGEU;                                              break;
-                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                case OP_MAP_BRANCH: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->BEQ;                                                       break;
+                    case 0b001: ctl_gold = CTRL->BNE;                                                       break;
+                    case 0b100: ctl_gold = CTRL->BLT;                                                       break;
+                    case 0b101: ctl_gold = CTRL->BGE;                                                       break;
+                    case 0b110: ctl_gold = CTRL->BLTU;                                                      break;
+                    case 0b111: ctl_gold = CTRL->BGEU;                                                      break;
+                    default:    ctl_gold = CTRL->INVALID;                                                   break;
                 } break;
-                case OP_IMM: switch (p_ctrl->i_funct3) {
-                    case 0b000: ctl_gold = CTRL->ADDI;                                              break;
-                    case 0b010: ctl_gold = CTRL->SLTI;                                              break;
-                    case 0b011: ctl_gold = CTRL->SLTIU;                                             break;
-                    case 0b100: ctl_gold = CTRL->XORI;                                              break;
-                    case 0b110: ctl_gold = CTRL->ORI;                                               break;
-                    case 0b111: ctl_gold = CTRL->ANDI;                                              break;
-                    case 0b001: ctl_gold = CTRL->SLLI;                                              break;
-                    case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRAI : CTRL->SRLI; break;
-                    default:    ctl_gold = CTRL->INVALID;                                           break;
+                case OP_MAP_OP_IMM: switch (p_ctrl->i_funct3) {
+                    case 0b000: ctl_gold = CTRL->ADDI;                                                      break;
+                    case 0b010: ctl_gold = CTRL->SLTI;                                                      break;
+                    case 0b011: ctl_gold = CTRL->SLTIU;                                                     break;
+                    case 0b100: ctl_gold = CTRL->XORI;                                                      break;
+                    case 0b110: ctl_gold = CTRL->ORI;                                                       break;
+                    case 0b111: ctl_gold = CTRL->ANDI;                                                      break;
+                    case 0b001: ctl_gold = CTRL->SLLI;                                                      break;
+                    case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRAI : CTRL->SRLI;         break;
+                    default:    ctl_gold = CTRL->INVALID;                                                   break;
                 } break;
-                case SYSTEM:    ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->ECALL : CTRL->INVALID; break;
-                case MISC_MEM:  ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->FENCE : CTRL->INVALID; break;
-                case LUI_:      ctl_gold = CTRL->LUI;                                               break;
-                case AUIPC_:    ctl_gold = CTRL->AUIPC;                                             break;
-                case JAL_:      ctl_gold = CTRL->JAL;                                               break;
-                case JALR_:     ctl_gold = CTRL->JALR;                                              break;
-                default:        ctl_gold = CTRL->INVALID;
+                case OP_MAP_SYSTEM:     ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->ECALL : CTRL->INVALID; break;
+                case OP_MAP_MISC_MEM:   ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->FENCE : CTRL->INVALID; break;
+                case OP_MAP_LUI:        ctl_gold = CTRL->LUI;                                               break;
+                case OP_MAP_AUIPC:      ctl_gold = CTRL->AUIPC;                                             break;
+                case OP_MAP_JAL:        ctl_gold = CTRL->JAL;                                               break;
+                case OP_MAP_JALR:       ctl_gold = CTRL->JALR;                                              break;
+                default:                ctl_gold = CTRL->INVALID;
             }
         }
         p_ctrl->eval();

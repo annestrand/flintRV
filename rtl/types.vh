@@ -20,37 +20,37 @@
 // _____________________________________________________________________________________________________________
 // NOTE: Lower 2 bits of RV32 instruction "instr[1:0]" is unused - reserved for compressed (RV32C) instruction encoding
 // ----------------------------------
-`define LOAD                5'b00000
-`define LOAD_FP             5'b00001
-`define CUSTOM_0            5'b00010 // Free space
-`define MISC_MEM            5'b00011
-`define OP_IMM              5'b00100
-`define AUIPC               5'b00101
-`define OP_IMM_32           5'b00110
+`define OP_MAP_LOAD         5'b00000
+`define OP_MAP_LOAD_FP      5'b00001
+`define OP_MAP_CUSTOM_0     5'b00010 // Free space
+`define OP_MAP_MISC_MEM     5'b00011
+`define OP_MAP_OP_IMM       5'b00100
+`define OP_MAP_AUIPC        5'b00101
+`define OP_MAP_OP_IMM_32    5'b00110
 // ----------------------------------
-`define STORE               5'b01000
-`define STORE_FP            5'b01001
-`define CUSTOM_1            5'b01010 // Free space
-`define AMO                 5'b01011
-`define OP                  5'b01100
-`define LUI                 5'b01101
-`define OP_32               5'b01110
+`define OP_MAP_STORE        5'b01000
+`define OP_MAP_STORE_FP     5'b01001
+`define OP_MAP_CUSTOM_1     5'b01010 // Free space
+`define OP_MAP_AMO          5'b01011
+`define OP_MAP_OP           5'b01100
+`define OP_MAP_LUI          5'b01101
+`define OP_MAP_OP_32        5'b01110
 // ----------------------------------
-`define MADD                5'b10000
-`define MSUB                5'b10001
-`define NMSUB               5'b10010
-`define NMADD               5'b10011
-`define OP_FP               5'b10100
-`define RESERVED_1          5'b10101
-`define CUSTOM_2            5'b10110 // Free space (NOTE: This space is only available if NOT using RV128)
+`define OP_MAP_MADD         5'b10000
+`define OP_MAP_MSUB         5'b10001
+`define OP_MAP_NMSUB        5'b10010
+`define OP_MAP_NMADD        5'b10011
+`define OP_MAP_OP_FP        5'b10100
+`define OP_MAP_RESERVED_1   5'b10101
+`define OP_MAP_CUSTOM_2     5'b10110 // Free space (NOTE: This space is only available if NOT using RV128)
 // ----------------------------------
-`define BRANCH              5'b11000
-`define JALR                5'b11001
-`define RESERVED_2          5'b11010
-`define JAL                 5'b11011
-`define SYSTEM              5'b11100
-`define RESERVED_3          5'b11101
-`define CUSTOM_3            5'b11110 // Free space (NOTE: This space is only available if NOT using RV128)
+`define OP_MAP_BRANCH       5'b11000
+`define OP_MAP_JALR         5'b11001
+`define OP_MAP_RESERVED_2   5'b11010
+`define OP_MAP_JAL          5'b11011
+`define OP_MAP_SYSTEM       5'b11100
+`define OP_MAP_RESERVED_3   5'b11101
+`define OP_MAP_CUSTOM_3     5'b11110 // Free space (NOTE: This space is only available if NOT using RV128)
 // ----------------------------------
 
 // Instruction fields       x[a:b]

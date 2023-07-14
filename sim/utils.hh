@@ -6,10 +6,6 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <vector>
-
-#define HEX_DECODE_ASCII(in) strtol(in, NULL, 16)
-#define INT_DECODE_ASCII(in) strtol(in, NULL, 10)
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define LOG_I(msg, ...) \
@@ -21,7 +17,7 @@
 
 namespace
 {
-auto get_bits = [](unsigned int instr, int pos, int width) {
+auto get_bits = [](unsigned int instr, int pos, int width) -> unsigned int {
     return ((instr & ((((1 << width) - 1) << pos))) >> pos);
 };
 auto rev_byte_bits = [](unsigned char x) -> unsigned char {

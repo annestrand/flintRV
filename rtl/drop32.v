@@ -107,6 +107,7 @@ module drop32 (
     wire            WB_flush                `VP;
     wire            ecall                   `VP;
     wire            ebreak                  `VP;
+    wire            jalr                    `VP;
 
     // Branch/jump logic
     assign pcJump       = braOutcome || p_jmp[MEM];
@@ -153,7 +154,7 @@ module drop32 (
         p_bra       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_bra       [EXEC] : bra;
         p_jmp       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jmp       [EXEC] : jmp;
         p_ebreak    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ebreak    [EXEC] : ebreak;
-        p_jalr      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jalr      [EXEC] : `JALR == `OPCODE_RV32(instrReg);
+        p_jalr      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jalr      [EXEC] : jalr;
         // Memory
         p_mem_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem_w   [MEM] : p_mem_w     [EXEC];
         p_reg_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_reg_w   [MEM] : p_reg_w     [EXEC];
@@ -266,6 +267,7 @@ module drop32 (
     assign jmp      = `CTRL_JMP(ctrlSigs);
     assign ecall    = `CTRL_ECALL(ctrlSigs);
     assign ebreak   = `CTRL_EBREAK(ctrlSigs) || (ecall & instrReg[EBREAK]);
+    assign jalr     = `OP_MAP_JALR == `OPCODE_RV32(instrReg);
 
     // --- [Stage]: Execute ---
     // ALU
