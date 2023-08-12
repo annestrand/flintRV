@@ -281,12 +281,24 @@ TEST(unit, ctrl_unit_rv32i) {
         if (p_ctrl->i_opcode == OP_MAP_OP) { // R Type
             tbl_addr = p_ctrl->i_funct3;
             switch(tbl_addr) {
-                case 0b000: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SUB : CTRL->ADD; break;
+                case 0b000:
+                    if (p_ctrl->i_funct7 == 0b0100000) {
+                        ctl_gold = CTRL->SUB;
+                    } else {
+                        ctl_gold = CTRL->ADD;
+                    }
+                    break;
                 case 0b001: ctl_gold = CTRL->SLL; break;
                 case 0b010: ctl_gold = CTRL->SLT; break;
                 case 0b011: ctl_gold = CTRL->SLTU; break;
                 case 0b100: ctl_gold = CTRL->XOR; break;
-                case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRA : CTRL->SRL; break;
+                case 0b101:
+                    if (p_ctrl->i_funct7 == 0b0100000) {
+                        ctl_gold = CTRL->SRA;
+                    }  else {
+                        ctl_gold = CTRL->SRL;
+                    }
+                    break;
                 case 0b110: ctl_gold = CTRL->OR; break;
                 case 0b111: ctl_gold = CTRL->AND; break;
                 default:    ctl_gold = CTRL->INVALID; break;
@@ -325,16 +337,34 @@ TEST(unit, ctrl_unit_rv32i) {
                     case 0b110: ctl_gold = CTRL->ORI; break;
                     case 0b111: ctl_gold = CTRL->ANDI; break;
                     case 0b001: ctl_gold = CTRL->SLLI; break;
-                    case 0b101: ctl_gold = p_ctrl->i_funct7 == 0b0100000 ? CTRL->SRAI : CTRL->SRLI; break;
+                    case 0b101:
+                        if (p_ctrl->i_funct7 == 0b0100000) {
+                            ctl_gold = CTRL->SRAI;
+                        } else {
+                            ctl_gold = CTRL->SRLI;
+                        }
+                        break;
                     default:    ctl_gold = CTRL->INVALID; break;
                 } break;
-                case OP_MAP_SYSTEM:     ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->ECALL : CTRL->INVALID; break;
-                case OP_MAP_MISC_MEM:   ctl_gold = p_ctrl->i_funct3 == 0b000 ? CTRL->FENCE : CTRL->INVALID; break;
-                case OP_MAP_LUI:        ctl_gold = CTRL->LUI; break;
-                case OP_MAP_AUIPC:      ctl_gold = CTRL->AUIPC; break;
-                case OP_MAP_JAL:        ctl_gold = CTRL->JAL; break;
-                case OP_MAP_JALR:       ctl_gold = CTRL->JALR; break;
-                default:                ctl_gold = CTRL->INVALID; break;
+                case OP_MAP_SYSTEM:
+                    if (p_ctrl->i_funct3 == 0b000) {
+                        ctl_gold = CTRL->ECALL;
+                    } else {
+                        ctl_gold = CTRL->INVALID;
+                    }
+                    break;
+                case OP_MAP_MISC_MEM:
+                    if (p_ctrl->i_funct3 == 0b000) {
+                        ctl_gold = CTRL->FENCE;
+                    } else {
+                        ctl_gold = CTRL->INVALID;
+                    }
+                    break;
+                case OP_MAP_LUI:      ctl_gold = CTRL->LUI; break;
+                case OP_MAP_AUIPC:    ctl_gold = CTRL->AUIPC; break;
+                case OP_MAP_JAL:      ctl_gold = CTRL->JAL; break;
+                case OP_MAP_JALR:     ctl_gold = CTRL->JALR; break;
+                default:              ctl_gold = CTRL->INVALID; break;
             }
         }
         p_ctrl->eval();
