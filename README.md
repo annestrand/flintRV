@@ -75,6 +75,10 @@ Then to build the tests:
 
     $ make tests DOCKER=ON
 
+Then to shut down the container when finished:
+
+    $ docker stop drop32
+
 ## Make configs ⚙
 Below are a table of Make config variables:
 | Variable     | Behavior                   | Usage                                   | Default             |

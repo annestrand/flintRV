@@ -6,7 +6,6 @@ ROOT_DIR               := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST
 OUT_DIR                := build
 ifdef DOCKER
 DOCKER_PREFIX          := docker exec -u user -w /src drop32
-DOCKER_RUNNING         := $(shell docker ps -a -q -f name=drop32)
 else
 DOCKER_PREFIX          :=
 endif
@@ -202,7 +201,7 @@ soc: $(DROP32SOC_FIRMWARE)
 # Create the docker container (if needed) and start
 .PHONY: docker
 docker:
-ifeq ($(DOCKER_RUNNING),)
+ifeq ($(shell docker ps -a -q -f name=drop32),)
 	@docker build -t riscv-gnu-toolchain .
 	@docker create -it -v $(ROOT_DIR):/src --name drop32 riscv-gnu-toolchain
 endif
