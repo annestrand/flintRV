@@ -69,11 +69,13 @@ here to take care of this (easy-mode).
 
 To build and start the container (need to run at least once to ensure container is running):
 
-    $ make docker
+    $ docker build -t riscv-gnu-toolchain .
+    $ docker create -it -v $PWD:/src --name drop32 riscv-gnu-toolchain
+    $ docker start drop32
 
 Then to build the tests:
 
-    $ make tests DOCKER=ON
+    $ make DOCKER=ON
 
 Then to shut down the container when finished:
 

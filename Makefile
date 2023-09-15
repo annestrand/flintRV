@@ -198,15 +198,6 @@ soc: $(DROP32SOC_COREGEN)
 soc: $(DROP32SOC_ELF)
 soc: $(DROP32SOC_FIRMWARE)
 
-# Create the docker container (if needed) and start
-.PHONY: docker
-docker:
-ifeq ($(shell docker ps -a -q -f name=drop32),)
-	@docker build -t riscv-gnu-toolchain .
-	@docker create -it -v $(ROOT_DIR):/src --name drop32 riscv-gnu-toolchain
-endif
-	@docker start drop32
-
 .PHONY: clean
 clean:
 	rm -rf $(OUT_DIR)
