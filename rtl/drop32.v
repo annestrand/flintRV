@@ -199,7 +199,7 @@ module drop32 (
                                         PC + 32'd4      ;
     end
     generate
-        if (ICACHE_LATENCY == 1) begin // BRAM-based I$
+        if (ICACHE_LATENCY == 1) begin : gen_ICACHE_LATENCY // BRAM-based I$
             reg [XLEN-1:0]  PC2              `VP;
             reg             FETCH_flush2     `VP;
             wire            FETCH_flush_line `VP;
@@ -220,7 +220,7 @@ module drop32 (
                                     FETCH_stall         ?   PCReg       :
                                                             PC2         ;
             end
-        end else begin // LUT-based I$
+        end else begin : gen_ICACHE_LATENCY // LUT-based I$
             always @(posedge i_clk) begin
                 // Buffer instruction fetch to balance the 1cc BRAM-based regfile read
                 instrReg    <=  FETCH_flush ?   NOP         :
