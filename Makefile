@@ -9,7 +9,6 @@ DOCKER_PREFIX          := docker exec -u user -w /src drop32
 else
 DOCKER_PREFIX          :=
 endif
-GTEST_BASEDIR          ?= /usr/local/lib
 SYSTEM                 := $(shell uname -s)
 
 # Project metadata
@@ -110,12 +109,6 @@ SIM_FLAGS              += -I$(VERILATOR_ROOT)/include/vltstd
 SIM_FLAGS              += -faligned-new
 SIM_FLAGS              += -std=c++14
 
-SIM_LDFLAGS            :=
-ifeq ($(SYSTEM), Darwin)
-# Verilator fix weak symbols on macOS: https://github.com/verilator/verilator/pull/3823
-SIM_LDFLAGS            += -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv
-endif
-
 SIM_SRCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.cc" -exec basename {} \;)
 SIM_INCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.hh")
 SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/%.o)
@@ -159,11 +152,7 @@ TEST_FLAGS             += -faligned-new
 TEST_FLAGS             += -std=c++14
 
 TEST_LDFLAGS           := -pthread
-TEST_LDFLAGS           += $(GTEST_BASEDIR)/libgtest.a
-ifeq ($(SYSTEM), Darwin)
-# Verilator fix weak symbols on macOS: https://github.com/verilator/verilator/pull/3823
-TEST_LDFLAGS           += -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv
-endif
+TEST_LDFLAGS           += -lgtest
 
 TEST_SRCS              := $(shell find tests/ -type f -name "*.cc")
 TEST_SRCS_BASENAME     := $(notdir $(TEST_SRCS))

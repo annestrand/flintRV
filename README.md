@@ -86,5 +86,4 @@ Below are a table of Make config variables:
 | Variable     | Behavior                   | Usage                                   | Default             |
 |:-------------|:---------------------------|:----------------------------------------|:--------------------|
 |TC_TRIPLE     |RISCV-GCC toolchain triple  |$ make TC_TRIPLE=riscv64-unknown-elf ... | riscv64-unknown-elf |
-|GTEST_BASEDIR |GoogleTest install dir      |$ make GTEST_BASEDIR=/opt/gtest/lib ...  | /usr/local/lib      |
 |DOCKER        |Use Docker GCC toolchain    |$ make DOCKER=1 ...                      | 0 (OFF)             |
