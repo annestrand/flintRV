@@ -65,20 +65,6 @@ auto rev_byte_bits = [](unsigned char x) -> unsigned char {
 #define J_IMM(x)        (int)((IMM_10_1(x) | IMM_11_J(x) << 10 | IMM_19_12(x) << 11 | IMM_20(x) << 19) << 12) >> 11
 #define I_FENCE_IMM(x)  S_IMM(x)
 
-// RV32I types
-enum {
-    R       = 0b0110011,
-    I_JUMP  = 0b1100111,
-    I_LOAD  = 0b0000011,
-    I_ARITH = 0b0010011,
-    I_SYS   = 0b1110011,
-    I_FENCE = 0b0001111,
-    S       = 0b0100011,
-    B       = 0b1100011,
-    U_LUI   = 0b0110111,
-    U_AUIPC = 0b0010111,
-    J       = 0b1101111
-};
 // RV32I instructions
 enum {
     EBREAK  = (0x1  << 20) | (0x0 << 7) | (0x73),

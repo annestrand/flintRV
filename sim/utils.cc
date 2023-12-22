@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "utils.hh"
+#include "types.hh"
 
 // ====================================================================================================================
 bool loadMem(std::string filePath, char* mem, ssize_t memLen) {
