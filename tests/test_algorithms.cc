@@ -29,7 +29,7 @@ extern int g_dumpLevel;
 TEST(algorithms, fibonacci) {
   constexpr int memSize = 0x4000;
   drop32 dut = drop32(1000000, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/fibonacci.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(memSize, build_tests_fibonacci_hex,
@@ -72,7 +72,7 @@ TEST(algorithms, fibonacci) {
 TEST(algorithms, binsearch) {
   constexpr int memSize = 0x4000;
   drop32 dut = drop32(1000000, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/binsearch.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(memSize, build_tests_binsearch_hex,
@@ -108,7 +108,7 @@ TEST(algorithms, binsearch) {
 TEST(algorithms, mergesort) {
   constexpr int memSize = 0x4000;
   drop32 dut = drop32(1000000, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/mergesort.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(memSize, build_tests_mergesort_hex,

@@ -29,7 +29,7 @@ extern int g_dumpLevel;
 // ====================================================================================================================
 TEST(basic, loop) { // Basic test loop summation for 10 iterations
   drop32 dut = drop32(200, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/simple_loop.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(0x200, build_tests_simple_loop_hex,
@@ -61,7 +61,7 @@ TEST(basic, loop) { // Basic test loop summation for 10 iterations
 TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
                      // XOR, etc.)
   drop32 dut = drop32(200, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/simple_logic.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(0x200, build_tests_logic_hex,
@@ -100,7 +100,7 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
 TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
                      // ADD, SUB, SRL etc.)
   drop32 dut = drop32(200, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/simple_arith.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(0x200, build_tests_arith_hex,
@@ -141,7 +141,7 @@ TEST(
     basic,
     jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
   drop32 dut = drop32(200, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/simple_jump.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(0x200, build_tests_jump_branch_hex,
@@ -171,7 +171,7 @@ TEST(
 // ====================================================================================================================
 TEST(basic, load_store) { // Tests load and store based instructions
   drop32 dut = drop32(200, g_dumpLevel);
-  if (!dut.create(new Vdrop32(), "build/vcd/simple_load_store.vcd")) {
+  if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
   if (!dut.createMemory(0x200, build_tests_load_store_hex,

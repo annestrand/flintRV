@@ -63,7 +63,7 @@ extern int g_dumpLevel;
   TEST(functional, name) {                                                     \
     constexpr int memSize = memsize;                                           \
     drop32 dut = drop32(timeout, dumplvl);                                     \
-    if (!dut.create(new Vdrop32(), "build/vcd/" #name ".vcd")) {               \
+    if (!dut.create(new Vdrop32(), nullptr)) {                                 \
       FAIL();                                                                  \
     }                                                                          \
     if (!dut.createMemory(memSize, build_external_riscv_tests_##name##_hex,    \

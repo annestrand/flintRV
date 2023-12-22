@@ -242,7 +242,7 @@ $(OUT_DIR)/Vdrop32: $(SIM_OBJS)
 	@echo "    LD          $(notdir $@)"
 	@$(CXX) -o $@ $(SIM_OBJS) $(OUT_DIR)/verilated/Vdrop32__ALL.a $(VOBJS) $(SIM_LDFLAGS)
 
-$(OUT_DIR)/Vdrop32_tests: $(TEST_OBJS) | $(OUT_DIR)/vcd
+$(OUT_DIR)/Vdrop32_tests: $(TEST_OBJS)
 	@echo "    LD          $(notdir $@)"
 	@$(CXX) -o $@ $(TEST_OBJS) $(RTL_LIBS) $(VOBJS) $(TEST_LDFLAGS)
 
@@ -296,9 +296,6 @@ $(OUT_DIR)/tests:
 	@mkdir -p $@
 
 $(OUT_DIR)/external/riscv_tests:
-	@mkdir -p $@
-
-$(OUT_DIR)/vcd:
 	@mkdir -p $@
 
 $(OUT_DIR)/verilated:
