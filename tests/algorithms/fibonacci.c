@@ -14,7 +14,7 @@ int fibonacci(int x) {
     return fibonacci(x - 1) + fibonacci(x - 2);
 }
 
-// ====================================================================================================================
+
 int main(void) {
     int test_6                      = fibonacci(6);
     int test_7                      = fibonacci(7);

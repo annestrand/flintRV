@@ -34,7 +34,7 @@
 #define UNIT(sim) (sim)
 #endif
 
-// ====================================================================================================================
+
 TEST(unit, alu) {
   std::unique_ptr<VALU> dut(new VALU);
   auto p_alu = dut.get();
@@ -107,7 +107,7 @@ TEST(unit, alu) {
     }
   }
 }
-// ====================================================================================================================
+
 TEST(unit, regfile) {
   std::unique_ptr<VRegfile> dut(new VRegfile);
   auto p_regfile = dut.get();
@@ -147,7 +147,7 @@ TEST(unit, regfile) {
   EXPECT_EQ(p_regfile->o_rs1Data, 0xffffffff);
   EXPECT_EQ(p_regfile->o_rs2Data, 0xffffffff);
 }
-// ====================================================================================================================
+
 TEST(unit, dualportram) {
   std::unique_ptr<VDualPortRam> dut(new VDualPortRam);
   auto p_dpr = dut.get();
@@ -176,7 +176,7 @@ TEST(unit, dualportram) {
     EXPECT_EQ(p_dpr->o_q, test_data[i]);
   }
 }
-// ====================================================================================================================
+
 TEST(unit, immgen) {
   std::unique_ptr<VImmGen> dut(new VImmGen);
   auto p_immgen = dut.get();
@@ -277,7 +277,7 @@ TEST(unit, immgen) {
     EXPECT_EQ(p_immgen->o_imm, I_IMM(x));
   }
 }
-// ====================================================================================================================
+
 TEST(unit, ctrl_unit_rv32i) {
   std::unique_ptr<VControlUnit> dut(new VControlUnit);
   auto p_ctrl = dut.get();

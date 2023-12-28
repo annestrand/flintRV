@@ -26,7 +26,7 @@ namespace {
 
 extern int g_dumpLevel;
 
-// ====================================================================================================================
+
 TEST(basic, loop) { // Basic test loop summation for 10 iterations
   drop32 dut = drop32(200, g_dumpLevel);
   if (!dut.create(new Vdrop32(), nullptr)) {
@@ -57,7 +57,7 @@ TEST(basic, loop) { // Basic test loop summation for 10 iterations
 
   EXPECT_EQ(dut.readRegfile(resultReg), expectedVal);
 }
-// ====================================================================================================================
+
 TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
                      // XOR, etc.)
   drop32 dut = drop32(200, g_dumpLevel);
@@ -96,7 +96,7 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
 
   EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
-// ====================================================================================================================
+
 TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
                      // ADD, SUB, SRL etc.)
   drop32 dut = drop32(200, g_dumpLevel);
@@ -136,7 +136,7 @@ TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
 
   EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
-// ====================================================================================================================
+
 TEST(
     basic,
     jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
@@ -168,7 +168,7 @@ TEST(
 
   EXPECT_EQ(dut.readRegfile(resultReg), 0);
 }
-// ====================================================================================================================
+
 TEST(basic, load_store) { // Tests load and store based instructions
   drop32 dut = drop32(200, g_dumpLevel);
   if (!dut.create(new Vdrop32(), nullptr)) {

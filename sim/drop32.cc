@@ -18,11 +18,11 @@
 #include "drop32.hh"
 #include "utils.hh"
 
-// ====================================================================================================================
+
 drop32::drop32(vluint64_t maxSimTime, int dumpLevel)
     : m_cpu(nullptr), m_cycles(0), m_trace(nullptr), m_maxSimTime(maxSimTime),
       m_dump(dumpLevel), m_mem(nullptr), m_memSize(0) {}
-// ====================================================================================================================
+
 drop32::~drop32() {
   m_cpu->final();
   if (m_trace != nullptr) {
@@ -39,7 +39,7 @@ drop32::~drop32() {
     m_mem = nullptr;
   }
 }
-// ====================================================================================================================
+
 bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
   if (cpu == nullptr) {
     LOG_E("Failed to create Verilated drop32 module!\n");
@@ -59,7 +59,7 @@ bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
   reset(1); // Reset CPU on create for 1cc
   return true;
 }
-// ====================================================================================================================
+
 bool drop32::createMemory(size_t memSize) {
   if (memSize == 0) {
     LOG_E("Memory cannot be of size 0!\n");
@@ -74,7 +74,7 @@ bool drop32::createMemory(size_t memSize) {
   std::memset(m_mem, 0, m_memSize);
   return true;
 }
-// ====================================================================================================================
+
 bool drop32::createMemory(size_t memSize, std::string initHexfile) {
   if (memSize == 0) {
     LOG_E("Memory cannot be of size 0!\n");
@@ -90,7 +90,7 @@ bool drop32::createMemory(size_t memSize, std::string initHexfile) {
   // Init mem from hexfile
   return loadMem(initHexfile, m_mem, m_memSize);
 }
-// ====================================================================================================================
+
 bool drop32::createMemory(size_t memSize, unsigned char *initHexarray,
                           unsigned int initHexarrayLen) {
   if (memSize == 0) {
@@ -112,7 +112,7 @@ bool drop32::createMemory(size_t memSize, unsigned char *initHexarray,
   std::memcpy(m_mem, initHexarray, initHexarrayLen);
   return true;
 }
-// ====================================================================================================================
+
 bool drop32::instructionUpdate() {
   // Error check
   if (m_mem == nullptr) {
@@ -128,7 +128,7 @@ bool drop32::instructionUpdate() {
   m_cpu->i_instr = *(int *)&m_mem[m_cpu->o_pcOut];
   return true;
 }
-// ====================================================================================================================
+
 bool drop32::loadStoreUpdate() {
   // Request and error checking
   if (!m_cpu->o_loadReq && !m_cpu->o_storeReq) {
@@ -159,7 +159,7 @@ bool drop32::loadStoreUpdate() {
   }
   return true;
 }
-// ====================================================================================================================
+
 bool drop32::peekMem(size_t addr, int &val) {
   // Error check
   if (m_mem == nullptr) {
@@ -175,7 +175,7 @@ bool drop32::peekMem(size_t addr, int &val) {
   val = *(int *)&m_mem[addr];
   return true;
 }
-// ====================================================================================================================
+
 bool drop32::pokeMem(size_t addr, int val) {
   // Error check
   if (m_mem == nullptr) {
@@ -191,7 +191,7 @@ bool drop32::pokeMem(size_t addr, int val) {
   *(int *)&m_mem[addr] = val;
   return true;
 }
-// ====================================================================================================================
+
 void drop32::writeRegfile(int index, int val) {
   // Skip if x0 reg
   if (index == 0) {
@@ -201,12 +201,12 @@ void drop32::writeRegfile(int index, int val) {
   CPU(this)->REGFILE_unit->RS1_PORT_RAM->ram[index] = val;
   CPU(this)->REGFILE_unit->RS2_PORT_RAM->ram[index] = val;
 }
-// ====================================================================================================================
+
 int drop32::readRegfile(int index) {
   // Does not matter which port we read from
   return (index == 0) ? 0 : CPU(this)->REGFILE_unit->RS1_PORT_RAM->ram[index];
 }
-// ====================================================================================================================
+
 void drop32::reset(int cycles) {
   // Some dummy values for now
   m_cpu->i_instr = 0x0badc0de;
@@ -220,7 +220,7 @@ void drop32::reset(int cycles) {
   }
   m_cpu->i_rst = 0;
 }
-// ====================================================================================================================
+
 void drop32::tick(bool enableDump) {
   static std::atomic<vluint64_t> global_time{0};
   if (enableDump) {
@@ -238,7 +238,7 @@ void drop32::tick(bool enableDump) {
   }
   m_cycles++;
 }
-// ====================================================================================================================
+
 void drop32::dump() {
   if (!m_dump) {
     return;
@@ -276,7 +276,7 @@ void drop32::dump() {
          RST ? 'R' : '-', BRA ? 'B' : '-', JMP ? 'J' : '-', LD_REQ ? 'L' : '-',
          SD_REQ ? 'S' : '-', m_cycles);
 }
-// ====================================================================================================================
+
 bool drop32::end() {
   bool isEbreak = CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump;
   bool isFinished =
@@ -290,4 +290,4 @@ bool drop32::end() {
   }
   return isFinished;
 }
-// ====================================================================================================================
+

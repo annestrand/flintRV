@@ -60,7 +60,7 @@ void myMergesort(int* arr, int len) {
     free(tmpStore);
 }
 
-// ====================================================================================================================
+
 int main() {
     // Gold (sorted) data
     const int testArrSorted[] = {

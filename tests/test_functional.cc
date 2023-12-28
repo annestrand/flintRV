@@ -92,7 +92,7 @@ extern int g_dumpLevel;
   }
 
 // FUNCTIONAL_TEST(name, memsize, timeout, dumplvl)
-// ====================================================================================================================
+
 FUNCTIONAL_TEST(add, 0x4000, 1000, g_dumpLevel)
 FUNCTIONAL_TEST(addi, 0x4000, 1000, g_dumpLevel)
 FUNCTIONAL_TEST(and, 0x4000, 1000, g_dumpLevel)

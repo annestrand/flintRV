@@ -25,7 +25,7 @@ namespace {
 
 extern int g_dumpLevel;
 
-// ====================================================================================================================
+
 TEST(algorithms, fibonacci) {
   constexpr int memSize = 0x4000;
   drop32 dut = drop32(1000000, g_dumpLevel);
@@ -68,7 +68,7 @@ TEST(algorithms, fibonacci) {
   EXPECT_EQ(dut.readRegfile(S9), fibonacci(9));
   EXPECT_EQ(dut.readRegfile(S10), fibonacci(10));
 }
-// ====================================================================================================================
+
 TEST(algorithms, binsearch) {
   constexpr int memSize = 0x4000;
   drop32 dut = drop32(1000000, g_dumpLevel);
@@ -104,7 +104,7 @@ TEST(algorithms, binsearch) {
   EXPECT_EQ(dut.readRegfile(S3), 1); // Testing valid binsearch result
   EXPECT_EQ(dut.readRegfile(S4), 0); // Testing invalid binsearch result
 }
-// ====================================================================================================================
+
 TEST(algorithms, mergesort) {
   constexpr int memSize = 0x4000;
   drop32 dut = drop32(1000000, g_dumpLevel);
