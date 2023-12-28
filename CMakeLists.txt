@@ -10,7 +10,7 @@ add_custom_target(typesVh
             sed "\"s/[0-9]*'/0/g\"" |
             awk "'!/{/'" |
             awk "'!/x\\[/'" >
-            ${CMAKE_BINARY_DIR}/types.hh
+            ${CMAKE_BINARY_DIR}/types.h
 )
 
 # Verilated core

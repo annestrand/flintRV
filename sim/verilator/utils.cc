@@ -8,8 +8,8 @@
 
 #include <cstdint>
 
-#include "types.hh"
-#include "utils.hh"
+#include "types.h"
+#include "utils.h"
 
 
 bool loadMem(std::string filePath, char *mem, ssize_t memLen) {

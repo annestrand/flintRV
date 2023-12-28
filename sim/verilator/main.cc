@@ -1,8 +1,8 @@
 // Copyright (c) 2022 - present, Austin Annestrand.
 // Licensed under the MIT License (see LICENSE file).
 
-#include "drop32.hh"
-#include "utils.hh"
+#include "drop32.h"
+#include "utils.h"
 
 #include "miniargparse.h"
 

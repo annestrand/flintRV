@@ -25,8 +25,8 @@
 #include "VRegfile.h"
 #include "VRegfile__Syms.h"
 
-#include "types.hh"
-#include "utils.hh"
+#include "types.h"
+#include "utils.h"
 
 #if VERILATOR_VER >= 4210
 #define UNIT(sim) (sim)->rootp
