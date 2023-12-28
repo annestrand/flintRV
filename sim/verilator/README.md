@@ -1,4 +1,4 @@
-# Simulator
+# Verilated Simulator
 ```
 $ ./Vdrop32 ./my_loop.hex -d 2
 [Vdrop32 - Info ]:[         main.cc:73] - Memory size set to: [ 0.031250 MB ].

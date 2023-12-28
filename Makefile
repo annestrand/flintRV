@@ -111,9 +111,9 @@ SIM_FLAGS              += -std=c++14
 
 SIM_SRCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.cc" -exec basename {} \;)
 SIM_INCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.hh")
-SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/%.o)
+SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/verilator/%.o)
 SIM_OBJS_D             := $(SIM_OBJS:.o=.d)
-SIM_OBJS_BASE          := $(filter-out build/sim/main.o,$(SIM_OBJS))
+SIM_OBJS_BASE          := $(filter-out build/sim/verilator/main.o,$(SIM_OBJS))
 SIM_OBJS_BASE_D        := $(SIM_OBJS_BASE:.o=.d)
 
 # --- TEST SOURCES ----------------------------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ TEST_FLAGS             := -Wall
 TEST_FLAGS             += -g
 TEST_FLAGS             += -DVERILATOR_VER=$(VERILATOR_VER)
 TEST_FLAGS             += -DDROP32_VERSION='"$(DROP32_VERSION)"'
-TEST_FLAGS             += -Isim
+TEST_FLAGS             += -Isim/verilator
 TEST_FLAGS             += -Ibuild/tests
 TEST_FLAGS             += -Ibuild/verilated
 TEST_FLAGS             += -Iexternal/miniargparse
@@ -229,7 +229,7 @@ $(OUT_DIR)/verilated/V%__ALL.a: rtl/%.v rtl/types.vh $(VTYPES) | $(OUT_DIR)/veri
 	@$(MAKE) -C $(dir $@) -f V$(basename $(notdir $<)).mk > /dev/null
 
 -include $(SIM_OBJS_D)
-$(OUT_DIR)/sim/%.o: sim/%.cc $(RTL_LIBS) $(RTL_SRCS) $(VOBJS) | $(OUT_DIR)/sim
+$(OUT_DIR)/sim/verilator/%.o: sim/verilator/%.cc $(RTL_LIBS) $(RTL_SRCS) $(VOBJS) | $(OUT_DIR)/sim/verilator
 	@echo "    CXX         $(notdir $<)"
 	@$(CXX) -c -o $@ $(SIM_FLAGS) $<
 
@@ -290,6 +290,9 @@ $(OUT_DIR):
 	@mkdir -p $@
 
 $(OUT_DIR)/sim:
+	@mkdir -p $@
+
+$(OUT_DIR)/sim/verilator:
 	@mkdir -p $@
 
 $(OUT_DIR)/tests:
