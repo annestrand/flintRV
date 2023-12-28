@@ -4,6 +4,7 @@ project(drop32)
 find_package(verilator HINTS $ENV{VERILATOR_ROOT})
 
 # Generate C/C++ header of types.vh
+# TODO: Make this routine a python script for portability
 add_custom_target(typesVh
     COMMAND sed "'s/`/#/g'" ${CMAKE_SOURCE_DIR}/rtl/types.vh |
             sed "\"s/[0-9]*'/0/g\"" |
@@ -23,7 +24,7 @@ target_include_directories(Vdrop32_lib PRIVATE
 )
 add_dependencies(Vdrop32_lib typesVh)
 
-# CLI verilated driver
+# CLI verilated simulation driver
 add_executable(Vdrop32 ${CMAKE_SOURCE_DIR}/sim/verilator/main.cc)
 target_include_directories(Vdrop32 PRIVATE
     ${CMAKE_BINARY_DIR}
@@ -34,18 +35,12 @@ target_link_libraries(Vdrop32 PRIVATE Vdrop32_lib)
 add_dependencies(Vdrop32 typesVh)
 
 # Verilate Verilog RTL to C++
-verilate(Vdrop32_lib
-    SOURCES
-        rtl/drop32.v
-        rtl/ALU.v
-        rtl/ControlUnit.v
-        rtl/DualPortRam.v
-        rtl/ImmGen.v
-        rtl/Regfile.v
-    INCLUDE_DIRS
-        rtl
-    TRACE
-)
+verilate(Vdrop32_lib SOURCES rtl/drop32.v INCLUDE_DIRS rtl TRACE)
+verilate(Vdrop32_lib SOURCES rtl/ALU.v INCLUDE_DIRS rtl TRACE)
+verilate(Vdrop32_lib SOURCES rtl/ControlUnit.v INCLUDE_DIRS rtl TRACE)
+verilate(Vdrop32_lib SOURCES rtl/DualPortRam.v INCLUDE_DIRS rtl TRACE)
+verilate(Vdrop32_lib SOURCES rtl/ImmGen.v INCLUDE_DIRS rtl TRACE)
+verilate(Vdrop32_lib SOURCES rtl/Regfile.v INCLUDE_DIRS rtl TRACE)
 
 # TODO: Still need to implement the following
 #   - Test building
