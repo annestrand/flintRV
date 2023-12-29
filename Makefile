@@ -94,7 +94,7 @@ VSRCS                  += $(VERILATOR_ROOT)/include/verilated_threads.cpp
 endif
 VSRCS_BASENAME         := $(notdir $(VSRCS))
 VOBJS                  := $(VSRCS_BASENAME:%.cpp=$(OUT_DIR)/verilated/%.o)
-VTYPES                 := $(OUT_DIR)/verilated/types.hh
+VTYPES                 := $(OUT_DIR)/verilated/types.h
 
 # --- SIMULATOR -------------------------------------------------------------------------------------------------------
 SIM_FLAGS              := -Wall
@@ -110,7 +110,7 @@ SIM_FLAGS              += -faligned-new
 SIM_FLAGS              += -std=c++14
 
 SIM_SRCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.cc" -exec basename {} \;)
-SIM_INCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.hh")
+SIM_INCS               := $(shell find $(ROOT_DIR)/sim -type f -name "*.h")
 SIM_OBJS               := $(SIM_SRCS:%.cc=$(OUT_DIR)/sim/verilator/%.o)
 SIM_OBJS_D             := $(SIM_OBJS:.o=.d)
 SIM_OBJS_BASE          := $(filter-out build/sim/verilator/main.o,$(SIM_OBJS))
@@ -213,8 +213,8 @@ drop32soc/%.mem: drop32soc/%.elf
 	@echo "    PY          $(notdir scripts/byteswap_memfile.py)"
 	@$(PYTHON) ./scripts/byteswap_memfile.py $@
 
-$(OUT_DIR)/verilated/types.hh: rtl/types.vh | $(OUT_DIR)/verilated
-	@echo "    VH2HH       $(notdir $<)"
+$(OUT_DIR)/verilated/types.h: rtl/types.vh | $(OUT_DIR)/verilated
+	@echo "    VH2H       $(notdir $<)"
 	@sed 's/`/#/g' $< | 	\
 	sed "s/[0-9]*'/0/g" | 	\
 	awk '!/{/' | awk '!/x\[/' > $@
