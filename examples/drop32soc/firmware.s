@@ -5,6 +5,9 @@
 # -------------------------
 # Test program to blink an LED on drop32soc
 
+.section .text;
+.global _start;
+_start:
 .equ LED_BASE, 0x00003000
 
         li  x20, LED_BASE

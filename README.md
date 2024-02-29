@@ -7,7 +7,7 @@
 - Aimed to be implemented as a soft-cpu for use in FPGAs
 
 ## Prerequisites ✅
-- GNU Make
+- CMake >= 3.12
 - Python >= 3.6
 - C++14 compiler (or greater)
 - Verilator >= 4.028 (**optional**)
@@ -22,9 +22,10 @@ This repo uses git submodules - make sure to pull those first:
 ## Build Simulator 🖥
 To build Verilator-based simulator:
 
-    $ make sim
+    $ cmake -Bbuild
+    $ cmake --build build
 
-Output dir: `build/Vdrop32`
+Simulator: `<OUTPUT_DIR>/Vdrop32`
 
 See this [README.md](./sim/README.md) for guide.
 
@@ -33,9 +34,10 @@ Building tests require the above `optional` prerequisites.
 
 To build tests:
 
-    $ make tests
+    $ cmake -Bbuild -DBUILD_TESTS=ON
+    $ cmake --build build
 
-Test runner: `build/Vdrop32_tests`
+Test runner: `<OUTPUT_DIR>/Vdrop32_tests`
 
 ## Build drop32 core
 There is a convenience script to generate a singular core/CPU RTL file to stdout:
@@ -51,7 +53,10 @@ The CPU is generated using the `scripts/drop32soc_gen.py` utility.
 
 To build Firmware and Generate CPU core for SoC:
 
-    $ make soc
+    $ cmake -Bbuild -DBUILD_SOC=ON
+    $ cmake --build build
+
+Output SoC Files: `<OUTPUT_DIR>/<RISCV_TOOLCHAIN_TRIPLE>/drop32soc`
 
 - CPU specs
     - RV32I ISA
@@ -62,28 +67,3 @@ To build Firmware and Generate CPU core for SoC:
     - 1KB Instruction memory (pre-programmed in BRAM, readonly)
     - 1KB Data RAM
     - 1 Output pin (e.g. hello-world LED blink)
-
-## Docker 🐳
-RISC-V GCC cross-compiler is needed for building tests and building example firmware. There is a Dockerfile
-here to take care of this (easy-mode).
-
-To build and start the container (need to run at least once to ensure container is running):
-
-    $ docker build -t riscv-gnu-toolchain .
-    $ docker create -it -v $PWD:/src --name drop32 riscv-gnu-toolchain
-    $ docker start drop32
-
-Then to build the tests:
-
-    $ make DOCKER=ON
-
-Then to shut down the container when finished:
-
-    $ docker stop drop32
-
-## Make configs ⚙
-Below are a table of Make config variables:
-| Variable     | Behavior                   | Usage                                   | Default             |
-|:-------------|:---------------------------|:----------------------------------------|:--------------------|
-|TC_TRIPLE     |RISCV-GCC toolchain triple  |$ make TC_TRIPLE=riscv64-unknown-elf ... | riscv64-unknown-elf |
-|DOCKER        |Use Docker GCC toolchain    |$ make DOCKER=1 ...                      | 0 (OFF)             |

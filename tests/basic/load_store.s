@@ -5,6 +5,10 @@
 # -------------------------
 # Testing load/store instructions
 
+.section .text;
+.global _start;
+_start:
+
 # Test immediates (used by unit test)
 .equ TEST_ADDR, 0x100
 .equ TEST_DATA, 0xdeadbeef

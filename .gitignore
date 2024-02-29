@@ -13,9 +13,9 @@ __pycache__/
 *.log
 *_generated.v
 
-drop32soc/*.sh
-drop32soc/*.pcf
-drop32soc/*.asc
-drop32soc/*.bin
-drop32soc/*.json
+examples/**/*.sh
+examples/**/*.pcf
+examples/**/*.asc
+examples/**/*.bin
+examples/**/*.json
 .DS_Store

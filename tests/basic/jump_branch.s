@@ -4,6 +4,10 @@
 # --- Jump/Branch tests ---
 #   (Fails if s1 is non-zero)
 
+.section .text;
+.global _start;
+_start:
+
     li    s3, 1
     li    s1, 0
     j     L0

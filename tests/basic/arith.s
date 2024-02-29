@@ -9,6 +9,10 @@
 #
 # (Init regfile values are initialized in C++ test src)
 
+.section .text;
+.global _start;
+_start:
+
         addi  x30, x30, 1
         addi  x13, x1, -371
         bne   x13, x3, FAIL

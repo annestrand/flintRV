@@ -26,14 +26,12 @@ namespace {
 
 extern int g_dumpLevel;
 
-
 TEST(basic, loop) { // Basic test loop summation for 10 iterations
   drop32 dut = drop32(200, g_dumpLevel);
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(0x200, build_tests_simple_loop_hex,
-                        build_tests_simple_loop_hex_len)) {
+  if (!dut.createMemory(0x200, simple_loop_hex, simple_loop_hex_len)) {
     FAIL();
   }
 
@@ -64,8 +62,7 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(0x200, build_tests_logic_hex,
-                        build_tests_logic_hex_len)) {
+  if (!dut.createMemory(0x200, logic_hex, logic_hex_len)) {
     FAIL();
   }
 
@@ -103,8 +100,7 @@ TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(0x200, build_tests_arith_hex,
-                        build_tests_arith_hex_len)) {
+  if (!dut.createMemory(0x200, arith_hex, arith_hex_len)) {
     FAIL();
   }
 
@@ -144,8 +140,7 @@ TEST(
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(0x200, build_tests_jump_branch_hex,
-                        build_tests_jump_branch_hex_len)) {
+  if (!dut.createMemory(0x200, jump_branch_hex, jump_branch_hex_len)) {
     FAIL();
   }
 
@@ -174,8 +169,7 @@ TEST(basic, load_store) { // Tests load and store based instructions
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(0x200, build_tests_load_store_hex,
-                        build_tests_load_store_hex_len)) {
+  if (!dut.createMemory(0x200, load_store_hex, load_store_hex_len)) {
     FAIL();
   }
 

@@ -8,7 +8,11 @@
 #    j += i;
 #  }
 #  // Expected result: j == 45
-#
+
+.section .text;
+.global _start;
+_start:
+
         li  s3, 0           # i = 0
         li  s2, 0           # j = 0
         li  s4, 10          # loop-range

@@ -66,8 +66,7 @@ extern int g_dumpLevel;
     if (!dut.create(new Vdrop32(), nullptr)) {                                 \
       FAIL();                                                                  \
     }                                                                          \
-    if (!dut.createMemory(memSize, build_external_riscv_tests_##name##_hex,    \
-                          build_external_riscv_tests_##name##_hex_len)) {      \
+    if (!dut.createMemory(memSize, name##_hex, name##_hex_len)) {              \
       FAIL();                                                                  \
     }                                                                          \
     dut.m_cpu->i_ifValid = 1;                                                  \

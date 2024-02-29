@@ -25,15 +25,13 @@ namespace {
 
 extern int g_dumpLevel;
 
-
 TEST(algorithms, fibonacci) {
   constexpr int memSize = 0x4000;
   drop32 dut = drop32(1000000, g_dumpLevel);
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(memSize, build_tests_fibonacci_hex,
-                        build_tests_fibonacci_hex_len)) {
+  if (!dut.createMemory(memSize, fibonacci_hex, fibonacci_hex_len)) {
     FAIL();
   }
 
@@ -75,8 +73,7 @@ TEST(algorithms, binsearch) {
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(memSize, build_tests_binsearch_hex,
-                        build_tests_binsearch_hex_len)) {
+  if (!dut.createMemory(memSize, binsearch_hex, binsearch_hex_len)) {
     FAIL();
   }
 
@@ -111,8 +108,7 @@ TEST(algorithms, mergesort) {
   if (!dut.create(new Vdrop32(), nullptr)) {
     FAIL();
   }
-  if (!dut.createMemory(memSize, build_tests_mergesort_hex,
-                        build_tests_mergesort_hex_len)) {
+  if (!dut.createMemory(memSize, mergesort_hex, mergesort_hex_len)) {
     FAIL();
   }
 
