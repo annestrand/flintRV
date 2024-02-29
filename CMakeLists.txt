@@ -17,13 +17,16 @@ include(AddMultiTargetComponent)
 
 # Generate C/C++ header of types.vh
 # TODO: Make this routine a python script for portability
-add_custom_target(typesVh
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/types.h
     COMMAND sed "'s/`/#/g'" ${CMAKE_SOURCE_DIR}/rtl/types.vh |
             sed "\"s/[0-9]*'/0/g\"" |
             awk "'!/{/'" |
             awk "'!/x\\[/'" >
             ${CMAKE_BINARY_DIR}/types.h
+    DEPENDS ${CMAKE_SOURCE_DIR}/rtl/types.vh
 )
+add_custom_target(typesVh ALL DEPENDS ${CMAKE_BINARY_DIR}/types.h)
 
 # Verilated core
 add_library(Vdrop32_lib STATIC
@@ -44,7 +47,6 @@ target_include_directories(Vdrop32 PRIVATE
     ${CMAKE_SOURCE_DIR}/external/miniargparse
 )
 target_link_libraries(Vdrop32 PRIVATE Vdrop32_lib)
-add_dependencies(Vdrop32 typesVh)
 
 # Build RISC-V test sources (CLI GoogleTest driver)
 if (BUILD_TESTS)
