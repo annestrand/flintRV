@@ -8,8 +8,10 @@ find_package(verilator HINTS $ENV{VERILATOR_ROOT})
 set(RISCV_TOOLCHAIN_TRIPLE "riscv64-unknown-elf" CACHE STRING "RISC-V cross-compiler GCC triplet prefix value")
 set(EXTERN_PROJECT_GENERATOR "Ninja" CACHE STRING "Generator for external projects (i.e. riscv cross compilation)")
 # ---------------------------------------------------------------------------------------------------------------------
+option(GDBLOG OFF)
 option(BUILD_SOC OFF)
 option(BUILD_TESTS OFF)
+option(BUILD_HELLO_WORLD OFF)
 # ---------------------------------------------------------------------------------------------------------------------
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -27,6 +29,39 @@ add_custom_command(
     DEPENDS ${CMAKE_SOURCE_DIR}/rtl/types.vh
 )
 add_custom_target(typesVh ALL DEPENDS ${CMAKE_BINARY_DIR}/types.h)
+
+# C-based functional RV32I simulator
+add_executable(risa
+    ${CMAKE_SOURCE_DIR}/sim/risa/main.c
+    ${CMAKE_SOURCE_DIR}/sim/risa/risa.c
+    ${CMAKE_SOURCE_DIR}/sim/risa/socket.c
+    ${CMAKE_SOURCE_DIR}/sim/risa/handlers.c
+    ${CMAKE_SOURCE_DIR}/sim/risa/gdbserver.c
+)
+target_include_directories(risa PUBLIC
+    ${CMAKE_SOURCE_DIR}/sim/risa
+    ${CMAKE_SOURCE_DIR}/external/minigdbstub
+    ${CMAKE_SOURCE_DIR}/external/miniargparse
+)
+set_property(TARGET risa PROPERTY C_STANDARD 99)
+if (WIN32 OR MINGW)
+    target_link_libraries(risa PRIVATE wsock32 ws2_32)
+    target_compile_options(risa PUBLIC /W3)
+    target_compile_options(risa PUBLIC /WX)
+else ()
+    target_link_libraries(risa ${CMAKE_DL_LIBS})
+    target_compile_options(risa PUBLIC -Wall)
+    target_compile_options(risa PUBLIC -Werror)
+endif()
+if (GDBLOG)
+    target_compile_definitions(risa PRIVATE GDBLOG)
+endif()
+add_subdirectory(${CMAKE_SOURCE_DIR}/examples/risa_handler)
+
+# RV32I hello world example
+if (BUILD_HELLO_WORLD)
+    add_multi_target_component(examples hello_world ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
+endif()
 
 # Verilated core
 add_library(Vdrop32_lib STATIC

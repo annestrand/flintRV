@@ -1,3 +1,6 @@
 [submodule "external/miniargparse"]
 	path = external/miniargparse
 	url = ../miniargparse.git
+[submodule "external/minigdbstub"]
+	path = external/minigdbstub
+	url = ../minigdbstub.git
