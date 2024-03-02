@@ -1,4 +1,9 @@
-# Verilated Simulator
+# Vdrop32
+
+A cycle-accurate C++ simulator of the Verilated drop32 RTL.
+
+The C++ code here serves as the wrapper around the Verilated module.
+
 ```
 $ ./Vdrop32 ./my_loop.hex -d 2
 [Vdrop32 - Info ]:[         main.cc:73] - Memory size set to: [ 0.031250 MB ].

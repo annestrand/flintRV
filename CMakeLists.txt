@@ -65,20 +65,20 @@ endif()
 
 # Verilated core
 add_library(Vdrop32_lib STATIC
-    ${CMAKE_SOURCE_DIR}/sim/verilator/utils.cc
-    ${CMAKE_SOURCE_DIR}/sim/verilator/drop32.cc
+    ${CMAKE_SOURCE_DIR}/sim/Vdrop32/utils.cc
+    ${CMAKE_SOURCE_DIR}/sim/Vdrop32/drop32.cc
 )
 target_include_directories(Vdrop32_lib PRIVATE
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/sim/verilator
+    ${CMAKE_SOURCE_DIR}/sim/Vdrop32
 )
 add_dependencies(Vdrop32_lib typesVh)
 
 # CLI verilated simulation driver
-add_executable(Vdrop32 ${CMAKE_SOURCE_DIR}/sim/verilator/main.cc)
+add_executable(Vdrop32 ${CMAKE_SOURCE_DIR}/sim/Vdrop32/main.cc)
 target_include_directories(Vdrop32 PRIVATE
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/sim/verilator
+    ${CMAKE_SOURCE_DIR}/sim/Vdrop32
     ${CMAKE_SOURCE_DIR}/external/miniargparse
 )
 target_link_libraries(Vdrop32 PRIVATE Vdrop32_lib)
@@ -102,7 +102,7 @@ if (BUILD_TESTS)
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/basic
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/algorithms
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/riscv-tests
-        ${CMAKE_SOURCE_DIR}/sim/verilator
+        ${CMAKE_SOURCE_DIR}/sim/Vdrop32
         ${CMAKE_SOURCE_DIR}/external/miniargparse
     )
     target_link_libraries(Vdrop32_tests PRIVATE

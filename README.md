@@ -19,15 +19,14 @@ This repo uses git submodules - make sure to pull those first:
 
     $ git submodule update --init --recursive
 
-## Build Simulator 🖥
-To build Verilator-based simulator:
+## Build rISA (Functional ISA sim) and Vdrop32 (Verilated C++ sim) 🖥
 
     $ cmake -Bbuild
     $ cmake --build build
 
-Simulator: `<OUTPUT_DIR>/Vdrop32`
+[rISA Documentation](./sim/risa/README.md)
 
-See this [README.md](./sim/README.md) for guide.
+[Vdrop32 Documentation](./sim/Vdrop32/README.md)
 
 ## Build Tests 🧪
 Building tests require the above `optional` prerequisites.
