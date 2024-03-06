@@ -73,6 +73,7 @@ target_include_directories(Vdrop32_lib PRIVATE
     ${CMAKE_SOURCE_DIR}/sim/Vdrop32
 )
 add_dependencies(Vdrop32_lib typesVh)
+set_property(TARGET Vdrop32_lib PROPERTY CXX_STANDARD 14)
 
 # CLI verilated simulation driver
 add_executable(Vdrop32 ${CMAKE_SOURCE_DIR}/sim/Vdrop32/main.cc)
@@ -82,6 +83,7 @@ target_include_directories(Vdrop32 PRIVATE
     ${CMAKE_SOURCE_DIR}/external/miniargparse
 )
 target_link_libraries(Vdrop32 PRIVATE Vdrop32_lib)
+set_property(TARGET Vdrop32 PROPERTY CXX_STANDARD 14)
 
 # Build RISC-V test sources (CLI GoogleTest driver)
 if (BUILD_TESTS)
@@ -118,6 +120,7 @@ if (BUILD_TESTS)
         algorithms-${RISCV_TOOLCHAIN_TRIPLE}
         riscv-tests-${RISCV_TOOLCHAIN_TRIPLE}
     )
+    set_property(TARGET Vdrop32_tests PROPERTY CXX_STANDARD 14)
 endif ()
 
 # Build example SoC firmware
