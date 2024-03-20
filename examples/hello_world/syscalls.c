@@ -4,9 +4,7 @@
 #include <sys/stat.h>
 #include <stdint.h>
 
-#define	syscall_exit            1
-#define	syscall_read            4
-#define	syscall_write           5
+#include <machine/syscall.h>
 
 // syscall helper =====================================================================================================
 
@@ -30,17 +28,17 @@ static long syscall(long syscall_type, long arg0, long arg1, long arg2) {
 // Stubs ==============================================================================================================
 
 void _exit(int status) {
-  syscall(syscall_exit, status, 0, 0);
+  syscall(SYS_exit, status, 0, 0);
   for(;;);
 }
 
 ssize_t _write(int file, const void *ptr, size_t len) {
-  syscall(syscall_write, (long)file, (long)ptr, (long)len);
+  syscall(SYS_write, (long)file, (long)ptr, (long)len);
   return len; // rISA writes all the chars here, so we just return len (finished)
 }
 
 ssize_t _read(int file, void *ptr, size_t len) {
-  return syscall(syscall_read, (long)file, (long)ptr, (long)len);
+  return syscall(SYS_read, (long)file, (long)ptr, (long)len);
 }
 
 int _fstat(int file, struct stat *st) {

@@ -2,10 +2,9 @@
 #include "stdio.h"
 #include "risa.h"
 
-// Syscalls
-#define	syscall_exit    1
-#define	syscall_read    4
-#define	syscall_write   5
+// Syscalls (taken from "riscv64-unknown-elf/include/machine/syscall.h")
+#define SYS_exit 93
+#define SYS_write 64
 
 void defaultMmioHandler(rv32iHart_t *cpu)  { return; }
 void defaultIntHandler(rv32iHart_t *cpu)   { return; }
@@ -14,11 +13,17 @@ void defaultInitHandler(rv32iHart_t *cpu)  { return; }
 
 // Provide a default simple/basic syscall handler
 void defaultEnvHandler(rv32iHart_t *cpu) {
+    if ((ItypeInstructions)cpu->ID == EBREAK) {
+        // Default handler will just end simulation on EBREAK
+        cpu->endTime = clock();
+        printf(LOG_LINE_BREAK);
+        cpu->cleanupSimulator(cpu);
+        exit(0);
+    }
+
+    // Otherwise we are processing an ECALL
     switch(cpu->regFile[A7]) {
-        default:
-            break;
-        // Detect what syscall we encountered
-        case syscall_exit: {
+        case SYS_exit: {
             cpu->endTime = clock();
             // Print out return error code (if there is an error)
             printf(LOG_LINE_BREAK);
@@ -29,7 +34,7 @@ void defaultEnvHandler(rv32iHart_t *cpu) {
             cpu->cleanupSimulator(cpu);
             exit(0);
         }
-        case syscall_write: {
+        case SYS_write: {
             int base = cpu->regFile[A1];
             u32 len = cpu->regFile[A2];
             for (u32 i=0; i<len; ++i) {
@@ -38,5 +43,8 @@ void defaultEnvHandler(rv32iHart_t *cpu) {
             }
             break;
         }
+        default:
+            LOG_WARNING_PRINTF("Unknown syscall code encountered: [ %d ]", cpu->regFile[A7]);
+            break;
     }
 }
