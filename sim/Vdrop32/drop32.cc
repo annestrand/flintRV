@@ -245,40 +245,16 @@ void drop32::tick(bool enableDump) {
 }
 
 void drop32::dump() {
-    if (!m_tracing) {
-        return;
+    if (m_tracing) {
+        std::string instr =
+            m_cpu->i_rst ? "CPU Reset!" : disassembleRv32i(m_cpu->i_instr);
+        printf("%8x:   0x%08x   %-30s CYCLE:[%" PRIu64 "]\n", m_cpu->o_pcOut,
+               m_cpu->i_instr, instr.c_str(), m_cycles);
     }
-    std::string instr =
-        m_cpu->i_rst ? "CPU Reset!" : disassembleRv32i(m_cpu->i_instr);
-    bool fStall = CPU(this)->FETCH_stall;
-    bool eStall = CPU(this)->EXEC_stall;
-    bool mStall = CPU(this)->MEM_stall;
-    bool fFlush = CPU(this)->FETCH_flush;
-    bool eFlush = CPU(this)->EXEC_flush;
-    bool mFlush = CPU(this)->MEM_flush;
-    bool wFlush = CPU(this)->WB_flush;
-    // Status codes
-    bool BRA = CPU(this)->braOutcome;            // B
-    bool JMP = CPU(this)->p_jmp[CPU(this)->MEM]; // J
-    bool LD_REQ = m_cpu->o_loadReq;              // L
-    bool SD_REQ = m_cpu->o_storeReq;             // S
-    bool RST = m_cpu->i_rst;                     // R
-    bool iValid = m_cpu->i_ifValid;              // I
-    bool mValid = m_cpu->i_memValid;             // M
-
-    printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr,
-           instr.c_str());
-    printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  "
-           "CYCLE:[%" PRIu64 "]\n",
-           fStall ? 'x' : '-', eStall ? 'x' : '-', mStall ? 'x' : '-',
-           fFlush ? 'x' : '-', eFlush ? 'x' : '-', mFlush ? 'x' : '-',
-           wFlush ? 'x' : '-', iValid ? 'I' : '-', mValid ? 'M' : '-',
-           RST ? 'R' : '-', BRA ? 'B' : '-', JMP ? 'J' : '-',
-           LD_REQ ? 'L' : '-', SD_REQ ? 'S' : '-', m_cycles);
 }
 
 bool drop32::end() {
-    bool isEbreak = CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump;
+    bool isEbreak = m_cpu->i_instr == EBREAK;
     bool isFinished =
         Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;
     if (isEbreak) {
