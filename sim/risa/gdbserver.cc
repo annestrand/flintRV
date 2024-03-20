@@ -1,10 +1,12 @@
+#include "common/utils.h"
+
 #include "gdbserver.h"
 #include "risa.h"
 #include "socket.h"
 
 #include "minigdbstub/minigdbstub.h"
 
-void gdbserverInit(rv32iHart_t *cpu) {
+void gdbserverInit(rv32iHart *cpu) {
     cpu->gdbFields.serverPort = 3333;
 
     if ((cpu->gdbFields.socketFd > 0) || (cpu->gdbFields.connectFd > 0)) {
@@ -28,7 +30,7 @@ void gdbserverInit(rv32iHart_t *cpu) {
     return;
 }
 
-void gdbserverCall(rv32iHart_t *cpu) {
+void gdbserverCall(rv32iHart *cpu) {
     // Check gdb flags
     if (cpu->gdbFields.gdbFlags.dbgBreak &&
         cpu->pc == cpu->gdbFields.breakAddr) {
@@ -68,30 +70,30 @@ void gdbserverCall(rv32iHart_t *cpu) {
 // User-defined minigdbstub handlers
 static void minigdbstubUsrWriteMem(size_t addr, unsigned char data,
                                    void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     ACCESS_MEM_W(cpuHandle->virtMem, addr) = data;
     return;
 }
 
 static unsigned char minigdbstubUsrReadMem(size_t addr, void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     return ACCESS_MEM_B(cpuHandle->virtMem, addr);
 }
 
 static void minigdbstubUsrContinue(void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     cpuHandle->gdbFields.gdbFlags.dbgContinue = 1;
     return;
 }
 
 static void minigdbstubUsrStep(void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     cpuHandle->gdbFields.gdbFlags.dbgStep = 1;
     return;
 }
 
 static char minigdbstubUsrGetchar(void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     while (1) {
         char packet;
         size_t len = sizeof(packet);
@@ -101,21 +103,21 @@ static char minigdbstubUsrGetchar(void *usrData) {
 }
 
 static void minigdbstubUsrPutchar(char data, void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     writeSocket(cpuHandle->gdbFields.connectFd, (const char *)&data,
                 sizeof(char));
 }
 
 static void minigdbstubUsrProcessBreakpoint(int type, size_t addr,
                                             void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     cpuHandle->gdbFields.breakAddr = (u32)addr;
     cpuHandle->gdbFields.gdbFlags.dbgBreak = 1;
     return;
 }
 
 static void minigdbstubUsrKillSession(void *usrData) {
-    rv32iHart_t *cpuHandle = (rv32iHart_t *)usrData;
+    rv32iHart *cpuHandle = (rv32iHart *)usrData;
     cpuHandle->endTime = clock();
     printf(LOG_LINE_BREAK);
     cleanupSimulator(cpuHandle);

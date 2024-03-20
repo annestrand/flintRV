@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "common/utils.h"
+
 #include "risa.h"
 
 const char *toolBanner =
@@ -16,13 +18,11 @@ const char *toolBanner =
 int main(int argc, char **argv) {
     // Init simulator
     printf("%s", toolBanner);
-    rv32iHart_t cpu = {0};
-    int err = setupSimulator(argc, argv, &cpu);
-    if (err) {
-        return err;
+    rv32iHart cpu = {0};
+    if (!setupSimulator(argc, argv, &cpu)) {
+        return -1;
     }
     cpu.handlerProcs[RISA_INIT_HANDLER_PROC](&cpu);
     // Run
-    err = executionLoop(&cpu);
-    return err;
+    return executionLoop(&cpu);
 }

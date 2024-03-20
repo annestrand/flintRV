@@ -1,20 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common/utils.h"
+
 #include "risa.h"
 
 // Syscalls (taken from "riscv64-unknown-elf/include/machine/syscall.h")
 #define SYS_exit 93
 #define SYS_write 64
 
-void defaultMmioHandler(rv32iHart_t *cpu) { return; }
-void defaultIntHandler(rv32iHart_t *cpu) { return; }
-void defaultExitHandler(rv32iHart_t *cpu) { return; }
-void defaultInitHandler(rv32iHart_t *cpu) { return; }
+void defaultMmioHandler(rv32iHart *cpu) { return; }
+void defaultIntHandler(rv32iHart *cpu) { return; }
+void defaultExitHandler(rv32iHart *cpu) { return; }
+void defaultInitHandler(rv32iHart *cpu) { return; }
 
 // Provide a default simple/basic syscall handler
-void defaultEnvHandler(rv32iHart_t *cpu) {
-    if ((ItypeInstructions)cpu->ID == EBREAK) {
+void defaultEnvHandler(rv32iHart *cpu) {
+    if (cpu->ID == EBREAK) {
         // Default handler will just end simulation on EBREAK
         cpu->endTime = clock();
         printf(LOG_LINE_BREAK);

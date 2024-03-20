@@ -3,22 +3,101 @@
 
 #pragma once
 
+#include <cerrno>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include <string>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
-#define __FILENAME__                                                           \
-    (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#define LOG_I(msg, ...)                                                        \
-    printf("[Vdrop32 - Info ]:[%16s:%d] - " msg, __FILENAME__, __LINE__,       \
-           ##__VA_ARGS__)
-#define LOG_W(msg, ...)                                                        \
-    printf("[Vdrop32 - WARN ]:[%16s:%d] - " msg, __FILENAME__, __LINE__,       \
-           ##__VA_ARGS__)
-#define LOG_E(msg, ...)                                                        \
-    printf("[Vdrop32 - ERROR]:[%16s:%d] - " msg, __FILENAME__, __LINE__,       \
-           ##__VA_ARGS__)
+#ifdef _WIN32
+#define LOAD_LIB(libpath) LoadLibrary(libpath)
+#define CLOSE_LIB(handle) FreeLibrary(handle)
+#define LOAD_SYM(handle, fname) GetProcAddress(handle, fname)
+#define LIB_HANDLE HINSTANCE
+#define OPEN_FILE(fp, filename, mode)                                          \
+    do {                                                                       \
+        if ((fopen_s(&fp, filename, mode)) != 0) {                             \
+            fp = NULL;                                                         \
+        }                                                                      \
+    } while (0)
+#define EXPORT __declspec(dllexport)
+#define SIGINT_RET_TYPE BOOL WINAPI
+#define SIGINT_PARAM DWORD
+#define SIGINT_RET return TRUE
+#define SIGINT_REGISTER(cpu, function)                                         \
+    do {                                                                       \
+        if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)function, TRUE)) {        \
+            LOG_ERROR("Error. Couldn't register sigint handler.");             \
+            cleanupSimulator(cpu);                                             \
+            return ECANCELED;                                                  \
+        }                                                                      \
+    } while (0)
+#else
+#define LOAD_LIB(libpath) dlopen(libpath, RTLD_LAZY)
+#define CLOSE_LIB(handle) dlclose(handle)
+#define LOAD_SYM(handle, fname) dlsym(handle, fname)
+#define LIB_HANDLE void *
+#define OPEN_FILE(fp, filename, mode)                                          \
+    do {                                                                       \
+        fp = fopen(filename, mode);                                            \
+    } while (0)
+#define EXPORT __attribute__((visibility("default")))
+#define SIGINT_RET_TYPE void
+#define SIGINT_PARAM int
+#define SIGINT_RET                                                             \
+    do {                                                                       \
+    } while (0)
+#define SIGINT_REGISTER(cpu, function)                                         \
+    do {                                                                       \
+        if ((signal(SIGINT, function) == SIG_ERR)) {                           \
+            LOG_ERROR("Couldn't register sigint handler.");                    \
+            cleanupSimulator(cpu);                                             \
+            return ECANCELED;                                                  \
+        }                                                                      \
+    } while (0)
+#endif
 
+#define LOG_LINE_BREAK                                                         \
+    "========================================================================" \
+    "=="                                                                       \
+    "======================================\n"
+
+#define OUTPUT_LINE                                                            \
+    "===[ OUTPUT "                                                             \
+    "]=======================================================================" \
+    "=="                                                                       \
+    "==========================\n"
+
+// Prefer shortened __FILE__ expansion if available
+#if defined(__FILE_NAME__)
+#define FILENAME __FILE_NAME__
+#else
+#define FILENAME __FILE__
+#endif
+
+#define STRINGIFY_INTERNAL(x) #x
+#define STRINGIFY(x) STRINGIFY_INTERNAL(x)
+
+#define LINE STRINGIFY(__LINE__)
+
+// Log/trace macros
+#define LOG_INFO(msg) printf("[INFO][" FILENAME ":" LINE "]: " msg "\n")
+#define LOG_WARNING(msg) printf("[WARN][" FILENAME ":" LINE "]: " msg "\n")
+#define LOG_ERROR(msg) printf("[ERR ][" FILENAME ":" LINE "]: " msg "\n")
+#define LOG_INFO_PRINTF(fmt, ...)                                              \
+    printf("[INFO][" FILENAME ":" LINE "]: " fmt "\n", ##__VA_ARGS__)
+#define LOG_WARNING_PRINTF(fmt, ...)                                           \
+    printf("[WARN][" FILENAME ":" LINE "]: " fmt "\n", ##__VA_ARGS__)
+#define LOG_ERROR_PRINTF(fmt, ...)                                             \
+    printf("[ERR ][" FILENAME ":" LINE "]: " fmt "\n", ##__VA_ARGS__)
+
+// Anonymous helpers
 namespace {
 auto get_bits = [](unsigned int instr, int pos, int width) -> unsigned int {
     return ((instr & ((((1 << width) - 1) << pos))) >> pos);
@@ -76,6 +155,23 @@ auto rev_byte_bits = [](unsigned char x) -> unsigned char {
         11
 #define I_FENCE_IMM(x) S_IMM(x)
 
+#define KB_MULTIPLIER (1024)
+#define MB_MULTIPLIER (1024 * 1024)
+#define DEFAULT_VIRT_MEM_SIZE (KB_MULTIPLIER * 32) // Default to 32 KB
+#define DEFAULT_INT_PERIOD 500
+
+#define ACCESS_MEM_W(virtMem, offset) (*(u32 *)((u8 *)virtMem + offset))
+#define ACCESS_MEM_H(virtMem, offset) (*(u16 *)((u8 *)virtMem + offset))
+#define ACCESS_MEM_B(virtMem, offset) (*(u8 *)((u8 *)virtMem + offset))
+
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using s8 = int8_t;
+using s16 = int16_t;
+using s32 = int32_t;
+
 // RV32I instructions
 enum {
     EBREAK = (0x1 << 20) | (0x0 << 7) | (0x73),
@@ -120,5 +216,6 @@ enum {
     AUIPC = (0x17)
 };
 
+// Util functions
 std::string disassembleRv32i(unsigned int instr);
 bool loadMem(std::string filePath, char *mem, ssize_t memLen);

@@ -42,7 +42,7 @@ drop32::~drop32() {
 
 bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
     if (cpu == nullptr) {
-        LOG_E("Failed to create Verilated drop32 module!\n");
+        LOG_ERROR("Failed to create Verilated drop32 module!\n");
         return false;
     }
     m_cpu = cpu;
@@ -50,7 +50,7 @@ bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
         Verilated::traceEverOn(true);
         m_trace = new VerilatedVcdC;
         if (m_trace == nullptr) {
-            LOG_W("Failed to create drop32 VCD dumper!\n");
+            LOG_WARNING("Failed to create drop32 VCD dumper!\n");
         } else if (traceFile != nullptr) {
             m_cpu->trace(m_trace, 99);
             m_trace->open(traceFile);
@@ -62,13 +62,13 @@ bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
 
 bool drop32::createMemory(size_t memSize) {
     if (memSize == 0) {
-        LOG_E("Memory cannot be of size 0!\n");
+        LOG_ERROR("Memory cannot be of size 0!\n");
         return false;
     }
     m_memSize = memSize;
     m_mem = new char[memSize];
     if (m_mem == nullptr) {
-        LOG_E("Failed to allocate %ld bytes!\n", m_memSize);
+        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!\n", m_memSize);
         return false;
     }
     std::memset(m_mem, 0, m_memSize);
@@ -77,13 +77,13 @@ bool drop32::createMemory(size_t memSize) {
 
 bool drop32::createMemory(size_t memSize, std::string initHexfile) {
     if (memSize == 0) {
-        LOG_E("Memory cannot be of size 0!\n");
+        LOG_ERROR("Memory cannot be of size 0!\n");
         return false;
     }
     m_memSize = memSize;
     m_mem = new char[memSize];
     if (m_mem == nullptr) {
-        LOG_E("Failed to allocate %ld bytes!\n", m_memSize);
+        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!\n", m_memSize);
         return false;
     }
     std::memset(m_mem, 0, m_memSize);
@@ -94,17 +94,17 @@ bool drop32::createMemory(size_t memSize, std::string initHexfile) {
 bool drop32::createMemory(size_t memSize, unsigned char *initHexarray,
                           unsigned int initHexarrayLen) {
     if (memSize == 0) {
-        LOG_E("Memory cannot be of size 0!\n");
+        LOG_ERROR("Memory cannot be of size 0!\n");
         return false;
     }
     if (memSize < initHexarrayLen) {
-        LOG_E("Cannot fit initialization hex char array into memory!\n");
+        LOG_ERROR("Cannot fit initialization hex char array into memory!\n");
         return false;
     }
     m_memSize = memSize;
     m_mem = new char[memSize];
     if (m_mem == nullptr) {
-        LOG_E("Failed to allocate %ld bytes!\n", m_memSize);
+        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!\n", m_memSize);
         return false;
     }
     std::memset(m_mem, 0, m_memSize);
@@ -116,13 +116,14 @@ bool drop32::createMemory(size_t memSize, unsigned char *initHexarray,
 bool drop32::instructionUpdate() {
     // Error check
     if (m_mem == nullptr) {
-        LOG_E("Cannot fetch instruction from NULL memory!\n");
+        LOG_ERROR("Cannot fetch instruction from NULL memory!\n");
         return false;
     }
     if (m_cpu->o_pcOut >= m_memSize) {
-        LOG_E("PC address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx "
-              "]!\n",
-              m_cpu->o_pcOut, m_memSize);
+        LOG_ERROR_PRINTF(
+            "PC address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx "
+            "]!\n",
+            m_cpu->o_pcOut, m_memSize);
         return false;
     }
     // Fetch the next instruction
@@ -136,11 +137,11 @@ bool drop32::loadStoreUpdate() {
         return true;
     } // Skip if there was no load/store request
     if (m_mem == nullptr) {
-        LOG_E("Cannot loadStoreUpdate on NULL memory!\n");
+        LOG_ERROR("Cannot loadStoreUpdate on NULL memory!\n");
         return false;
     }
     if (m_cpu->o_dataAddr >= m_memSize) {
-        LOG_E(
+        LOG_ERROR_PRINTF(
             "Address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
             m_cpu->o_dataAddr, m_memSize);
         return false;
@@ -165,13 +166,14 @@ bool drop32::loadStoreUpdate() {
 bool drop32::peekMem(size_t addr, int &val) {
     // Error check
     if (m_mem == nullptr) {
-        LOG_E("Cannot 'peek' in NULL memory!\n");
+        LOG_ERROR("Cannot 'peek' in NULL memory!\n");
         return false;
     }
     if (addr >= m_memSize) {
-        LOG_E("'Peek' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx "
-              "]!\n",
-              addr, m_memSize);
+        LOG_ERROR_PRINTF(
+            "'Peek' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx "
+            "]!\n",
+            addr, m_memSize);
         return false;
     }
     val = *(int *)&m_mem[addr];
@@ -181,13 +183,14 @@ bool drop32::peekMem(size_t addr, int &val) {
 bool drop32::pokeMem(size_t addr, int val) {
     // Error check
     if (m_mem == nullptr) {
-        LOG_E("Cannot 'poke' at NULL memory!\n");
+        LOG_ERROR("Cannot 'poke' at NULL memory!\n");
         return false;
     }
     if (addr >= m_memSize) {
-        LOG_E("'Poke' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx "
-              "]!\n",
-              addr, m_memSize);
+        LOG_ERROR_PRINTF(
+            "'Poke' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx "
+            "]!\n",
+            addr, m_memSize);
         return false;
     }
     *(int *)&m_mem[addr] = val;

@@ -12,7 +12,7 @@
 #define GDBLOG 0
 #endif
 
-void gdbserverCall(rv32iHart_t *cpu);
-void gdbserverInit(rv32iHart_t *cpu);
+void gdbserverCall(rv32iHart *cpu);
+void gdbserverInit(rv32iHart *cpu);
 
 #endif // GDBSTUB_H

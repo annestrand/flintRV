@@ -9,10 +9,12 @@ typedef int socklen_t;
 #define SOCKET_ERR -1
 #endif
 
+#include "common/utils.h"
+
 #include "risa.h"
 #include "socket.h"
 
-void stopServer(rv32iHart_t *cpu) {
+void stopServer(rv32iHart *cpu) {
 #ifdef _WIN32
     shutdown(cpu->gdbFields.socketFd, SD_BOTH);
     closesocket(cpu->gdbFields.socketFd);
@@ -23,7 +25,7 @@ void stopServer(rv32iHart_t *cpu) {
 #endif
 }
 
-int startServer(rv32iHart_t *cpu) {
+int startServer(rv32iHart *cpu) {
 #ifdef _WIN32
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0) {

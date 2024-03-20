@@ -7,22 +7,8 @@
 
 #include "miniargparse/miniargparse.h"
 
-#define KB_MULTIPLIER (1024)
-#define MB_MULTIPLIER (1024 * 1024)
-#define DEFAULT_VIRT_MEM_SIZE (KB_MULTIPLIER * 32) // Default to 32 KB
-#define OUTPUT_LINE                                                            \
-    "===[ OUTPUT "                                                             \
-    "]=======================================================================" \
-    "=="                                                                       \
-    "==========================\n"
-#define LOG_LINE_BREAK                                                         \
-    "========================================================================" \
-    "=="                                                                       \
-    "======================================\n"
-
 void printHelp(void) {
-    printf("Vdrop32 - Verilator based drop32 simulator\n"
-           "[Usage]: Vdrop32 [OPTIONS] <program_binary>.hex\n\n"
+    printf("[Usage]: Vdrop32 [OPTIONS] <program_binary>.hex\n\n"
            "OPTIONS:\n");
     miniargparsePrint();
 }
@@ -45,7 +31,7 @@ int main(int argc, char *argv[]) {
     // Parse the args
     int unknownOpt = miniargparseParse(argc, argv);
     if (unknownOpt > 0) {
-        LOG_E("Unknown option ( %s ) used.\n\n", argv[unknownOpt]);
+        LOG_ERROR_PRINTF("Unknown option ( %s ) used.", argv[unknownOpt]);
         printHelp();
         return 1;
     }
@@ -64,7 +50,8 @@ int main(int argc, char *argv[]) {
     miniargparseOpt *tmp = miniargparseOptlistController(NULL);
     while (tmp != NULL) {
         if (tmp->infoBits.hasErr) {
-            LOG_E("%s ( Option: %s )\n\n", tmp->errValMsg, argv[tmp->index]);
+            LOG_ERROR_PRINTF("%s ( Option: %s )", tmp->errValMsg,
+                             argv[tmp->index]);
             printHelp();
             return 1;
         }
@@ -74,7 +61,7 @@ int main(int argc, char *argv[]) {
     // Get needed positional arg (i.e. program binary)
     int programIndex = miniargparseGetPositionalArg(argc, argv, 0);
     if (programIndex == 0) {
-        LOG_E("No program binary given.\n\n");
+        LOG_ERROR("No program binary given.");
         printHelp();
         return 1;
     }
@@ -93,19 +80,21 @@ int main(int argc, char *argv[]) {
     if (simTimeVal == 0) {
         simTimeVal = 1000;
     }
-    LOG_I("Memory size set to: [ %f MB ].\n",
-          (float)memSize / (float)(MB_MULTIPLIER));
-    LOG_I("Simulation timeout value:  [ %d ].\n", simTimeVal);
+
+    printf("Vdrop32 - Verilator based drop32 simulator\n");
+    LOG_INFO_PRINTF("Simulation timeout value: %d cycles.", simTimeVal);
+    LOG_INFO_PRINTF("Memory size set to: %f MB.",
+                    (float)memSize / (float)(MB_MULTIPLIER));
 
     // Instantiate CPU
     drop32 dut = drop32(simTimeVal, atoi(dumpLvl.value));
-    LOG_I("Starting simulation...\n\n%s", OUTPUT_LINE);
+    LOG_INFO_PRINTF("Running simulator...\n%s", OUTPUT_LINE);
     if (!dut.create(new Vdrop32(), simVcd.value)) {
-        LOG_E("Failed to create Vdrop32.\n");
+        LOG_ERROR("Failed to create Vdrop32.");
         return 1;
     }
     if (!dut.createMemory(memSize, programFile)) {
-        LOG_E("Failed to create memory.\n");
+        LOG_ERROR("Failed to create memory.");
         return 1;
     }
     dut.m_cpu->i_ifValid = 1;  // Always valid since we assume combinatorial
@@ -119,11 +108,11 @@ int main(int argc, char *argv[]) {
     // Run
     while (!dut.end()) {
         if (!dut.instructionUpdate()) {
-            LOG_E("Failed instruction fetch.\n");
+            LOG_ERROR("Failed instruction fetch.");
             return 1;
         }
         if (!dut.loadStoreUpdate()) {
-            LOG_E("Failed load/store fetch.\n");
+            LOG_ERROR("Failed load/store fetch.");
             return 1;
         }
         // Evaluate
@@ -131,6 +120,6 @@ int main(int argc, char *argv[]) {
     }
 
     printf("%s\n", LOG_LINE_BREAK);
-    LOG_I("Simulation done.\n");
+    LOG_INFO("Simulation done.");
     return 0;
 }

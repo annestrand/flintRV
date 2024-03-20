@@ -47,6 +47,7 @@ add_executable(risa
     ${CMAKE_SOURCE_DIR}/sim/risa/gdbserver.cc
 )
 target_include_directories(risa PUBLIC
+    ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/sim
     ${CMAKE_SOURCE_DIR}/external
 )
