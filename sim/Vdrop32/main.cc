@@ -105,6 +105,8 @@ int main(int argc, char *argv[]) {
     dut.writeRegfile(SP, memSize - 1);
     dut.writeRegfile(FP, memSize - 1);
 
+    clock_t startTime = clock();
+
     // Run
     while (!dut.end()) {
         if (!dut.instructionUpdate()) {
@@ -118,8 +120,11 @@ int main(int argc, char *argv[]) {
         // Evaluate
         dut.tick();
     }
-
     printf("%s", LOG_LINE_BREAK);
-    LOG_INFO("Simulation done.");
+
+    clock_t endTime = clock();
+    LOG_INFO_PRINTF("Simulation stopping, time elapsed: %f seconds.",
+                    ((double)(endTime - startTime)) / CLOCKS_PER_SEC);
+
     return 0;
 }
