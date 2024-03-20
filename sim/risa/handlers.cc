@@ -1,6 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "risa.h"
-#include "stdio.h"
-#include "stdlib.h"
 
 // Syscalls (taken from "riscv64-unknown-elf/include/machine/syscall.h")
 #define SYS_exit 93

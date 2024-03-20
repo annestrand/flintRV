@@ -13,8 +13,9 @@
 #include "Vdrop32.h"
 #include "Vdrop32__Syms.h"
 
-#include "drop32.h"
-#include "utils.h"
+#include "common/utils.h"
+
+#include "Vdrop32/drop32.h"
 
 namespace {
 // Embed the test programs binaries here

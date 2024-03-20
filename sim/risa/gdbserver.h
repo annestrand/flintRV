@@ -1,8 +1,9 @@
 #ifndef GDBSTUB_H
 #define GDBSTUB_H
 
-#include "risa.h"
 #include <stdint.h>
+
+#include "risa.h"
 
 // GDB packet logging
 #ifdef GDBLOG

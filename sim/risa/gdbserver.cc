@@ -1,7 +1,8 @@
 #include "gdbserver.h"
-#include "minigdbstub.h"
 #include "risa.h"
 #include "socket.h"
+
+#include "minigdbstub/minigdbstub.h"
 
 void gdbserverInit(rv32iHart_t *cpu) {
     cpu->gdbFields.serverPort = 3333;

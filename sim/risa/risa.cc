@@ -1,10 +1,10 @@
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "gdbserver.h"
-#include "miniargparse.h"
+#include "miniargparse/miniargparse.h"
 #include "risa.h"
 
 static volatile int g_sigIntDet = 0;

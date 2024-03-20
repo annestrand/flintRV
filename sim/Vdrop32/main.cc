@@ -1,10 +1,11 @@
 // Copyright (c) 2022 - present, Austin Annestrand.
 // Licensed under the MIT License (see LICENSE file).
 
-#include "drop32.h"
-#include "utils.h"
+#include "Vdrop32/drop32.h"
 
-#include "miniargparse.h"
+#include "common/utils.h"
+
+#include "miniargparse/miniargparse.h"
 
 #define KB_MULTIPLIER (1024)
 #define MB_MULTIPLIER (1024 * 1024)

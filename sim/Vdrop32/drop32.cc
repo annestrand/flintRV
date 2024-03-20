@@ -14,9 +14,10 @@
 #include <inttypes.h>
 
 #include "Vdrop32.h"
+#include "Vdrop32/drop32.h"
 #include "Vdrop32__Syms.h"
-#include "drop32.h"
-#include "utils.h"
+
+#include "common/utils.h"
 
 drop32::drop32(vluint64_t maxSimTime, int dumpLevel)
     : m_cpu(nullptr), m_cycles(0), m_trace(nullptr), m_maxSimTime(maxSimTime),

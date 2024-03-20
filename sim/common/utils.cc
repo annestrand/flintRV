@@ -8,8 +8,8 @@
 
 #include <cstdint>
 
+#include "common/utils.h"
 #include "types.h"
-#include "utils.h"
 
 bool loadMem(std::string filePath, char *mem, ssize_t memLen) {
     FILE *fp = fopen(filePath.c_str(), "rb+");

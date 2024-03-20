@@ -1,5 +1,6 @@
-#include "risa.h"
 #include <stdio.h>
+
+#include "risa.h"
 
 const char *toolBanner =
     " ________  ___  ________  ________     \n"

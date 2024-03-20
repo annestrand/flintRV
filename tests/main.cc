@@ -1,7 +1,7 @@
 // Copyright (c) 2022 - present, Austin Annestrand.
 // Licensed under the MIT License (see LICENSE file).
 
-#include "drop32.h"
+#include "Vdrop32/drop32.h"
 #include <gtest/gtest.h>
 
 int g_dumpLevel = 0;

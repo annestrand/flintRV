@@ -30,6 +30,14 @@ add_custom_command(
 )
 add_custom_target(typesVh ALL DEPENDS ${CMAKE_BINARY_DIR}/types.h)
 
+# Simulation utils
+add_library(sim_utils ${CMAKE_SOURCE_DIR}/sim/common/utils.cc)
+target_include_directories(sim_utils PRIVATE
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/sim
+)
+add_dependencies(sim_utils typesVh)
+
 # C-based functional RV32I simulator
 add_executable(risa
     ${CMAKE_SOURCE_DIR}/sim/risa/main.cc
@@ -39,9 +47,8 @@ add_executable(risa
     ${CMAKE_SOURCE_DIR}/sim/risa/gdbserver.cc
 )
 target_include_directories(risa PUBLIC
-    ${CMAKE_SOURCE_DIR}/sim/risa
-    ${CMAKE_SOURCE_DIR}/external/minigdbstub
-    ${CMAKE_SOURCE_DIR}/external/miniargparse
+    ${CMAKE_SOURCE_DIR}/sim
+    ${CMAKE_SOURCE_DIR}/external
 )
 set_property(TARGET risa PROPERTY CXX_STANDARD 14)
 if (WIN32 OR MINGW)
@@ -49,40 +56,32 @@ if (WIN32 OR MINGW)
     target_compile_options(risa PUBLIC /W3)
     target_compile_options(risa PUBLIC /WX)
 else ()
-    target_link_libraries(risa ${CMAKE_DL_LIBS})
+    target_link_libraries(risa PRIVATE ${CMAKE_DL_LIBS})
     target_compile_options(risa PUBLIC -Wall)
     target_compile_options(risa PUBLIC -Werror)
 endif()
 if (GDBLOG)
     target_compile_definitions(risa PRIVATE GDBLOG)
 endif()
+target_link_libraries(risa PRIVATE sim_utils)
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/risa_handler)
 
-# RV32I hello world example
-if (BUILD_HELLO_WORLD)
-    add_multi_target_component(examples hello_world ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
-endif()
-
 # Verilated core
-add_library(Vdrop32_lib STATIC
-    ${CMAKE_SOURCE_DIR}/sim/Vdrop32/utils.cc
-    ${CMAKE_SOURCE_DIR}/sim/Vdrop32/drop32.cc
-)
-target_include_directories(Vdrop32_lib PRIVATE
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/sim/Vdrop32
-)
-add_dependencies(Vdrop32_lib typesVh)
+add_library(Vdrop32_lib STATIC ${CMAKE_SOURCE_DIR}/sim/Vdrop32/drop32.cc)
+target_include_directories(Vdrop32_lib PRIVATE ${CMAKE_SOURCE_DIR}/sim)
 set_property(TARGET Vdrop32_lib PROPERTY CXX_STANDARD 14)
 
 # CLI verilated simulation driver
 add_executable(Vdrop32 ${CMAKE_SOURCE_DIR}/sim/Vdrop32/main.cc)
 target_include_directories(Vdrop32 PRIVATE
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/sim/Vdrop32
-    ${CMAKE_SOURCE_DIR}/external/miniargparse
+    ${CMAKE_SOURCE_DIR}/sim
+    ${CMAKE_SOURCE_DIR}/external
 )
-target_link_libraries(Vdrop32 PRIVATE Vdrop32_lib)
+target_link_libraries(Vdrop32 PRIVATE
+    Vdrop32_lib
+    sim_utils
+)
 set_property(TARGET Vdrop32 PROPERTY CXX_STANDARD 14)
 
 # Build RISC-V test sources (CLI GoogleTest driver)
@@ -104,14 +103,15 @@ if (BUILD_TESTS)
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/basic
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/algorithms
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/riscv-tests
-        ${CMAKE_SOURCE_DIR}/sim/Vdrop32
-        ${CMAKE_SOURCE_DIR}/external/miniargparse
+        ${CMAKE_SOURCE_DIR}/sim
+        ${CMAKE_SOURCE_DIR}/external
     )
     target_link_libraries(Vdrop32_tests PRIVATE
         Vdrop32_lib
         GTest::GTest
         GTest::Main
         ${CMAKE_DL_LIBS}
+        sim_utils
     )
     add_dependencies(Vdrop32_tests
         typesVh
@@ -122,6 +122,11 @@ if (BUILD_TESTS)
     )
     set_property(TARGET Vdrop32_tests PROPERTY CXX_STANDARD 14)
 endif ()
+
+# RV32I hello world example
+if (BUILD_HELLO_WORLD)
+    add_multi_target_component(examples hello_world ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
+endif()
 
 # Build example SoC firmware
 if (BUILD_SOC)
