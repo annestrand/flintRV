@@ -24,11 +24,11 @@ namespace {
 #include "mergesort.inc"
 } // namespace
 
-extern int g_dumpLevel;
+extern int g_testTracing;
 
 TEST(algorithms, fibonacci) {
     constexpr int memSize = 0x4000;
-    drop32 dut = drop32(1000000, g_dumpLevel);
+    drop32 dut = drop32(1000000, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }
@@ -70,7 +70,7 @@ TEST(algorithms, fibonacci) {
 
 TEST(algorithms, binsearch) {
     constexpr int memSize = 0x4000;
-    drop32 dut = drop32(1000000, g_dumpLevel);
+    drop32 dut = drop32(1000000, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }
@@ -105,7 +105,7 @@ TEST(algorithms, binsearch) {
 
 TEST(algorithms, mergesort) {
     constexpr int memSize = 0x4000;
-    drop32 dut = drop32(1000000, g_dumpLevel);
+    drop32 dut = drop32(1000000, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }

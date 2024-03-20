@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
         "Virtual memory/IO size (in bytes - decimal or hex format) "
         "[DEFAULT=32KB].");
     MINIARGPARSE_OPT(help, "h", "help", 0, "Print help and exit.");
-    MINIARGPARSE_OPT(dumpLvl, "d", "dumpLevel", 1,
-                     "Verbose trace print-level (0-2) [DEFAULT=0].");
+    MINIARGPARSE_OPT(tracing, "", "tracing", 0,
+                     "Enable trace printing to stdout.");
     MINIARGPARSE_OPT(simTime, "t", "timeout", 1,
                      "Simulation timeout value [DEFAULT=1000].");
     MINIARGPARSE_OPT(simVcd, "V", "vcdDump", 1,
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
                     (float)memSize / (float)(MB_MULTIPLIER));
 
     // Instantiate CPU
-    drop32 dut = drop32(simTimeVal, atoi(dumpLvl.value));
+    drop32 dut = drop32(simTimeVal, tracing.infoBits.used);
     LOG_INFO_PRINTF("Running simulator...\n%s", OUTPUT_LINE);
     if (!dut.create(new Vdrop32(), simVcd.value)) {
         LOG_ERROR("Failed to create Vdrop32.");
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
         dut.tick();
     }
 
-    printf("%s\n", LOG_LINE_BREAK);
+    printf("%s", LOG_LINE_BREAK);
     LOG_INFO("Simulation done.");
     return 0;
 }

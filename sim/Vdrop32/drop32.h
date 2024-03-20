@@ -58,7 +58,7 @@ typedef enum {
 
 class drop32 {
   public:
-    drop32(vluint64_t maxSimTime, int dumpLevel = 0);
+    drop32(vluint64_t maxSimTime, bool tracing = false);
     ~drop32();
     bool create(Vdrop32 *cpu, const char *traceFile = nullptr);
     bool createMemory(size_t memSize);
@@ -81,7 +81,7 @@ class drop32 {
     vluint64_t m_cycles;
     VerilatedVcdC *m_trace;
     vluint64_t m_maxSimTime;
-    int m_dump;
+    bool m_tracing;
     char *m_mem;      // Test memory
     size_t m_memSize; // Sizeof Test memory in bytes
 };

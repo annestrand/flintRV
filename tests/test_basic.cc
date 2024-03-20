@@ -25,10 +25,10 @@ namespace {
 #include "simple_loop.inc"
 } // namespace
 
-extern int g_dumpLevel;
+extern int g_testTracing;
 
 TEST(basic, loop) { // Basic test loop summation for 10 iterations
-    drop32 dut = drop32(200, g_dumpLevel);
+    drop32 dut = drop32(200, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }
@@ -59,7 +59,7 @@ TEST(basic, loop) { // Basic test loop summation for 10 iterations
 
 TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
                      // XOR, etc.)
-    drop32 dut = drop32(200, g_dumpLevel);
+    drop32 dut = drop32(200, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }
@@ -97,7 +97,7 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
 
 TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
                      // ADD, SUB, SRL etc.)
-    drop32 dut = drop32(200, g_dumpLevel);
+    drop32 dut = drop32(200, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }
@@ -137,7 +137,7 @@ TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
 TEST(
     basic,
     jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
-    drop32 dut = drop32(200, g_dumpLevel);
+    drop32 dut = drop32(200, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }
@@ -166,7 +166,7 @@ TEST(
 }
 
 TEST(basic, load_store) { // Tests load and store based instructions
-    drop32 dut = drop32(200, g_dumpLevel);
+    drop32 dut = drop32(200, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
     }

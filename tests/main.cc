@@ -4,7 +4,7 @@
 #include "Vdrop32/drop32.h"
 #include <gtest/gtest.h>
 
-int g_dumpLevel = 0;
+bool g_testTracing = false;
 
 int main(int argc, char *argv[]) {
     // Parse any passed option(s)
@@ -16,18 +16,14 @@ int main(int argc, char *argv[]) {
         }
         if (s.find("-h") != std::string::npos) {
             printf("%s\n", "Vdrop32_tests option(s):\n"
-                           "    -h         : Prints help and exits\n"
-                           "    -v         : Prints version and exits\n"
-                           "    -dump      : Prints disassembled instruction\n"
-                           "    -dump-all  : Prints disassembled instruction + "
-                           "CPU state\n");
+                           "    -h             : Prints help and exits\n"
+                           "    -v             : Prints version and exits\n"
+                           "    --tracing      : Prints disassembled "
+                           "instructions + CPU state\n");
             return 0;
         }
-        if (s.find("-dump") != std::string::npos) {
-            g_dumpLevel = g_dumpLevel > 0 ? g_dumpLevel : 1;
-        }
-        if (s.find("-dump-all") != std::string::npos) {
-            g_dumpLevel = g_dumpLevel > 1 ? g_dumpLevel : 2;
+        if (s.find("--tracing") != std::string::npos) {
+            g_testTracing = true;
         }
     }
     testing::InitGoogleTest(&argc, argv);

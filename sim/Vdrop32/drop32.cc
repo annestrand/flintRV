@@ -19,9 +19,9 @@
 
 #include "common/utils.h"
 
-drop32::drop32(vluint64_t maxSimTime, int dumpLevel)
+drop32::drop32(vluint64_t maxSimTime, bool tracing)
     : m_cpu(nullptr), m_cycles(0), m_trace(nullptr), m_maxSimTime(maxSimTime),
-      m_dump(dumpLevel), m_mem(nullptr), m_memSize(0) {}
+      m_tracing(tracing), m_mem(nullptr), m_memSize(0) {}
 
 drop32::~drop32() {
     m_cpu->final();
@@ -245,7 +245,7 @@ void drop32::tick(bool enableDump) {
 }
 
 void drop32::dump() {
-    if (!m_dump) {
+    if (!m_tracing) {
         return;
     }
     std::string instr =
@@ -265,14 +265,9 @@ void drop32::dump() {
     bool RST = m_cpu->i_rst;                     // R
     bool iValid = m_cpu->i_ifValid;              // I
     bool mValid = m_cpu->i_memValid;             // M
-    // Dump disassembled instruction
+
     printf("%8x:   0x%08x   %-22s", m_cpu->o_pcOut, m_cpu->i_instr,
            instr.c_str());
-    if (m_dump < 2) {
-        printf("\n");
-        return;
-    }
-    // Dump more detailed info
     printf("STALL:[%c%c%c-]  FLUSH:[%c%c%c%c]  STATUS:[%c%c%c%c%c%c%c]  "
            "CYCLE:[%" PRIu64 "]\n",
            fStall ? 'x' : '-', eStall ? 'x' : '-', mStall ? 'x' : '-',
