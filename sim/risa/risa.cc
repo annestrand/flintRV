@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <inttypes.h>
 
 #include <string>
 
@@ -192,8 +193,9 @@ int executionLoop(rv32iHart *cpu) {
         cpu->cycleCounter++;
         cpu->IF = ACCESS_MEM_W(cpu->virtMem, cpu->pc);
         if (cpu->opts.o_tracePrintEnable) {
-            printf("%8x:   0x%08x   %-22s\n", cpu->pc, cpu->IF,
-                   disassembleRv32i(cpu->IF).c_str());
+            printf("%8x:   0x%08x   %-30s CYCLE:[%" PRIu64 "]\n", cpu->pc,
+                   cpu->IF, disassembleRv32i(cpu->IF).c_str(),
+                   (long unsigned int)cpu->cycleCounter);
         }
         cpu->instFields.opcode = OPCODE(cpu->IF);
         switch (cpu->instFields.opcode) {
