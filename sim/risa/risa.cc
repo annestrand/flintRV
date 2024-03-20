@@ -18,7 +18,9 @@ void defaultIntHandler(rv32iHart_t *cpu);
 void defaultEnvHandler(rv32iHart_t *cpu);
 void defaultExitHandler(rv32iHart_t *cpu);
 void defaultInitHandler(rv32iHart_t *cpu);
-const void *g_defaultHandlerTable[RISA_HANDLER_PROC_COUNT] = {
+
+using risa_handler = void (*)(rv32iHart *);
+risa_handler g_defaultHandlerTable[RISA_HANDLER_PROC_COUNT] = {
     defaultMmioHandler, defaultIntHandler, defaultEnvHandler,
     defaultExitHandler, defaultInitHandler};
 const char *g_handlerProcNames[RISA_HANDLER_PROC_COUNT] = {
@@ -66,7 +68,7 @@ int loadProgram(rv32iHart_t *cpu) {
         LOG_ERROR("Could not allocate virtual memory.");
         return ENOMEM;
     }
-    for (int i = 0; feof(binFile) == 0; ++i) {
+    for (unsigned int i = 0; feof(binFile) == 0; ++i) {
         if (i >= (cpu->virtMemSize / sizeof(u32))) {
             LOG_ERROR("Could not fit program in simulator's virtual memory!"
                       " (NOTE: Use larger \"size\" value for -m <size>)");
@@ -155,7 +157,7 @@ int setupSimulator(int argc, char **argv, rv32iHart_t *cpu) {
         cpu->handlerProcs[i] =
             (pfn_risa_handlers)LOAD_SYM(cpu->handlerLib, g_handlerProcNames[i]);
         if (cpu->handlerProcs[i] == NULL) {
-            cpu->handlerProcs[i] = (void *)g_defaultHandlerTable[i];
+            cpu->handlerProcs[i] = g_defaultHandlerTable[i];
             if (handlerLib.infoBits.used) {
                 LOG_WARNING_PRINTF(
                     "Could not load %s - using default stub instead.",

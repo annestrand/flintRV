@@ -32,18 +32,18 @@ add_custom_target(typesVh ALL DEPENDS ${CMAKE_BINARY_DIR}/types.h)
 
 # C-based functional RV32I simulator
 add_executable(risa
-    ${CMAKE_SOURCE_DIR}/sim/risa/main.c
-    ${CMAKE_SOURCE_DIR}/sim/risa/risa.c
-    ${CMAKE_SOURCE_DIR}/sim/risa/socket.c
-    ${CMAKE_SOURCE_DIR}/sim/risa/handlers.c
-    ${CMAKE_SOURCE_DIR}/sim/risa/gdbserver.c
+    ${CMAKE_SOURCE_DIR}/sim/risa/main.cc
+    ${CMAKE_SOURCE_DIR}/sim/risa/risa.cc
+    ${CMAKE_SOURCE_DIR}/sim/risa/socket.cc
+    ${CMAKE_SOURCE_DIR}/sim/risa/handlers.cc
+    ${CMAKE_SOURCE_DIR}/sim/risa/gdbserver.cc
 )
 target_include_directories(risa PUBLIC
     ${CMAKE_SOURCE_DIR}/sim/risa
     ${CMAKE_SOURCE_DIR}/external/minigdbstub
     ${CMAKE_SOURCE_DIR}/external/miniargparse
 )
-set_property(TARGET risa PROPERTY C_STANDARD 99)
+set_property(TARGET risa PROPERTY CXX_STANDARD 14)
 if (WIN32 OR MINGW)
     target_link_libraries(risa PRIVATE wsock32 ws2_32)
     target_compile_options(risa PUBLIC /W3)
