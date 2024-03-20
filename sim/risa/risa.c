@@ -1,11 +1,11 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 
-#include "risa.h"
 #include "gdbserver.h"
 #include "miniargparse.h"
+#include "risa.h"
 
 static volatile int g_sigIntDet = 0;
 static SIGINT_RET_TYPE sigintHandler(SIGINT_PARAM sig) {
@@ -19,27 +19,19 @@ void defaultEnvHandler(rv32iHart_t *cpu);
 void defaultExitHandler(rv32iHart_t *cpu);
 void defaultInitHandler(rv32iHart_t *cpu);
 const void *g_defaultHandlerTable[RISA_HANDLER_PROC_COUNT] = {
-    defaultMmioHandler,
-    defaultIntHandler,
-    defaultEnvHandler,
-    defaultExitHandler,
-    defaultInitHandler
-};
+    defaultMmioHandler, defaultIntHandler, defaultEnvHandler,
+    defaultExitHandler, defaultInitHandler};
 const char *g_handlerProcNames[RISA_HANDLER_PROC_COUNT] = {
-    "risaMmioHandler",
-    "risaIntHandler",
-    "risaEnvHandler",
-    "risaInitHandler",
-    "risaExitHandler",
+    "risaMmioHandler", "risaIntHandler",  "risaEnvHandler",
+    "risaInitHandler", "risaExitHandler",
 };
 
 void printHelp(void) {
     printf("\n"
-        "[Usage  ]: risa [OPTIONS] <program_binary>\n"
-        "[Example]: risa -m 1024 my_riscv_program.hex"
-        "\n\n"
-        "OPTIONS:\n"
-    );
+           "[Usage  ]: risa [OPTIONS] <program_binary>\n"
+           "[Example]: risa -m 1024 my_riscv_program.hex"
+           "\n\n"
+           "OPTIONS:\n");
     miniargparsePrint();
 }
 
@@ -47,16 +39,21 @@ void cleanupSimulator(rv32iHart_t *cpu) {
     if (cpu->handlerProcs[RISA_EXIT_HANDLER_PROC] != NULL) {
         cpu->handlerProcs[RISA_EXIT_HANDLER_PROC](cpu);
     }
-    if (cpu->virtMem        != NULL)    { free(cpu->virtMem);          }
-    if (cpu->handlerData    != NULL)    { free(cpu->handlerData);      }
-    if (cpu->handlerLib     != NULL)    { CLOSE_LIB(cpu->handlerLib);  }
+    if (cpu->virtMem != NULL) {
+        free(cpu->virtMem);
+    }
+    if (cpu->handlerData != NULL) {
+        free(cpu->handlerData);
+    }
+    if (cpu->handlerLib != NULL) {
+        CLOSE_LIB(cpu->handlerLib);
+    }
     LOG_INFO_PRINTF("Simulation stopping, time elapsed: %f seconds.",
-        ((double)(cpu->endTime - cpu->startTime)) / CLOCKS_PER_SEC
-    );
+                    ((double)(cpu->endTime - cpu->startTime)) / CLOCKS_PER_SEC);
 }
 
 int loadProgram(rv32iHart_t *cpu) {
-    FILE* binFile;
+    FILE *binFile;
     OPEN_FILE(binFile, cpu->programFile, "rb");
     if (binFile == NULL) {
         LOG_ERROR_PRINTF("Could not open file ( %s ).", cpu->programFile);
@@ -64,21 +61,20 @@ int loadProgram(rv32iHart_t *cpu) {
         return EIO;
     }
     // Alloc vmem and load program
-    cpu->virtMem = (u32*)malloc(cpu->virtMemSize);
+    cpu->virtMem = (u32 *)malloc(cpu->virtMemSize);
     if (cpu->virtMem == NULL) {
         LOG_ERROR("Could not allocate virtual memory.");
         return ENOMEM;
     }
-    for (int i=0; feof(binFile) == 0; ++i) {
+    for (int i = 0; feof(binFile) == 0; ++i) {
         if (i >= (cpu->virtMemSize / sizeof(u32))) {
             LOG_ERROR("Could not fit program in simulator's virtual memory!"
-                      " (NOTE: Use larger \"size\" value for -m <size>)"
-            );
+                      " (NOTE: Use larger \"size\" value for -m <size>)");
             fclose(binFile);
             cleanupSimulator(cpu);
             return ENOMEM;
         }
-        fread(cpu->virtMem+i, sizeof(u32), 1, binFile);
+        fread(cpu->virtMem + i, sizeof(u32), 1, binFile);
     }
     fclose(binFile);
     return 0;
@@ -86,15 +82,20 @@ int loadProgram(rv32iHart_t *cpu) {
 
 int setupSimulator(int argc, char **argv, rv32iHart_t *cpu) {
     // Define opts
-    MINIARGPARSE_OPT(virtMem, "m", "memSize", 1,
-        "Virtual memory/IO size (in bytes - decimal or hex format) [DEFAULT=32KB].");
+    MINIARGPARSE_OPT(
+        virtMem, "m", "memSize", 1,
+        "Virtual memory/IO size (in bytes - decimal or hex format) "
+        "[DEFAULT=32KB].");
     MINIARGPARSE_OPT(handlerLib, "l", "handlerLibrary", 1,
-        "Shared library file to user-defined handler functions [DEFAULT=stubs].");
+                     "Shared library file to user-defined handler functions "
+                     "[DEFAULT=stubs].");
     MINIARGPARSE_OPT(help, "h", "help", 0, "Print help and exit.");
-    MINIARGPARSE_OPT(tracing, "", "tracing", 0, "Enable trace printing to stdout.");
-    MINIARGPARSE_OPT(timeout, "t", "timeout", 1, "Simulator cycle timeout value [DEFAULT=INT32_MAX].");
+    MINIARGPARSE_OPT(tracing, "", "tracing", 0,
+                     "Enable trace printing to stdout.");
+    MINIARGPARSE_OPT(timeout, "t", "timeout", 1,
+                     "Simulator cycle timeout value [DEFAULT=INT32_MAX].");
     MINIARGPARSE_OPT(interrupt, "i", "interruptPeriod", 1,
-        "Simulator interrupt-check timeout value [DEFAULT=500].");
+                     "Simulator interrupt-check timeout value [DEFAULT=500].");
     MINIARGPARSE_OPT(gdb, "g", "gdb", 0, "Run the simulator in GDB-mode.");
 
     // Parse the args
@@ -115,7 +116,8 @@ int setupSimulator(int argc, char **argv, rv32iHart_t *cpu) {
     miniargparseOpt *tmp = miniargparseOptlistController(NULL);
     while (tmp != NULL) {
         if (tmp->infoBits.hasErr) {
-            LOG_ERROR_PRINTF("%s ( Option: %s )", tmp->errValMsg, argv[tmp->index]);
+            LOG_ERROR_PRINTF("%s ( Option: %s )", tmp->errValMsg,
+                             argv[tmp->index]);
             printHelp();
             return EINVAL;
         }
@@ -146,31 +148,41 @@ int setupSimulator(int argc, char **argv, rv32iHart_t *cpu) {
     // Load handler lib and syms (if given)
     cpu->handlerLib = LOAD_LIB(handlerLib.value);
     if (handlerLib.infoBits.used && cpu->handlerLib == NULL) {
-        LOG_WARNING_PRINTF("Could not load dynamic library ( %s ).", handlerLib.value);
+        LOG_WARNING_PRINTF("Could not load dynamic library ( %s ).",
+                           handlerLib.value);
     }
-    for (int i=0; i<RISA_HANDLER_PROC_COUNT; ++i) {
-        cpu->handlerProcs[i] = (pfn_risa_handlers)LOAD_SYM(cpu->handlerLib, g_handlerProcNames[i]);
+    for (int i = 0; i < RISA_HANDLER_PROC_COUNT; ++i) {
+        cpu->handlerProcs[i] =
+            (pfn_risa_handlers)LOAD_SYM(cpu->handlerLib, g_handlerProcNames[i]);
         if (cpu->handlerProcs[i] == NULL) {
-            cpu->handlerProcs[i] = (void*)g_defaultHandlerTable[i];
+            cpu->handlerProcs[i] = (void *)g_defaultHandlerTable[i];
             if (handlerLib.infoBits.used) {
-                LOG_WARNING_PRINTF("Could not load %s - using default stub instead.", g_handlerProcNames[i]);
+                LOG_WARNING_PRINTF(
+                    "Could not load %s - using default stub instead.",
+                    g_handlerProcNames[i]);
             }
         }
     }
     cpu->cleanupSimulator = cleanupSimulator;
 
     // Interrupt period and virtual memory config
-    if (cpu->intPeriodVal == 0) { cpu->intPeriodVal = DEFAULT_INT_PERIOD;   }
-    if (cpu->virtMemSize == 0)  { cpu->virtMemSize = DEFAULT_VIRT_MEM_SIZE; }
+    if (cpu->intPeriodVal == 0) {
+        cpu->intPeriodVal = DEFAULT_INT_PERIOD;
+    }
+    if (cpu->virtMemSize == 0) {
+        cpu->virtMemSize = DEFAULT_VIRT_MEM_SIZE;
+    }
     LOG_INFO_PRINTF("Interrupt period set to: %d cycles.", cpu->intPeriodVal);
-    LOG_INFO_PRINTF("Virtual memory size set to: %f MB.", (float)cpu->virtMemSize / (float)(MB_MULTIPLIER));
+    LOG_INFO_PRINTF("Virtual memory size set to: %f MB.",
+                    (float)cpu->virtMemSize / (float)(MB_MULTIPLIER));
 
     // Alloc vmem and load program binary
     return loadProgram(cpu);
 }
 
 int executionLoop(rv32iHart_t *cpu) {
-    cpu->regFile[SP] = cpu->regFile[FP] = cpu->virtMemSize-1; // Init stack and frame pointer
+    cpu->regFile[SP] = cpu->regFile[FP] =
+        cpu->virtMemSize - 1; // Init stack and frame pointer
     cpu->startTime = clock();
     if (cpu->opts.o_gdbEnabled) {
         gdbserverInit(cpu);
@@ -181,11 +193,13 @@ int executionLoop(rv32iHart_t *cpu) {
     printf(LOG_LINE_BREAK);
     for (;;) {
         // Sim timeout value or sigint detected - normal cleanup/exit
-        if (g_sigIntDet || (cpu->opts.o_timeout && cpu->cycleCounter == cpu->timeoutVal)) {
+        if (g_sigIntDet ||
+            (cpu->opts.o_timeout && cpu->cycleCounter == cpu->timeoutVal)) {
             cpu->endTime = clock();
             printf(LOG_LINE_BREAK);
             if (cpu->opts.o_timeout) {
-                LOG_INFO_PRINTF("Timeout value reached - ( %d cycles ).", cpu->timeoutVal);
+                LOG_INFO_PRINTF("Timeout value reached - ( %d cycles ).",
+                                cpu->timeoutVal);
             }
             cleanupSimulator(cpu);
             return 0;
@@ -202,72 +216,88 @@ int executionLoop(rv32iHart_t *cpu) {
         switch (g_opcodeToFormat[cpu->instFields.opcode]) {
             case R: {
                 // Decode
-                cpu->instFields.rd     = GET_RD(cpu->IF);
-                cpu->instFields.rs1    = GET_RS1(cpu->IF);
-                cpu->instFields.rs2    = GET_RS2(cpu->IF);
+                cpu->instFields.rd = GET_RD(cpu->IF);
+                cpu->instFields.rs1 = GET_RS1(cpu->IF);
+                cpu->instFields.rs2 = GET_RS2(cpu->IF);
                 cpu->instFields.funct3 = GET_FUNCT3(cpu->IF);
                 cpu->instFields.funct7 = GET_FUNCT7(cpu->IF);
-                cpu->ID = (cpu->instFields.funct7 << 10) | (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
+                cpu->ID = (cpu->instFields.funct7 << 10) |
+                          (cpu->instFields.funct3 << 7) |
+                          cpu->instFields.opcode;
                 // Execute
                 switch ((RtypeInstructions)cpu->ID) {
-                    case ADD:  { // Addition
+                    case ADD: { // Addition
                         TRACE_R((cpu), "add");
                         cpu->regFile[cpu->instFields.rd] =
-                            cpu->regFile[cpu->instFields.rs1] + cpu->regFile[cpu->instFields.rs2];
+                            cpu->regFile[cpu->instFields.rs1] +
+                            cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
-                    case SUB:  { // Subtraction
+                    case SUB: { // Subtraction
                         TRACE_R((cpu), "sub");
                         cpu->regFile[cpu->instFields.rd] =
-                            cpu->regFile[cpu->instFields.rs1] - cpu->regFile[cpu->instFields.rs2];
+                            cpu->regFile[cpu->instFields.rs1] -
+                            cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
-                    case SLL:  { // Shift left logical
+                    case SLL: { // Shift left logical
                         TRACE_R((cpu), "sll");
                         cpu->regFile[cpu->instFields.rd] =
-                            cpu->regFile[cpu->instFields.rs1] << cpu->regFile[cpu->instFields.rs2];
+                            cpu->regFile[cpu->instFields.rs1]
+                            << cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
-                    case SLT:  { // Set if less than (signed)
+                    case SLT: { // Set if less than (signed)
                         TRACE_R((cpu), "slt");
                         cpu->regFile[cpu->instFields.rd] =
-                            ((s32)cpu->regFile[cpu->instFields.rs1] < (s32)cpu->regFile[cpu->instFields.rs2]) ? 1 : 0;
+                            ((s32)cpu->regFile[cpu->instFields.rs1] <
+                             (s32)cpu->regFile[cpu->instFields.rs2])
+                                ? 1
+                                : 0;
                         break;
                     }
                     case SLTU: { // Set if less than (unsigned)
                         TRACE_R((cpu), "sltu");
                         cpu->regFile[cpu->instFields.rd] =
-                            (cpu->regFile[cpu->instFields.rs1] < cpu->regFile[cpu->instFields.rs2]) ? 1 : 0;
+                            (cpu->regFile[cpu->instFields.rs1] <
+                             cpu->regFile[cpu->instFields.rs2])
+                                ? 1
+                                : 0;
                         break;
                     }
-                    case XOR:  { // Bitwise xor
+                    case XOR: { // Bitwise xor
                         TRACE_R((cpu), "xor");
                         cpu->regFile[cpu->instFields.rd] =
-                            cpu->regFile[cpu->instFields.rs1] ^ cpu->regFile[cpu->instFields.rs2];
+                            cpu->regFile[cpu->instFields.rs1] ^
+                            cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
-                    case SRL:  { // Shift right logical
+                    case SRL: { // Shift right logical
                         TRACE_R((cpu), "srl");
                         cpu->regFile[cpu->instFields.rd] =
-                            cpu->regFile[cpu->instFields.rs1] >> cpu->regFile[cpu->instFields.rs2];
+                            cpu->regFile[cpu->instFields.rs1] >>
+                            cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
-                    case SRA:  { // Shift right arithmetic
+                    case SRA: { // Shift right arithmetic
                         TRACE_R((cpu), "sra");
                         cpu->regFile[cpu->instFields.rd] =
-                            (u32)((s32)cpu->regFile[cpu->instFields.rs1] >> cpu->regFile[cpu->instFields.rs2]);
+                            (u32)((s32)cpu->regFile[cpu->instFields.rs1] >>
+                                  cpu->regFile[cpu->instFields.rs2]);
                         break;
                     }
-                    case OR:   { // Bitwise or
+                    case OR: { // Bitwise or
                         TRACE_R((cpu), "or");
                         cpu->regFile[cpu->instFields.rd] =
-                            cpu->regFile[cpu->instFields.rs1] | cpu->regFile[cpu->instFields.rs2];
+                            cpu->regFile[cpu->instFields.rs1] |
+                            cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
-                    case AND:  { // Bitwise and
+                    case AND: { // Bitwise and
                         TRACE_R((cpu), "and");
                         cpu->regFile[cpu->instFields.rd] =
-                            cpu->regFile[cpu->instFields.rs1] & cpu->regFile[cpu->instFields.rs2];
+                            cpu->regFile[cpu->instFields.rs1] &
+                            cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
                 }
@@ -275,102 +305,126 @@ int executionLoop(rv32iHart_t *cpu) {
             }
             case I: {
                 // Decode
-                cpu->instFields.rd     = GET_RD(cpu->IF);
-                cpu->instFields.rs1    = GET_RS1(cpu->IF);
+                cpu->instFields.rd = GET_RD(cpu->IF);
+                cpu->instFields.rs1 = GET_RS1(cpu->IF);
                 cpu->instFields.funct3 = GET_FUNCT3(cpu->IF);
                 cpu->immFields.imm11_0 = GET_IMM_11_0(cpu->IF);
-                cpu->immFields.succ    = GET_SUCC(cpu->IF);
-                cpu->immFields.pred    = GET_PRED(cpu->IF);
-                cpu->immFields.fm      = GET_FM(cpu->IF);
+                cpu->immFields.succ = GET_SUCC(cpu->IF);
+                cpu->immFields.pred = GET_PRED(cpu->IF);
+                cpu->immFields.fm = GET_FM(cpu->IF);
                 cpu->immFinal = (((s32)cpu->immFields.imm11_0 << 20) >> 20);
-                cpu->ID = (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
-                cpu->targetAddress = cpu->regFile[cpu->instFields.rs1] + cpu->immFinal;
+                cpu->ID =
+                    (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
+                cpu->targetAddress =
+                    cpu->regFile[cpu->instFields.rs1] + cpu->immFinal;
                 // Execute
                 switch ((ItypeInstructions)cpu->ID) {
-                    case SLLI: { // Shift left logical by immediate (i.e. rs2 is shamt)
+                    case SLLI: { // Shift left logical by immediate (i.e. rs2 is
+                                 // shamt)
                         TRACE_I((cpu), "slli");
-                        cpu->regFile[cpu->instFields.rd] = cpu->regFile[cpu->instFields.rs1] << cpu->immFinal;
+                        cpu->regFile[cpu->instFields.rd] =
+                            cpu->regFile[cpu->instFields.rs1] << cpu->immFinal;
                         break;
                     }
-                    case SRLI: { // Shift right logical by immediate (i.e. rs2 is shamt)
+                    case SRLI: { // Shift right logical by immediate (i.e. rs2
+                                 // is shamt)
                         TRACE_I((cpu), "srli");
-                        cpu->regFile[cpu->instFields.rd] = cpu->regFile[cpu->instFields.rs1] >> cpu->immFinal;
+                        cpu->regFile[cpu->instFields.rd] =
+                            cpu->regFile[cpu->instFields.rs1] >> cpu->immFinal;
                         break;
                     }
-                    case SRAI: { // Shift right arithmetic by immediate (i.e. rs2 is shamt)
+                    case SRAI: { // Shift right arithmetic by immediate (i.e.
+                                 // rs2 is shamt)
                         TRACE_I((cpu), "srai");
                         cpu->regFile[cpu->instFields.rd] =
-                            (u32)((s32)cpu->regFile[cpu->instFields.rs1] >> cpu->immFinal);
+                            (u32)((s32)cpu->regFile[cpu->instFields.rs1] >>
+                                  cpu->immFinal);
                         break;
                     }
-                    case JALR:  { // Jump and link register
+                    case JALR: { // Jump and link register
                         TRACE_I((cpu), "jalr");
                         cpu->regFile[cpu->instFields.rd] = cpu->pc + 4;
                         cpu->pc = ((cpu->targetAddress) & 0xfffffffe) - 4;
                         break;
                     }
-                    case LB:    { // Load byte (signed)
+                    case LB: { // Load byte (signed)
                         TRACE_L((cpu), "lb");
-                        u32 loadByte = (u32)ACCESS_MEM_B(cpu->virtMem, cpu->targetAddress);
-                        cpu->regFile[cpu->instFields.rd] = (u32)((s32)(loadByte << 24) >> 24);
+                        u32 loadByte =
+                            (u32)ACCESS_MEM_B(cpu->virtMem, cpu->targetAddress);
+                        cpu->regFile[cpu->instFields.rd] =
+                            (u32)((s32)(loadByte << 24) >> 24);
                         break;
                     }
-                    case LH:    { // Load halfword (signed)
+                    case LH: { // Load halfword (signed)
                         TRACE_L((cpu), "lh");
-                        u32 loadHalfword = (u32)ACCESS_MEM_H(cpu->virtMem, cpu->targetAddress);
-                        cpu->regFile[cpu->instFields.rd] = (u32)((s32)(loadHalfword << 16) >> 16);
+                        u32 loadHalfword =
+                            (u32)ACCESS_MEM_H(cpu->virtMem, cpu->targetAddress);
+                        cpu->regFile[cpu->instFields.rd] =
+                            (u32)((s32)(loadHalfword << 16) >> 16);
                         break;
                     }
-                    case LW:    { // Load word
+                    case LW: { // Load word
                         TRACE_L((cpu), "lw");
-                        cpu->regFile[cpu->instFields.rd] = ACCESS_MEM_W(cpu->virtMem, cpu->targetAddress);
+                        cpu->regFile[cpu->instFields.rd] =
+                            ACCESS_MEM_W(cpu->virtMem, cpu->targetAddress);
                         break;
                     }
-                    case LBU:   { // Load byte (unsigned)
+                    case LBU: { // Load byte (unsigned)
                         TRACE_L((cpu), "lbu");
                         cpu->regFile[cpu->instFields.rd] =
                             (u32)ACCESS_MEM_B(cpu->virtMem, cpu->targetAddress);
                         break;
                     }
-                    case LHU:   { // Load halfword (unsigned)
+                    case LHU: { // Load halfword (unsigned)
                         TRACE_L((cpu), "lhu");
                         cpu->regFile[cpu->instFields.rd] =
                             (u32)ACCESS_MEM_H(cpu->virtMem, cpu->targetAddress);
                         break;
                     }
-                    case ADDI:  { // Add immediate
+                    case ADDI: { // Add immediate
                         TRACE_I((cpu), "addi");
-                        cpu->regFile[cpu->instFields.rd] = cpu->regFile[cpu->instFields.rs1] + cpu->immFinal;
+                        cpu->regFile[cpu->instFields.rd] =
+                            cpu->regFile[cpu->instFields.rs1] + cpu->immFinal;
                         break;
                     }
-                    case SLTI:  { // Set if less than immediate (signed)
+                    case SLTI: { // Set if less than immediate (signed)
                         TRACE_I((cpu), "slti");
                         cpu->regFile[cpu->instFields.rd] =
-                            ((s32)cpu->regFile[cpu->instFields.rs1] < cpu->immFinal) ? 1 : 0;
+                            ((s32)cpu->regFile[cpu->instFields.rs1] <
+                             cpu->immFinal)
+                                ? 1
+                                : 0;
                         break;
                     }
                     case SLTIU: { // Set if less than immediate (unsigned)
                         TRACE_I((cpu), "sltiu");
                         cpu->regFile[cpu->instFields.rd] =
-                            (cpu->regFile[cpu->instFields.rs1] < (u32)cpu->immFinal) ? 1 : 0;
+                            (cpu->regFile[cpu->instFields.rs1] <
+                             (u32)cpu->immFinal)
+                                ? 1
+                                : 0;
                         break;
                     }
-                    case XORI:  { // Bitwise exclusive or immediate
+                    case XORI: { // Bitwise exclusive or immediate
                         TRACE_I((cpu), "xori");
-                        cpu->regFile[cpu->instFields.rd] = cpu->regFile[cpu->instFields.rs1] ^ cpu->immFinal;
+                        cpu->regFile[cpu->instFields.rd] =
+                            cpu->regFile[cpu->instFields.rs1] ^ cpu->immFinal;
                         break;
                     }
-                    case ORI:   { // Bitwise or immediate
+                    case ORI: { // Bitwise or immediate
                         TRACE_I((cpu), "ori");
-                        cpu->regFile[cpu->instFields.rd] = cpu->regFile[cpu->instFields.rs1] | cpu->immFinal;
+                        cpu->regFile[cpu->instFields.rd] =
+                            cpu->regFile[cpu->instFields.rs1] | cpu->immFinal;
                         break;
                     }
-                    case ANDI:  { // Bitwise and immediate
+                    case ANDI: { // Bitwise and immediate
                         TRACE_I((cpu), "andi");
-                        cpu->regFile[cpu->instFields.rd] = cpu->regFile[cpu->instFields.rs1] & cpu->immFinal;
+                        cpu->regFile[cpu->instFields.rd] =
+                            cpu->regFile[cpu->instFields.rs1] & cpu->immFinal;
                         break;
                     }
-                    case FENCE: { // FENCE - order device I/O and memory accesses
+                    case FENCE: { // FENCE - order device I/O and memory
+                                  // accesses
                         TRACE_FEN((cpu), "fence");
                         cpu->handlerProcs[RISA_ENV_HANDLER_PROC](cpu);
                         break;
@@ -378,14 +432,16 @@ int executionLoop(rv32iHart_t *cpu) {
                     // Catch environment-type instructions
                     default: {
                         cpu->ID = (cpu->immFields.imm11_0 << 20) |
-                            (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
+                                  (cpu->instFields.funct3 << 7) |
+                                  cpu->instFields.opcode;
                         switch ((ItypeInstructions)cpu->ID) {
-                            case ECALL:  { // ECALL - request a syscall
+                            case ECALL: { // ECALL - request a syscall
                                 TRACE_E((cpu), "ecall");
                                 cpu->handlerProcs[RISA_ENV_HANDLER_PROC](cpu);
                                 break;
                             }
-                            case EBREAK: { // EBREAK - halt processor execution, transfer control to debugger
+                            case EBREAK: { // EBREAK - halt processor execution,
+                                           // transfer control to debugger
                                 TRACE_E((cpu), "ebreak");
                                 cpu->handlerProcs[RISA_ENV_HANDLER_PROC](cpu);
                                 break;
@@ -393,7 +449,9 @@ int executionLoop(rv32iHart_t *cpu) {
                             default: { // Invalid instruction
                                 cpu->endTime = clock();
                                 printf(LOG_LINE_BREAK);
-                                LOG_ERROR_PRINTF("(0x%08x) is an invalid instruction.", cpu->IF);
+                                LOG_ERROR_PRINTF(
+                                    "(0x%08x) is an invalid instruction.",
+                                    cpu->IF);
                                 cleanupSimulator(cpu);
                                 return EILSEQ;
                             }
@@ -405,14 +463,17 @@ int executionLoop(rv32iHart_t *cpu) {
             case S: {
                 // Decode
                 cpu->instFields.funct3 = GET_FUNCT3(cpu->IF);
-                cpu->immFields.imm4_0  = GET_IMM_4_0(cpu->IF);
-                cpu->instFields.rs1    = GET_RS1(cpu->IF);
-                cpu->instFields.rs2    = GET_RS2(cpu->IF);
+                cpu->immFields.imm4_0 = GET_IMM_4_0(cpu->IF);
+                cpu->instFields.rs1 = GET_RS1(cpu->IF);
+                cpu->instFields.rs2 = GET_RS2(cpu->IF);
                 cpu->immFields.imm11_5 = GET_IMM_11_5(cpu->IF);
-                cpu->immPartial = cpu->immFields.imm4_0 | (cpu->immFields.imm11_5 << 5);
+                cpu->immPartial =
+                    cpu->immFields.imm4_0 | (cpu->immFields.imm11_5 << 5);
                 cpu->immFinal = (((s32)cpu->immPartial << 20) >> 20);
-                cpu->ID = (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
-                cpu->targetAddress = cpu->regFile[cpu->instFields.rs1] + cpu->immFinal;
+                cpu->ID =
+                    (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
+                cpu->targetAddress =
+                    cpu->regFile[cpu->instFields.rs1] + cpu->immFinal;
                 // Execute
                 switch ((StypeInstructions)cpu->ID) {
                     case SB: { // Store byte
@@ -429,7 +490,8 @@ int executionLoop(rv32iHart_t *cpu) {
                     }
                     case SW: { // Store word
                         TRACE_S((cpu), "sw");
-                        ACCESS_MEM_W(cpu->virtMem, cpu->targetAddress) = cpu->regFile[cpu->instFields.rs2];
+                        ACCESS_MEM_W(cpu->virtMem, cpu->targetAddress) =
+                            cpu->regFile[cpu->instFields.rs2];
                         break;
                     }
                 }
@@ -438,57 +500,65 @@ int executionLoop(rv32iHart_t *cpu) {
             }
             case B: {
                 // Decode
-                cpu->instFields.rs1    = GET_RS1(cpu->IF);
-                cpu->instFields.rs2    = GET_RS2(cpu->IF);
+                cpu->instFields.rs1 = GET_RS1(cpu->IF);
+                cpu->instFields.rs2 = GET_RS2(cpu->IF);
                 cpu->instFields.funct3 = GET_FUNCT3(cpu->IF);
-                cpu->immFields.imm11   = GET_IMM_11_B(cpu->IF);
-                cpu->immFields.imm4_1  = GET_IMM_4_1(cpu->IF);
+                cpu->immFields.imm11 = GET_IMM_11_B(cpu->IF);
+                cpu->immFields.imm4_1 = GET_IMM_4_1(cpu->IF);
                 cpu->immFields.imm10_5 = GET_IMM_10_5(cpu->IF);
-                cpu->immFields.imm12   = GET_IMM_12(cpu->IF);
-                cpu->immPartial = cpu->immFields.imm4_1 | (cpu->immFields.imm10_5 << 4) |
+                cpu->immFields.imm12 = GET_IMM_12(cpu->IF);
+                cpu->immPartial =
+                    cpu->immFields.imm4_1 | (cpu->immFields.imm10_5 << 4) |
                     (cpu->immFields.imm11 << 10) | (cpu->immFields.imm12 << 11);
                 cpu->targetAddress = (s32)(cpu->immPartial << 20) >> 19;
-                cpu->ID = (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
+                cpu->ID =
+                    (cpu->instFields.funct3 << 7) | cpu->instFields.opcode;
                 // Execute
                 switch ((BtypeInstructions)cpu->ID) {
-                    case BEQ:  { // Branch if Equal
+                    case BEQ: { // Branch if Equal
                         TRACE_B((cpu), "beq");
-                        if ((s32)cpu->regFile[cpu->instFields.rs1] == (s32)cpu->regFile[cpu->instFields.rs2]) {
+                        if ((s32)cpu->regFile[cpu->instFields.rs1] ==
+                            (s32)cpu->regFile[cpu->instFields.rs2]) {
                             cpu->pc += cpu->targetAddress - 4;
                         }
                         break;
                     }
-                    case BNE:  { // Branch if Not Equal
+                    case BNE: { // Branch if Not Equal
                         TRACE_B((cpu), "bne");
-                        if ((s32)cpu->regFile[cpu->instFields.rs1] != (s32)cpu->regFile[cpu->instFields.rs2]) {
+                        if ((s32)cpu->regFile[cpu->instFields.rs1] !=
+                            (s32)cpu->regFile[cpu->instFields.rs2]) {
                             cpu->pc += cpu->targetAddress - 4;
                         }
                         break;
                     }
-                    case BLT:  { // Branch if Less Than
+                    case BLT: { // Branch if Less Than
                         TRACE_B((cpu), "blt");
-                        if ((s32)cpu->regFile[cpu->instFields.rs1] < (s32)cpu->regFile[cpu->instFields.rs2]) {
+                        if ((s32)cpu->regFile[cpu->instFields.rs1] <
+                            (s32)cpu->regFile[cpu->instFields.rs2]) {
                             cpu->pc += cpu->targetAddress - 4;
                         }
                         break;
                     }
-                    case BGE:  { // Branch if Greater Than or Equal
+                    case BGE: { // Branch if Greater Than or Equal
                         TRACE_B((cpu), "bge");
-                        if ((s32)cpu->regFile[cpu->instFields.rs1] >= (s32)cpu->regFile[cpu->instFields.rs2]) {
+                        if ((s32)cpu->regFile[cpu->instFields.rs1] >=
+                            (s32)cpu->regFile[cpu->instFields.rs2]) {
                             cpu->pc += cpu->targetAddress - 4;
                         }
                         break;
                     }
                     case BLTU: { // Branch if Less Than (unsigned)
                         TRACE_B((cpu), "bltu");
-                        if (cpu->regFile[cpu->instFields.rs1] < cpu->regFile[cpu->instFields.rs2]) {
+                        if (cpu->regFile[cpu->instFields.rs1] <
+                            cpu->regFile[cpu->instFields.rs2]) {
                             cpu->pc += cpu->targetAddress - 4;
                         }
                         break;
                     }
                     case BGEU: { // Branch if Greater Than or Equal (unsigned)
                         TRACE_B((cpu), "bgeu");
-                        if (cpu->regFile[cpu->instFields.rs1] >= cpu->regFile[cpu->instFields.rs2]) {
+                        if (cpu->regFile[cpu->instFields.rs1] >=
+                            cpu->regFile[cpu->instFields.rs2]) {
                             cpu->pc += cpu->targetAddress - 4;
                         }
                         break;
@@ -498,19 +568,20 @@ int executionLoop(rv32iHart_t *cpu) {
             }
             case U: {
                 // Decode
-                cpu->instFields.rd      = GET_RD(cpu->IF);
+                cpu->instFields.rd = GET_RD(cpu->IF);
                 cpu->immFields.imm31_12 = GET_IMM_31_12(cpu->IF);
                 cpu->immFinal = cpu->immFields.imm31_12 << 12;
                 // Execute
                 switch ((UtypeInstructions)cpu->instFields.opcode) {
-                    case LUI:   { // Load Upper Immediate
+                    case LUI: { // Load Upper Immediate
                         TRACE_U((cpu), "lui");
                         cpu->regFile[cpu->instFields.rd] = cpu->immFinal;
                         break;
                     }
                     case AUIPC: { // Add Upper Immediate to cpu->pc
                         TRACE_U((cpu), "auipc");
-                        cpu->regFile[cpu->instFields.rd] = cpu->pc + cpu->immFinal;
+                        cpu->regFile[cpu->instFields.rd] =
+                            cpu->pc + cpu->immFinal;
                         break;
                     }
                 }
@@ -518,13 +589,15 @@ int executionLoop(rv32iHart_t *cpu) {
             }
             case J: { // Jump and link
                 // Decode
-                cpu->instFields.rd      = GET_RD(cpu->IF);
+                cpu->instFields.rd = GET_RD(cpu->IF);
                 cpu->immFields.imm19_12 = GET_IMM_19_12(cpu->IF);
-                cpu->immFields.imm11    = GET_IMM_11_J(cpu->IF);
-                cpu->immFields.imm10_1  = GET_IMM_10_1(cpu->IF);
-                cpu->immFields.imm20    = GET_IMM_20(cpu->IF);
-                cpu->immPartial = cpu->immFields.imm10_1 | (cpu->immFields.imm11 << 10) |
-                    (cpu->immFields.imm19_12 << 11) | (cpu->immFields.imm20 << 19);
+                cpu->immFields.imm11 = GET_IMM_11_J(cpu->IF);
+                cpu->immFields.imm10_1 = GET_IMM_10_1(cpu->IF);
+                cpu->immFields.imm20 = GET_IMM_20(cpu->IF);
+                cpu->immPartial = cpu->immFields.imm10_1 |
+                                  (cpu->immFields.imm11 << 10) |
+                                  (cpu->immFields.imm19_12 << 11) |
+                                  (cpu->immFields.imm20 << 19);
                 cpu->targetAddress = (s32)(cpu->immPartial << 12) >> 11;
                 TRACE_J((cpu), "jal");
                 // Execute
@@ -535,7 +608,8 @@ int executionLoop(rv32iHart_t *cpu) {
             default: { // Invalid instruction
                 cpu->endTime = clock();
                 printf(LOG_LINE_BREAK);
-                LOG_ERROR_PRINTF("( 0x%08x ) is an invalid instruction.", cpu->IF);
+                LOG_ERROR_PRINTF("( 0x%08x ) is an invalid instruction.",
+                                 cpu->IF);
                 cleanupSimulator(cpu);
                 return EILSEQ;
             }
@@ -558,18 +632,9 @@ int executionLoop(rv32iHart_t *cpu) {
 }
 
 const char *g_regfileAliasLookup[] = {
-    "zero",
-    "ra",
-    "sp",
-    "gp", "tp",
-    "t0", "t1", "t2",
-    "s0",
-    "s1",
-    "a0", "a1",
-    "a2", "a3", "a4", "a5", "a6", "a7",
-    "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11",
-    "t3", "t4", "t5", "t6"
-};
+    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
+    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
+    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
 
 const InstFormats g_opcodeToFormat[128] = {
     /* 0b0000000 */ Undefined,
@@ -699,5 +764,4 @@ const InstFormats g_opcodeToFormat[128] = {
     /* 0b1111100 */ Undefined,
     /* 0b1111101 */ Undefined,
     /* 0b1111110 */ Undefined,
-    /* 0b1111111 */ Undefined
-};
+    /* 0b1111111 */ Undefined};

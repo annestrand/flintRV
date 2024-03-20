@@ -1,15 +1,15 @@
-#include "stdlib.h"
-#include "stdio.h"
 #include "risa.h"
+#include "stdio.h"
+#include "stdlib.h"
 
 // Syscalls (taken from "riscv64-unknown-elf/include/machine/syscall.h")
 #define SYS_exit 93
 #define SYS_write 64
 
-void defaultMmioHandler(rv32iHart_t *cpu)  { return; }
-void defaultIntHandler(rv32iHart_t *cpu)   { return; }
-void defaultExitHandler(rv32iHart_t *cpu)  { return; }
-void defaultInitHandler(rv32iHart_t *cpu)  { return; }
+void defaultMmioHandler(rv32iHart_t *cpu) { return; }
+void defaultIntHandler(rv32iHart_t *cpu) { return; }
+void defaultExitHandler(rv32iHart_t *cpu) { return; }
+void defaultInitHandler(rv32iHart_t *cpu) { return; }
 
 // Provide a default simple/basic syscall handler
 void defaultEnvHandler(rv32iHart_t *cpu) {
@@ -22,14 +22,16 @@ void defaultEnvHandler(rv32iHart_t *cpu) {
     }
 
     // Otherwise we are processing an ECALL
-    switch(cpu->regFile[A7]) {
+    switch (cpu->regFile[A7]) {
         case SYS_exit: {
             cpu->endTime = clock();
             // Print out return error code (if there is an error)
             printf(LOG_LINE_BREAK);
             int err = (int)cpu->regFile[A0];
             if (err) {
-                LOG_INFO_PRINTF("Program code on simulator has returned error code: [ %d ]", err);
+                LOG_INFO_PRINTF(
+                    "Program code on simulator has returned error code: [ %d ]",
+                    err);
             }
             cpu->cleanupSimulator(cpu);
             exit(0);
@@ -37,14 +39,15 @@ void defaultEnvHandler(rv32iHart_t *cpu) {
         case SYS_write: {
             int base = cpu->regFile[A1];
             u32 len = cpu->regFile[A2];
-            for (u32 i=0; i<len; ++i) {
+            for (u32 i = 0; i < len; ++i) {
                 printf("%c", ACCESS_MEM_B(cpu->virtMem, base + i));
                 fflush(stdout);
             }
             break;
         }
         default:
-            LOG_WARNING_PRINTF("Unknown syscall code encountered: [ %d ]", cpu->regFile[A7]);
+            LOG_WARNING_PRINTF("Unknown syscall code encountered: [ %d ]",
+                               cpu->regFile[A7]);
             break;
     }
 }

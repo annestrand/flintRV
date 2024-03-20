@@ -3,15 +3,14 @@
 typedef int socklen_t;
 #define SOCKET_ERR INVALID_SOCKET
 #else // *nix
-#include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #define SOCKET_ERR -1
 #endif
 
 #include "risa.h"
 #include "socket.h"
-
 
 void stopServer(rv32iHart_t *cpu) {
 #ifdef _WIN32
@@ -24,7 +23,7 @@ void stopServer(rv32iHart_t *cpu) {
 #endif
 }
 
-int startServer(rv32iHart_t *cpu){
+int startServer(rv32iHart_t *cpu) {
 #ifdef _WIN32
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0) {
@@ -39,7 +38,8 @@ int startServer(rv32iHart_t *cpu){
         return -1;
     }
     int enable = 1;
-    if (setsockopt(cpu->gdbFields.socketFd, SOL_SOCKET, SO_REUSEADDR, (void*)&enable, sizeof(int)) < 0) {
+    if (setsockopt(cpu->gdbFields.socketFd, SOL_SOCKET, SO_REUSEADDR,
+                   (void *)&enable, sizeof(int)) < 0) {
         LOG_ERROR("setsockopt failed.");
         return -1;
     }
@@ -53,7 +53,8 @@ int startServer(rv32iHart_t *cpu){
     serverAddr.sin_addr = localhostaddr;
     serverAddr.sin_port = htons(cpu->gdbFields.serverPort);
 
-    if ((bind(cpu->gdbFields.socketFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr))) != 0) {
+    if ((bind(cpu->gdbFields.socketFd, (struct sockaddr *)&serverAddr,
+              sizeof(serverAddr))) != 0) {
         LOG_ERROR("Socket binding for GDB failed.");
         stopServer(cpu);
         return -1;
@@ -67,8 +68,10 @@ int startServer(rv32iHart_t *cpu){
 
     // Connect to client
     int len = sizeof(client);
-    LOG_INFO_PRINTF("GDB server listening on port ( %hu ) (CTRL-C to exit).", cpu->gdbFields.serverPort);
-    cpu->gdbFields.connectFd = (int)accept(cpu->gdbFields.socketFd, (struct sockaddr*)&client, (socklen_t*)&len);
+    LOG_INFO_PRINTF("GDB server listening on port ( %hu ) (CTRL-C to exit).",
+                    cpu->gdbFields.serverPort);
+    cpu->gdbFields.connectFd = (int)accept(
+        cpu->gdbFields.socketFd, (struct sockaddr *)&client, (socklen_t *)&len);
     if (cpu->gdbFields.connectFd < 0) {
         LOG_ERROR("Socket server accept for GDB failed.");
         stopServer(cpu);

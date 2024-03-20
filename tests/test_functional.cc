@@ -60,35 +60,35 @@ namespace {
 extern int g_dumpLevel;
 
 #define FUNCTIONAL_TEST(name, memsize, timeout, dumplvl)                       \
-  TEST(functional, name) {                                                     \
-    constexpr int memSize = memsize;                                           \
-    drop32 dut = drop32(timeout, dumplvl);                                     \
-    if (!dut.create(new Vdrop32(), nullptr)) {                                 \
-      FAIL();                                                                  \
-    }                                                                          \
-    if (!dut.createMemory(memSize, name##_hex, name##_hex_len)) {              \
-      FAIL();                                                                  \
-    }                                                                          \
-    dut.m_cpu->i_ifValid = 1;                                                  \
-    dut.m_cpu->i_memValid = 1;                                                 \
-    dut.writeRegfile(SP, memSize - 1);                                         \
-    dut.writeRegfile(FP, memSize - 1);                                         \
-    while (!dut.end()) {                                                       \
-      if (!dut.instructionUpdate()) {                                          \
-        FAIL();                                                                \
-      }                                                                        \
-      if (!dut.loadStoreUpdate()) {                                            \
-        FAIL();                                                                \
-      }                                                                        \
-      dut.tick();                                                              \
-    }                                                                          \
-    char resultStr[4] = {0};                                                   \
-    resultStr[0] = (char)dut.readRegfile(A1);                                  \
-    resultStr[1] = (char)dut.readRegfile(A2);                                  \
-    resultStr[2] = (char)dut.readRegfile(A3);                                  \
-    EXPECT_EQ(std::strcmp(resultStr, "OK"), 0)                                 \
-        << "resultStr: \"" << resultStr << "\"";                               \
-  }
+    TEST(functional, name) {                                                   \
+        constexpr int memSize = memsize;                                       \
+        drop32 dut = drop32(timeout, dumplvl);                                 \
+        if (!dut.create(new Vdrop32(), nullptr)) {                             \
+            FAIL();                                                            \
+        }                                                                      \
+        if (!dut.createMemory(memSize, name##_hex, name##_hex_len)) {          \
+            FAIL();                                                            \
+        }                                                                      \
+        dut.m_cpu->i_ifValid = 1;                                              \
+        dut.m_cpu->i_memValid = 1;                                             \
+        dut.writeRegfile(SP, memSize - 1);                                     \
+        dut.writeRegfile(FP, memSize - 1);                                     \
+        while (!dut.end()) {                                                   \
+            if (!dut.instructionUpdate()) {                                    \
+                FAIL();                                                        \
+            }                                                                  \
+            if (!dut.loadStoreUpdate()) {                                      \
+                FAIL();                                                        \
+            }                                                                  \
+            dut.tick();                                                        \
+        }                                                                      \
+        char resultStr[4] = {0};                                               \
+        resultStr[0] = (char)dut.readRegfile(A1);                              \
+        resultStr[1] = (char)dut.readRegfile(A2);                              \
+        resultStr[2] = (char)dut.readRegfile(A3);                              \
+        EXPECT_EQ(std::strcmp(resultStr, "OK"), 0)                             \
+            << "resultStr: \"" << resultStr << "\"";                           \
+    }
 
 // FUNCTIONAL_TEST(name, memsize, timeout, dumplvl)
 
