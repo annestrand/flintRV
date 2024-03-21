@@ -195,7 +195,7 @@ int executionLoop(rv32iHart *cpu) {
         if (cpu->opts.o_tracePrintEnable) {
             printf("%8x:   0x%08x   %-30s CYCLE:[%" PRIu64 "]\n", cpu->pc,
                    cpu->IF, disassembleRv32i(cpu->IF).c_str(),
-                   (long unsigned int)cpu->cycleCounter);
+                   (u64)cpu->cycleCounter);
         }
         cpu->instFields.opcode = OPCODE(cpu->IF);
         switch (cpu->instFields.opcode) {

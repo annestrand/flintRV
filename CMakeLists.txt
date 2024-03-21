@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.12)
 project(drop32)
 find_package(verilator HINTS $ENV{VERILATOR_ROOT})
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # User adjustable vars/options
 # ---------------------------------------------------------------------------------------------------------------------
 set(RISCV_TOOLCHAIN_TRIPLE "riscv64-unknown-elf" CACHE STRING "RISC-V cross-compiler GCC triplet prefix value")
@@ -51,7 +55,6 @@ target_include_directories(risa PUBLIC
     ${CMAKE_SOURCE_DIR}/sim
     ${CMAKE_SOURCE_DIR}/external
 )
-set_property(TARGET risa PROPERTY CXX_STANDARD 14)
 if (WIN32 OR MINGW)
     target_link_libraries(risa PRIVATE wsock32 ws2_32)
     target_compile_options(risa PUBLIC /W3)
@@ -70,7 +73,6 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/examples/risa_handler)
 # Verilated core
 add_library(Vdrop32_lib STATIC ${CMAKE_SOURCE_DIR}/sim/Vdrop32/drop32.cc)
 target_include_directories(Vdrop32_lib PRIVATE ${CMAKE_SOURCE_DIR}/sim)
-set_property(TARGET Vdrop32_lib PROPERTY CXX_STANDARD 14)
 
 # CLI verilated simulation driver
 add_executable(Vdrop32 ${CMAKE_SOURCE_DIR}/sim/Vdrop32/main.cc)
@@ -83,7 +85,6 @@ target_link_libraries(Vdrop32 PRIVATE
     Vdrop32_lib
     sim_utils
 )
-set_property(TARGET Vdrop32 PROPERTY CXX_STANDARD 14)
 
 # Build RISC-V test sources (CLI GoogleTest driver)
 if (BUILD_TESTS)
@@ -121,7 +122,6 @@ if (BUILD_TESTS)
         algorithms-${RISCV_TOOLCHAIN_TRIPLE}
         riscv-tests-${RISCV_TOOLCHAIN_TRIPLE}
     )
-    set_property(TARGET Vdrop32_tests PROPERTY CXX_STANDARD 14)
 endif ()
 
 # RV32I hello world example
