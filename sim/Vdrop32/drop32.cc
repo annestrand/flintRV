@@ -254,7 +254,7 @@ void drop32::dump() {
 }
 
 bool drop32::end() {
-    bool isEbreak = m_cpu->i_instr == EBREAK;
+    bool isEbreak = CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump;
     bool isFinished =
         Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;
     if (isEbreak) {
