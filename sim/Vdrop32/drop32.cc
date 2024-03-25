@@ -248,8 +248,8 @@ void drop32::dump() {
     if (m_tracing) {
         std::string instr =
             m_cpu->i_rst ? "CPU Reset!" : disassembleRv32i(m_cpu->i_instr);
-        printf("%8x:   0x%08x   %-30s CYCLE:[%" PRIu64 "]\n", m_cpu->o_pcOut,
-               m_cpu->i_instr, instr.c_str(), m_cycles);
+        printf("%8x:   0x%08x   %-30s\n", m_cpu->o_pcOut, m_cpu->i_instr,
+               instr.c_str());
     }
 }
 

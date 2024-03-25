@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     MINIARGPARSE_OPT(tracing, "", "tracing", 0,
                      "Enable trace printing to stdout.");
     MINIARGPARSE_OPT(simTime, "t", "timeout", 1,
-                     "Simulation timeout value [DEFAULT=1000].");
+                     "Simulation timeout value [DEFAULT=INT32_MAX].");
     MINIARGPARSE_OPT(simVcd, "V", "vcdDump", 1,
                      "Filename for VCD dump [DEFAULT=Disabled].");
     MINIARGPARSE_OPT(version, "v", "version", 0, "Prints version and exits");
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     }
     int simTimeVal = atoi(simTime.value);
     if (simTimeVal == 0) {
-        simTimeVal = 1000;
+        simTimeVal = INT32_MAX;
     }
 
     printf("Vdrop32 - Verilator based drop32 simulator\n");
