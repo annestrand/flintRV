@@ -104,7 +104,7 @@ TEST(algorithms, binsearch) {
 }
 
 TEST(algorithms, mergesort) {
-    constexpr int memSize = 0x4000;
+    constexpr int memSize = 0x8000;
     drop32 dut = drop32(1000000, g_testTracing);
     if (!dut.create(new Vdrop32(), nullptr)) {
         FAIL();
