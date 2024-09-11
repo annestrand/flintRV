@@ -3,7 +3,7 @@
 
 # firmware.s:
 # -------------------------
-# Test program to blink an LED on drop32soc
+# Test program to blink an LED on flintRVsoc
 
 .section .text;
 .global _start;

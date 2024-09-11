@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(drop32)
+project(flintRV)
 find_package(verilator HINTS $ENV{VERILATOR_ROOT})
 
 set(CMAKE_CXX_STANDARD 14)
@@ -71,18 +71,18 @@ target_link_libraries(risa PRIVATE sim_utils)
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/risa_handler)
 
 # Verilated core
-add_library(Vdrop32_lib STATIC ${CMAKE_SOURCE_DIR}/sim/Vdrop32/drop32.cc)
-target_include_directories(Vdrop32_lib PRIVATE ${CMAKE_SOURCE_DIR}/sim)
+add_library(flintRV_lib STATIC ${CMAKE_SOURCE_DIR}/sim/flintRV/flintRV.cc)
+target_include_directories(flintRV_lib PRIVATE ${CMAKE_SOURCE_DIR}/sim)
 
 # CLI verilated simulation driver
-add_executable(Vdrop32 ${CMAKE_SOURCE_DIR}/sim/Vdrop32/main.cc)
-target_include_directories(Vdrop32 PRIVATE
+add_executable(flintRV ${CMAKE_SOURCE_DIR}/sim/flintRV/main.cc)
+target_include_directories(flintRV PRIVATE
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/sim
     ${CMAKE_SOURCE_DIR}/external
 )
-target_link_libraries(Vdrop32 PRIVATE
-    Vdrop32_lib
+target_link_libraries(flintRV PRIVATE
+    flintRV_lib
     sim_utils
 )
 
@@ -93,14 +93,14 @@ if (BUILD_TESTS)
     add_multi_target_component(tests algorithms ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
     add_multi_target_component(external riscv-tests ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
 
-    add_executable(Vdrop32_tests
+    add_executable(flintRV_tests
         ${CMAKE_SOURCE_DIR}/tests/main.cc
         ${CMAKE_SOURCE_DIR}/tests/test_unit.cc
         ${CMAKE_SOURCE_DIR}/tests/test_basic.cc
         ${CMAKE_SOURCE_DIR}/tests/test_functional.cc
         ${CMAKE_SOURCE_DIR}/tests/test_algorithms.cc
     )
-    target_include_directories(Vdrop32_tests PRIVATE
+    target_include_directories(flintRV_tests PRIVATE
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/basic
         ${CMAKE_BINARY_DIR}/${RISCV_TOOLCHAIN_TRIPLE}/algorithms
@@ -108,16 +108,16 @@ if (BUILD_TESTS)
         ${CMAKE_SOURCE_DIR}/sim
         ${CMAKE_SOURCE_DIR}/external
     )
-    target_link_libraries(Vdrop32_tests PRIVATE
-        Vdrop32_lib
+    target_link_libraries(flintRV_tests PRIVATE
+        flintRV_lib
         GTest::GTest
         GTest::Main
         ${CMAKE_DL_LIBS}
         sim_utils
     )
-    add_dependencies(Vdrop32_tests
+    add_dependencies(flintRV_tests
         typesVh
-        Vdrop32_lib
+        flintRV_lib
         basic-${RISCV_TOOLCHAIN_TRIPLE}
         algorithms-${RISCV_TOOLCHAIN_TRIPLE}
         riscv-tests-${RISCV_TOOLCHAIN_TRIPLE}
@@ -131,13 +131,13 @@ endif()
 
 # Build example SoC firmware
 if (BUILD_SOC)
-    add_multi_target_component(examples drop32soc ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
+    add_multi_target_component(examples flintRVsoc ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
 endif()
 
 # Verilate Verilog RTL to C++
-verilate(Vdrop32_lib SOURCES rtl/drop32.v INCLUDE_DIRS rtl TRACE)
-verilate(Vdrop32_lib SOURCES rtl/ALU.v INCLUDE_DIRS rtl TRACE)
-verilate(Vdrop32_lib SOURCES rtl/ControlUnit.v INCLUDE_DIRS rtl TRACE)
-verilate(Vdrop32_lib SOURCES rtl/DualPortRam.v INCLUDE_DIRS rtl TRACE)
-verilate(Vdrop32_lib SOURCES rtl/ImmGen.v INCLUDE_DIRS rtl TRACE)
-verilate(Vdrop32_lib SOURCES rtl/Regfile.v INCLUDE_DIRS rtl TRACE)
+verilate(flintRV_lib SOURCES rtl/flintRV.v INCLUDE_DIRS rtl TRACE)
+verilate(flintRV_lib SOURCES rtl/ALU.v INCLUDE_DIRS rtl TRACE)
+verilate(flintRV_lib SOURCES rtl/ControlUnit.v INCLUDE_DIRS rtl TRACE)
+verilate(flintRV_lib SOURCES rtl/DualPortRam.v INCLUDE_DIRS rtl TRACE)
+verilate(flintRV_lib SOURCES rtl/ImmGen.v INCLUDE_DIRS rtl TRACE)
+verilate(flintRV_lib SOURCES rtl/Regfile.v INCLUDE_DIRS rtl TRACE)

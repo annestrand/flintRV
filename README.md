@@ -1,10 +1,9 @@
-# drop32
+# flintRV
 
-**D**rop32 **R**ISC-V **O**pen-sourced **P**rocessor
+A simple RISC-V soft-core CPU aimed to be implemented for use in FPGAs.
 
 - RV32I ISA
 - 4-stage in-order pipelined processor
-- Aimed to be implemented as a soft-cpu for use in FPGAs
 
 ## Prerequisites ✅
 - CMake >= 3.12
@@ -19,14 +18,14 @@ This repo uses git submodules - make sure to pull those first:
 
     $ git submodule update --init --recursive
 
-## Build rISA (Functional ISA sim) and Vdrop32 (Verilated C++ sim) 🖥
+## Build rISA (Functional ISA sim) and flintRV (Verilated C++ sim) 🖥
 
     $ cmake -Bbuild
     $ cmake --build build
 
 [rISA Documentation](./sim/risa/README.md)
 
-[Vdrop32 Documentation](./sim/Vdrop32/README.md)
+[flintRV Documentation](./sim/flintRV/README.md)
 
 ## Build Tests 🧪
 Building tests require the above `optional` prerequisites.
@@ -36,26 +35,26 @@ To build tests:
     $ cmake -Bbuild -DBUILD_TESTS=ON
     $ cmake --build build
 
-Test runner: `<OUTPUT_DIR>/Vdrop32_tests`
+Test runner: `<OUTPUT_DIR>/flintRV_tests`
 
-## Build drop32 core
+## Build flintRV core
 There is a convenience script to generate a singular core/CPU RTL file to stdout:
 
     $ python3 ./scripts/core_gen.py [opts]
 
 Use `-h` to list available options.
 
-## Build drop32soc
-`drop32soc/` directory provides a very basic example SoC using the drop32 soft-cpu.
+## Build flintRVsoc
+`flintRVsoc/` directory provides a very basic example SoC using the flintRV soft-cpu.
 
-The CPU is generated using the `scripts/drop32soc_gen.py` utility.
+The CPU is generated using the `scripts/flintRVsoc_gen.py` utility.
 
 To build Firmware and Generate CPU core for SoC:
 
     $ cmake -Bbuild -DBUILD_SOC=ON
     $ cmake --build build
 
-Output SoC Files: `<OUTPUT_DIR>/<RISCV_TOOLCHAIN_TRIPLE>/drop32soc`
+Output SoC Files: `<OUTPUT_DIR>/<RISCV_TOOLCHAIN_TRIPLE>/flintRVsoc`
 
 - CPU specs
     - RV32I ISA

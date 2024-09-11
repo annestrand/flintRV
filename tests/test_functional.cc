@@ -10,12 +10,12 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#include "Vdrop32.h"
-#include "Vdrop32__Syms.h"
+#include "VflintRV.h"
+#include "VflintRV__Syms.h"
 
 #include "common/utils.h"
 
-#include "Vdrop32/drop32.h"
+#include "flintRV/flintRV.h"
 
 namespace {
 // Embed the test programs binaries here
@@ -63,8 +63,8 @@ extern int g_testTracing;
 #define FUNCTIONAL_TEST(name, memsize, timeout, dumplvl)                       \
     TEST(functional, name) {                                                   \
         constexpr int memSize = memsize;                                       \
-        drop32 dut = drop32(timeout, dumplvl);                                 \
-        if (!dut.create(new Vdrop32(), nullptr)) {                             \
+        flintRV dut = flintRV(timeout, dumplvl);                               \
+        if (!dut.create(new VflintRV(), nullptr)) {                            \
             FAIL();                                                            \
         }                                                                      \
         if (!dut.createMemory(memSize, name##_hex, name##_hex_len)) {          \

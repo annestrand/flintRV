@@ -8,7 +8,7 @@ import os
 import sys
 import subprocess
 
-# Basic convenience script to bundle all example drop32soc example srcs together
+# Basic convenience script to bundle all example flintRVsoc example srcs together
 if __name__ == "__main__":
     # Setup cmd
     core_gen_path   = os.path.abspath(os.path.join(os.path.dirname(__file__), "core_gen.py"))
@@ -16,8 +16,8 @@ if __name__ == "__main__":
     # Run core_gen.py
     core_rtl        = subprocess.run(command, stdout=subprocess.PIPE, encoding='utf-8').stdout
     # Concatenate [SoC srcs + core] to 1 file
-    src_dir         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "examples", "drop32soc"))
-    soc_srcs        = [os.path.join(src_dir, "bootrom.v"), os.path.join(src_dir, "drop32soc.v")]
+    src_dir         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "examples", "flintRVsoc"))
+    soc_srcs        = [os.path.join(src_dir, "bootrom.v"), os.path.join(src_dir, "flintRVsoc.v")]
     # Output core RTL
     core_rtl        = re.sub(r"\[ core_gen.py \]", f"[ {os.path.basename(__file__)} ]", core_rtl)
     print(core_rtl)

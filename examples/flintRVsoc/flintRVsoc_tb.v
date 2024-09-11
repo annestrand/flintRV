@@ -2,14 +2,14 @@
 // Licensed under the MIT License (see LICENSE file).
 
 // Simple testbench to simulate SoC example
-module drop32soc_tb;
+module flintRVsoc_tb;
 reg i_clk = 0, i_rst = 0;
 wire o_led;
 
-drop32soc DUT(.*);
+flintRVsoc DUT(.*);
 
 initial begin
-    $dumpfile("drop32soc.vcd");
+    $dumpfile("flintRVsoc.vcd");
     $dumpvars;
 end
 

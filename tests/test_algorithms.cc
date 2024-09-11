@@ -10,12 +10,12 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#include "Vdrop32.h"
-#include "Vdrop32__Syms.h"
+#include "VflintRV.h"
+#include "VflintRV__Syms.h"
 
 #include "common/utils.h"
 
-#include "Vdrop32/drop32.h"
+#include "flintRV/flintRV.h"
 
 namespace {
 // Embed the test programs binaries here
@@ -28,8 +28,8 @@ extern int g_testTracing;
 
 TEST(algorithms, fibonacci) {
     constexpr int memSize = 0x4000;
-    drop32 dut = drop32(1000000, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(1000000, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(memSize, fibonacci_hex, fibonacci_hex_len)) {
@@ -70,8 +70,8 @@ TEST(algorithms, fibonacci) {
 
 TEST(algorithms, binsearch) {
     constexpr int memSize = 0x4000;
-    drop32 dut = drop32(1000000, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(1000000, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(memSize, binsearch_hex, binsearch_hex_len)) {
@@ -105,8 +105,8 @@ TEST(algorithms, binsearch) {
 
 TEST(algorithms, mergesort) {
     constexpr int memSize = 0x8000;
-    drop32 dut = drop32(1000000, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(1000000, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(memSize, mergesort_hex, mergesort_hex_len)) {

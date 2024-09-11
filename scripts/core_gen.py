@@ -63,14 +63,14 @@ def build_top_module(args):
                 output [{xlen-1}:0] o_dataAddr,
                 output [{xlen-1}:0] o_dataOut
             );
-                drop32 #(
+                flintRV #(
                     // CPU Configuration
                     .PC_START           ({args.pcStart}),
                     .REGFILE_ADDR_WIDTH ({regfile_addr_width}),
                     .INSTR_WIDTH        ({instr_width}),
                     .XLEN               ({xlen}),
                     .ICACHE_LATENCY     ({args.iLatency})
-                ) drop32_unit (
+                ) flintRV_unit (
                     .i_clk              (i_clk     ),
                     .i_rst              (i_rst     ),
                     .i_ifValid          (i_ifValid ),

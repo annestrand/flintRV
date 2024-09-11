@@ -13,17 +13,17 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#include "Vdrop32.h"
-#include "Vdrop32/drop32.h"
-#include "Vdrop32__Syms.h"
+#include "VflintRV__Syms.h"
+#include "flintRV.h"
+#include "flintRV/flintRV.h"
 
 #include "common/utils.h"
 
-drop32::drop32(vluint64_t maxSimTime, bool tracing)
+flintRV::flintRV(vluint64_t maxSimTime, bool tracing)
     : m_cpu(nullptr), m_cycles(0), m_trace(nullptr), m_maxSimTime(maxSimTime),
       m_tracing(tracing), m_mem(nullptr), m_memSize(0) {}
 
-drop32::~drop32() {
+flintRV::~flintRV() {
     m_cpu->final();
     if (m_trace != nullptr) {
         m_trace->close();
@@ -40,9 +40,9 @@ drop32::~drop32() {
     }
 }
 
-bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
+bool flintRV::create(VflintRV *cpu, const char *traceFile) {
     if (cpu == nullptr) {
-        LOG_ERROR("Failed to create Verilated drop32 module!\n");
+        LOG_ERROR("Failed to create Verilated flintRV module!\n");
         return false;
     }
     m_cpu = cpu;
@@ -50,7 +50,7 @@ bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
         Verilated::traceEverOn(true);
         m_trace = new VerilatedVcdC;
         if (m_trace == nullptr) {
-            LOG_WARNING("Failed to create drop32 VCD dumper!\n");
+            LOG_WARNING("Failed to create flintRV VCD dumper!\n");
         } else if (traceFile != nullptr) {
             m_cpu->trace(m_trace, 99);
             m_trace->open(traceFile);
@@ -60,7 +60,7 @@ bool drop32::create(Vdrop32 *cpu, const char *traceFile) {
     return true;
 }
 
-bool drop32::createMemory(size_t memSize) {
+bool flintRV::createMemory(size_t memSize) {
     if (memSize == 0) {
         LOG_ERROR("Memory cannot be of size 0!\n");
         return false;
@@ -75,7 +75,7 @@ bool drop32::createMemory(size_t memSize) {
     return true;
 }
 
-bool drop32::createMemory(size_t memSize, std::string initHexfile) {
+bool flintRV::createMemory(size_t memSize, std::string initHexfile) {
     if (memSize == 0) {
         LOG_ERROR("Memory cannot be of size 0!\n");
         return false;
@@ -91,8 +91,8 @@ bool drop32::createMemory(size_t memSize, std::string initHexfile) {
     return loadMem(initHexfile, m_mem, m_memSize);
 }
 
-bool drop32::createMemory(size_t memSize, unsigned char *initHexarray,
-                          unsigned int initHexarrayLen) {
+bool flintRV::createMemory(size_t memSize, unsigned char *initHexarray,
+                           unsigned int initHexarrayLen) {
     if (memSize == 0) {
         LOG_ERROR("Memory cannot be of size 0!\n");
         return false;
@@ -113,7 +113,7 @@ bool drop32::createMemory(size_t memSize, unsigned char *initHexarray,
     return true;
 }
 
-bool drop32::instructionUpdate() {
+bool flintRV::instructionUpdate() {
     // Error check
     if (m_mem == nullptr) {
         LOG_ERROR("Cannot fetch instruction from NULL memory!\n");
@@ -131,7 +131,7 @@ bool drop32::instructionUpdate() {
     return true;
 }
 
-bool drop32::loadStoreUpdate() {
+bool flintRV::loadStoreUpdate() {
     // Request and error checking
     if (!m_cpu->o_loadReq && !m_cpu->o_storeReq) {
         return true;
@@ -163,7 +163,7 @@ bool drop32::loadStoreUpdate() {
     return true;
 }
 
-bool drop32::peekMem(size_t addr, int &val) {
+bool flintRV::peekMem(size_t addr, int &val) {
     // Error check
     if (m_mem == nullptr) {
         LOG_ERROR("Cannot 'peek' in NULL memory!\n");
@@ -180,7 +180,7 @@ bool drop32::peekMem(size_t addr, int &val) {
     return true;
 }
 
-bool drop32::pokeMem(size_t addr, int val) {
+bool flintRV::pokeMem(size_t addr, int val) {
     // Error check
     if (m_mem == nullptr) {
         LOG_ERROR("Cannot 'poke' at NULL memory!\n");
@@ -197,7 +197,7 @@ bool drop32::pokeMem(size_t addr, int val) {
     return true;
 }
 
-void drop32::writeRegfile(int index, int val) {
+void flintRV::writeRegfile(int index, int val) {
     // Skip if x0 reg
     if (index == 0) {
         return;
@@ -207,12 +207,12 @@ void drop32::writeRegfile(int index, int val) {
     CPU(this)->REGFILE_unit->RS2_PORT_RAM->ram[index] = val;
 }
 
-int drop32::readRegfile(int index) {
+int flintRV::readRegfile(int index) {
     // Does not matter which port we read from
     return (index == 0) ? 0 : CPU(this)->REGFILE_unit->RS1_PORT_RAM->ram[index];
 }
 
-void drop32::reset(int cycles) {
+void flintRV::reset(int cycles) {
     // Some dummy values for now
     m_cpu->i_instr = 0x0badc0de;
     m_cpu->i_dataIn = 0xdecafbad;
@@ -226,7 +226,7 @@ void drop32::reset(int cycles) {
     m_cpu->i_rst = 0;
 }
 
-void drop32::tick(bool enableDump) {
+void flintRV::tick(bool enableDump) {
     static std::atomic<vluint64_t> global_time{0};
     if (enableDump) {
         dump();
@@ -244,7 +244,7 @@ void drop32::tick(bool enableDump) {
     m_cycles++;
 }
 
-void drop32::dump() {
+void flintRV::dump() {
     if (m_tracing) {
         std::string instr =
             m_cpu->i_rst ? "CPU Reset!" : disassembleRv32i(m_cpu->i_instr);
@@ -253,7 +253,7 @@ void drop32::dump() {
     }
 }
 
-bool drop32::end() {
+bool flintRV::end() {
     bool isEbreak = CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump;
     bool isFinished =
         Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;

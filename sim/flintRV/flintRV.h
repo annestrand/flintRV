@@ -7,16 +7,16 @@
 #include <string>
 #include <vector>
 
-#include "Vdrop32.h"
-#include "Vdrop32__Syms.h"
+#include "VflintRV.h"
+#include "VflintRV__Syms.h"
 
 #ifndef VERILATOR_VER
 #define VERILATOR_VER 4028
 #endif // VERILATOR_VER
 
-#ifndef DROP32_VERSION
-#define DROP32_VERSION "unknown"
-#endif // DROP32_VERSION
+#ifndef flintRV_VERSION
+#define flintRV_VERSION "unknown"
+#endif // flintRV_VERSION
 
 // Regfile aliases
 typedef enum {
@@ -56,11 +56,11 @@ typedef enum {
     REGISTER_COUNT
 } RV32I_Registers;
 
-class drop32 {
+class flintRV {
   public:
-    drop32(vluint64_t maxSimTime, bool tracing = false);
-    ~drop32();
-    bool create(Vdrop32 *cpu, const char *traceFile = nullptr);
+    flintRV(vluint64_t maxSimTime, bool tracing = false);
+    ~flintRV();
+    bool create(VflintRV *cpu, const char *traceFile = nullptr);
     bool createMemory(size_t memSize);
     bool createMemory(size_t memSize, std::string initHexfile);
     bool createMemory(size_t memSize, unsigned char *initHexarray,
@@ -75,7 +75,7 @@ class drop32 {
     void tick(bool enableDump = true);
     void dump();
     bool end();
-    Vdrop32 *m_cpu; // Reference to CPU object
+    VflintRV *m_cpu; // Reference to CPU object
 
   private:
     vluint64_t m_cycles;
@@ -93,7 +93,7 @@ class drop32 {
    changes)
 */
 #if VERILATOR_VER >= 4210
-#define CPU(sim) (sim)->m_cpu->rootp->drop32
+#define CPU(sim) (sim)->m_cpu->rootp->flintRV
 #else
-#define CPU(sim) (sim)->m_cpu->drop32
+#define CPU(sim) (sim)->m_cpu->flintRV
 #endif

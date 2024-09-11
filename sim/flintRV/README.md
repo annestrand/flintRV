@@ -1,14 +1,14 @@
-# Vdrop32
+# flintRV
 
-A cycle-accurate C++ simulator of the Verilated drop32 RTL.
+A cycle-accurate C++ simulator of the Verilated flintRV RTL.
 
 The C++ code here serves as the wrapper around the Verilated module.
 
 ```
-$ ./Vdrop32 ./my_loop.hex -d 2
-[Vdrop32 - Info ]:[         main.cc:73] - Memory size set to: [ 0.031250 MB ].
-[Vdrop32 - Info ]:[         main.cc:74] - Simulation timeout value:  [ 1000 ].
-[Vdrop32 - Info ]:[         main.cc:78] - Starting simulation...
+$ ./flintRV ./my_loop.hex -d 2
+[flintRV - Info ]:[         main.cc:73] - Memory size set to: [ 0.031250 MB ].
+[flintRV - Info ]:[         main.cc:74] - Simulation timeout value:  [ 1000 ].
+[flintRV - Info ]:[         main.cc:78] - Starting simulation...
 
 ===[ OUTPUT ]===================================================================================================
        0:   0x0badc0de   CPU Reset!            STALL:[----]  FLUSH:[----]  STATUS:[--R----]  CYCLE:[0]
@@ -36,13 +36,13 @@ $ ./Vdrop32 ./my_loop.hex -d 2
       18:   0x00100073   ebreak                STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[22]
 ================================================================================================================
 
-[Vdrop32 - Info ]:[         main.cc:96] - Simulation done.
+[flintRV - Info ]:[         main.cc:96] - Simulation done.
 ```
 
 ## Simulator guide ❓
 
 ### Program Input 💾
-`Vdrop32` requires a HEX binary/file of the RISC-V program that you want to run.
+`flintRV` requires a HEX binary/file of the RISC-V program that you want to run.
 
 One can use `objcopy` to obtain raw HEX of program, for example:
 ```
@@ -50,12 +50,12 @@ $ riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 main.c -o myTest
 $ riscv64-unknown-elf-objcopy -O binary myTest myTest.hex
 ```
 
-Standard usage of `Vdrop32`:
+Standard usage of `flintRV`:
 ```
-[Usage]: Vdrop32 [OPTIONS] <program_binary>.hex
+[Usage]: flintRV [OPTIONS] <program_binary>.hex
 ```
 
-`Vdrop32` also can take options - these options can be viewed by passing the `-h`/`--help` flag.
+`flintRV` also can take options - these options can be viewed by passing the `-h`/`--help` flag.
 
 ### Simulation finish cases 🔚
 Besides error cases, the simulator ends if any of the following is true:

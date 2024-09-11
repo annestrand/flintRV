@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 void _start(void);
-void _drop32_start(void) {
+void _flintRV_start(void) {
     _start();
     for (;;)
         ;

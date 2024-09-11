@@ -10,7 +10,7 @@ add_compile_options(
 
 add_link_options(
     ${RV32I_ABI}
-    -Wl,--section-start=.text=0x0 -Wl,-T${PARENT_DIR}/scripts/drop32.ld
+    -Wl,--section-start=.text=0x0 -Wl,-T${PARENT_DIR}/scripts/flintRV.ld
 )
 
 add_executable(binsearch ${CMAKE_CURRENT_SOURCE_DIR}/binsearch.c)

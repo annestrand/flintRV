@@ -55,7 +55,7 @@ SECTIONS
   .iplt           : { *(.iplt) }
   .text           :
   {
-    *(.text._drop32_start) /* drop32: ADDED */
+    *(.text._flintRV_start) /* flintRV: ADDED */
     *(.text.unlikely .text.*_unlikely .text.unlikely.*)
     *(.text.exit .text.exit.*)
     *(.text.startup .text.startup.*)

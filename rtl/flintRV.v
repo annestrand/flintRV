@@ -3,7 +3,7 @@
 
 `include "types.vh"
 
-module drop32 (
+module flintRV (
     input                       i_clk, i_rst, i_ifValid, i_memValid,
     input   [INSTR_WIDTH-1:0]   i_instr,
     input          [XLEN-1:0]   i_dataIn,

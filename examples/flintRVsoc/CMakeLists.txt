@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(drop32soc ASM)
+project(flintRVsoc ASM)
 
 find_package (Python COMPONENTS Interpreter)
 set(CMAKE_MODULE_PATH "${PARENT_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -23,5 +23,5 @@ asm_build_verilog(${CMAKE_CURRENT_SOURCE_DIR}/firmware.s)
 
 add_custom_command(
     TARGET firmware POST_BUILD
-    COMMAND ${Python_EXECUTABLE} ${PARENT_DIR}/scripts/drop32soc_gen.py > ${CMAKE_BINARY_DIR}/drop32soc_generated.v
+    COMMAND ${Python_EXECUTABLE} ${PARENT_DIR}/scripts/flintRVsoc_gen.py > ${CMAKE_BINARY_DIR}/flintRVsoc_generated.v
 )

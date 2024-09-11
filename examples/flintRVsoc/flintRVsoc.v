@@ -2,7 +2,7 @@
 // Licensed under the MIT License (see LICENSE file).
 
 // Really simple example SoC design
-module drop32soc (
+module flintRVsoc (
     input   i_clk, i_rst,
     output  o_led
 );

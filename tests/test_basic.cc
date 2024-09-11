@@ -9,12 +9,12 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#include "Vdrop32.h"
-#include "Vdrop32__Syms.h"
+#include "VflintRV.h"
+#include "VflintRV__Syms.h"
 
 #include "common/utils.h"
 
-#include "Vdrop32/drop32.h"
+#include "flintRV/flintRV.h"
 
 namespace {
 // Embed the test programs binaries here
@@ -28,8 +28,8 @@ namespace {
 extern int g_testTracing;
 
 TEST(basic, loop) { // Basic test loop summation for 10 iterations
-    drop32 dut = drop32(200, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(200, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(0x200, simple_loop_hex, simple_loop_hex_len)) {
@@ -59,8 +59,8 @@ TEST(basic, loop) { // Basic test loop summation for 10 iterations
 
 TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
                      // XOR, etc.)
-    drop32 dut = drop32(200, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(200, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(0x200, logic_hex, logic_hex_len)) {
@@ -97,8 +97,8 @@ TEST(basic, logic) { // Tests all the core logic functions of ALU (e.g. AND, OR,
 
 TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
                      // ADD, SUB, SRL etc.)
-    drop32 dut = drop32(200, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(200, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(0x200, arith_hex, arith_hex_len)) {
@@ -137,8 +137,8 @@ TEST(basic, arith) { // Tests all the core arithmetic functions of ALU (e.g.
 TEST(
     basic,
     jump) { // Tests all the core branch instructions (e.g. BEQ, JAL, BNE, etc.)
-    drop32 dut = drop32(200, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(200, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(0x200, jump_branch_hex, jump_branch_hex_len)) {
@@ -166,8 +166,8 @@ TEST(
 }
 
 TEST(basic, load_store) { // Tests load and store based instructions
-    drop32 dut = drop32(200, g_testTracing);
-    if (!dut.create(new Vdrop32(), nullptr)) {
+    flintRV dut = flintRV(200, g_testTracing);
+    if (!dut.create(new VflintRV(), nullptr)) {
         FAIL();
     }
     if (!dut.createMemory(0x200, load_store_hex, load_store_hex_len)) {

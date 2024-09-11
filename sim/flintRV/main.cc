@@ -1,14 +1,14 @@
 // Copyright (c) 2022 - present, Austin Annestrand.
 // Licensed under the MIT License (see LICENSE file).
 
-#include "Vdrop32/drop32.h"
+#include "flintRV/flintRV.h"
 
 #include "common/utils.h"
 
 #include "miniargparse/miniargparse.h"
 
 void printHelp(void) {
-    printf("[Usage]: Vdrop32 [OPTIONS] <program_binary>.hex\n\n"
+    printf("[Usage]: flintRV [OPTIONS] <program_binary>.hex\n\n"
            "OPTIONS:\n");
     miniargparsePrint();
 }
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     if (version.infoBits.used) {
-        printf("%s\n", DROP32_VERSION);
+        printf("%s\n", flintRV_VERSION);
         return 0;
     }
 
@@ -81,16 +81,16 @@ int main(int argc, char *argv[]) {
         simTimeVal = INT32_MAX;
     }
 
-    printf("Vdrop32 - Verilator based drop32 simulator\n");
+    printf("flintRV - Verilator based flintRV simulator\n");
     LOG_INFO_PRINTF("Simulation timeout value: %d cycles.", simTimeVal);
     LOG_INFO_PRINTF("Memory size set to: %f MB.",
                     (float)memSize / (float)(MB_MULTIPLIER));
 
     // Instantiate CPU
-    drop32 dut = drop32(simTimeVal, tracing.infoBits.used);
+    flintRV dut = flintRV(simTimeVal, tracing.infoBits.used);
     LOG_INFO_PRINTF("Running simulator...\n%s", OUTPUT_LINE);
-    if (!dut.create(new Vdrop32(), simVcd.value)) {
-        LOG_ERROR("Failed to create Vdrop32.");
+    if (!dut.create(new VflintRV(), simVcd.value)) {
+        LOG_ERROR("Failed to create flintRV.");
         return 1;
     }
     if (!dut.createMemory(memSize, programFile)) {
