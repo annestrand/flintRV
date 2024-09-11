@@ -2,22 +2,22 @@
 A simple RISC-V ISA Simulator.
 
 ```
- ________  ___  ________  ________
-|\   __  \|\  \|\   ____\|\   __  \
-\ \  \|\  \ \  \ \  \___|\ \  \|\  \
- \ \   _  _\ \  \ \_____  \ \   __  \
-  \ \  \\  \\ \  \|____|\  \ \  \ \  \
+ ________  ___  ________  ________     
+|\   __  \|\  \|\   ____\|\   __  \    
+\ \  \|\  \ \  \ \  \___|\ \  \|\  \   
+ \ \   _  _\ \  \ \_____  \ \   __  \  
+  \ \  \\  \\ \  \|____|\  \ \  \ \  \ 
    \ \__\\ _\\ \__\____\_\  \ \__\ \__\
     \|__|\|__|\|__|\_________\|__|\|__| - RISC-V (RV32I) ISA simulator
-                  \|_________|
+                  \|_________|         
 
-[rISA] [/home/wsl/src/rISA/src/risa.c:165] [INFO]: Interrupt period set to: 500 cycles.
-[rISA] [/home/wsl/src/rISA/src/risa.c:166] [INFO]: Virtual memory size set to: 0.031250 MB.
-[rISA] [/home/wsl/src/rISA/src/risa.c:180] [INFO]: Running simulator...
-============================================================================================
+[INFO][risa.cc:147]: Interrupt period set to: 500 cycles.
+[INFO][risa.cc:149]: Virtual memory size set to: 0.031250 MB.
+[INFO][risa.cc:172]: Running simulator...
+===[ OUTPUT ]===================================================================================================
 Hello World in rISA!
-============================================================================================
-[rISA] [/home/wsl/src/rISA/src/risa.c:53] [INFO]: Simulation stopping, time elapsed: 0.000122 seconds.
+================================================================================================================
+[INFO][risa.cc:52]: Simulation stopping, time elapsed: 0.000212 seconds.
 ```
 
 ## Project features

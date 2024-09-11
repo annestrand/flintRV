@@ -1,42 +1,82 @@
-# flintRV
+# flintRV Simulator
 
-A cycle-accurate C++ simulator of the Verilated flintRV RTL.
+A cycle-accurate Verilated C++ flintRV RTL simulator.
 
 The C++ code here serves as the wrapper around the Verilated module.
 
 ```
-$ ./flintRV ./my_loop.hex -d 2
-[flintRV - Info ]:[         main.cc:73] - Memory size set to: [ 0.031250 MB ].
-[flintRV - Info ]:[         main.cc:74] - Simulation timeout value:  [ 1000 ].
-[flintRV - Info ]:[         main.cc:78] - Starting simulation...
-
+$ flintRV ./build/riscv64-unknown-elf/basic/simple_loop.hex --tracing
+flintRV - Verilator based flintRV simulator
+[INFO][main.cc:85]: Simulation timeout value: 2147483647 cycles.
+[INFO][main.cc:87]: Memory size set to: 0.031250 MB.
+[INFO][main.cc:91]: Running simulator...
 ===[ OUTPUT ]===================================================================================================
-       0:   0x0badc0de   CPU Reset!            STALL:[----]  FLUSH:[----]  STATUS:[--R----]  CYCLE:[0]
-       0:   0x00000993   addi s3, zero, 0      STALL:[x---]  FLUSH:[xxxx]  STATUS:[IM-----]  CYCLE:[1]
-       4:   0x00000913   addi s2, zero, 0      STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[2]
-       8:   0x00400a13   addi s4, zero, 4      STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[3]
-       c:   0x01298933   add s2, s3, s2        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[4]
-      10:   0x00198993   addi s3, s3, 1        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[5]
-      14:   0xff499ce3   bne s3, s4, -8        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[6]
-      18:   0x00100073   ebreak                STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[7]
-      1c:   0x0000006f   jal zero, 0           STALL:[----]  FLUSH:[xx--]  STATUS:[IM-B---]  CYCLE:[8]
-       c:   0x01298933   add s2, s3, s2        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[9]
-      10:   0x00198993   addi s3, s3, 1        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[10]
-      14:   0xff499ce3   bne s3, s4, -8        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[11]
-      18:   0x00100073   ebreak                STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[12]
-      1c:   0x0000006f   jal zero, 0           STALL:[----]  FLUSH:[xx--]  STATUS:[IM-B---]  CYCLE:[13]
-       c:   0x01298933   add s2, s3, s2        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[14]
-      10:   0x00198993   addi s3, s3, 1        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[15]
-      14:   0xff499ce3   bne s3, s4, -8        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[16]
-      18:   0x00100073   ebreak                STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[17]
-      1c:   0x0000006f   jal zero, 0           STALL:[----]  FLUSH:[xx--]  STATUS:[IM-B---]  CYCLE:[18]
-       c:   0x01298933   add s2, s3, s2        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[19]
-      10:   0x00198993   addi s3, s3, 1        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[20]
-      14:   0xff499ce3   bne s3, s4, -8        STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[21]
-      18:   0x00100073   ebreak                STALL:[----]  FLUSH:[----]  STATUS:[IM-----]  CYCLE:[22]
-================================================================================================================
 
-[flintRV - Info ]:[         main.cc:96] - Simulation done.
+       0:   0x0badc0de   CPU Reset!                    
+       0:   0x00000993   addi s3, zero, 0              
+       4:   0x00000913   addi s2, zero, 0              
+       8:   0x00a00a13   addi s4, zero, 10             
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+      20:   0x00000013   addi zero, zero, 0            
+       c:   0x01298933   add s2, s3, s2                
+      10:   0x00198993   addi s3, s3, 1                
+      14:   0xff499ce3   bne s3, s4, -8                
+      18:   0x00100073   ebreak                        
+      1c:   0x0000006f   jal zero, 0                   
+================================================================================================================
+[INFO][main.cc:127]: Simulation stopping, time elapsed: 0.000394 seconds.
 ```
 
 ## Simulator guide ❓
