@@ -92,6 +92,7 @@ if (BUILD_TESTS)
     add_multi_target_component(tests basic ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
     add_multi_target_component(tests algorithms ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
     add_multi_target_component(external riscv-tests ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
+    add_multi_target_component(examples hello_world ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
 
     add_executable(flintRV_tests
         ${CMAKE_SOURCE_DIR}/tests/main.cc
@@ -123,11 +124,6 @@ if (BUILD_TESTS)
         riscv-tests-${RISCV_TOOLCHAIN_TRIPLE}
     )
 endif ()
-
-# RV32I hello world example
-if (BUILD_HELLO_WORLD)
-    add_multi_target_component(examples hello_world ${RISCV_TOOLCHAIN_TRIPLE} ${EXTERN_PROJECT_GENERATOR})
-endif()
 
 # Build example SoC firmware
 if (BUILD_SOC)
