@@ -18,6 +18,10 @@
 #define flintRV_VERSION "unknown"
 #endif // flintRV_VERSION
 
+// Syscalls (taken from "riscv64-unknown-elf/include/machine/syscall.h")
+#define SYS_exit 93
+#define SYS_write 64
+
 // Regfile aliases
 typedef enum {
     ZERO = 0,
@@ -82,6 +86,7 @@ class flintRV {
     VerilatedVcdC *m_trace;
     vluint64_t m_maxSimTime;
     bool m_tracing;
+    bool m_endNow;
     char *m_mem;      // Test memory
     size_t m_memSize; // Sizeof Test memory in bytes
 };

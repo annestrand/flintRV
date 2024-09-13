@@ -57,6 +57,7 @@ module flintRV (
     reg             p_bra       [EXEC:WB]   `VP;
     reg             p_jmp       [EXEC:WB]   `VP;
     reg             p_ebreak    [EXEC:WB]   `VP;
+    reg             p_ecall     [EXEC:WB]   `VP;
     reg             p_jalr      [EXEC:WB]   `VP;
 
     // Internal regs
@@ -154,14 +155,17 @@ module flintRV (
         p_bra       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_bra       [EXEC] : bra;
         p_jmp       [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jmp       [EXEC] : jmp;
         p_ebreak    [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ebreak    [EXEC] : ebreak;
+        p_ecall     [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_ecall     [EXEC] : ecall;
         p_jalr      [EXEC]  <= EXEC_flush ? 1'd0 : EXEC_stall ? p_jalr      [EXEC] : jalr;
         // Memory
+        p_ecall     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_ecall   [MEM] : p_ecall     [EXEC];
         p_mem_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem_w   [MEM] : p_mem_w     [EXEC];
         p_reg_w     [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_reg_w   [MEM] : p_reg_w     [EXEC];
         p_mem2reg   [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_mem2reg [MEM] : p_mem2reg   [EXEC];
         p_bra       [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_bra     [MEM] : p_bra       [EXEC];
         p_jmp       [MEM]   <= MEM_flush ? 1'd0 : MEM_stall ? p_jmp     [MEM] : p_jmp       [EXEC];
         // Writeback
+        p_ecall     [WB]    <= WB_flush ? 1'd0 : p_ecall    [MEM];
         p_reg_w     [WB]    <= WB_flush ? 1'd0 : p_reg_w    [MEM];
         p_mem2reg   [WB]    <= WB_flush ? 1'd0 : p_mem2reg  [MEM];
     end

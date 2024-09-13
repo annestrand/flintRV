@@ -88,7 +88,8 @@ int main(int argc, char *argv[]) {
 
     // Instantiate CPU
     flintRV dut = flintRV(simTimeVal, tracing.infoBits.used);
-    LOG_INFO_PRINTF("Running simulator...\n%s", OUTPUT_LINE);
+    LOG_INFO_PRINTF("Running simulator...");
+    printf(OUTPUT_LINE);
     if (!dut.create(new VflintRV(), simVcd.value)) {
         LOG_ERROR("Failed to create flintRV.");
         return 1;

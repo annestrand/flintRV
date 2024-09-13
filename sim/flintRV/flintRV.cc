@@ -21,7 +21,7 @@
 
 flintRV::flintRV(vluint64_t maxSimTime, bool tracing)
     : m_cpu(nullptr), m_cycles(0), m_trace(nullptr), m_maxSimTime(maxSimTime),
-      m_tracing(tracing), m_mem(nullptr), m_memSize(0) {}
+      m_tracing(tracing), m_endNow(false), m_mem(nullptr), m_memSize(0) {}
 
 flintRV::~flintRV() {
     m_cpu->final();
@@ -128,6 +128,37 @@ bool flintRV::instructionUpdate() {
     }
     // Fetch the next instruction
     m_cpu->i_instr = *(int *)&m_mem[m_cpu->o_pcOut];
+
+    if (CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump) {
+        // flintRV simulator treats EBREAK as the quit/exit signal
+        m_endNow = true;
+    }
+    if (CPU(this)->p_ecall[CPU(this)->WB]) {
+        // Emulate the ECALL handling
+        int syscallCode = readRegfile(A7);
+        switch (syscallCode) {
+            case SYS_exit:
+                m_endNow = true;
+                break;
+            case SYS_write: {
+                int value = 0;
+                int address = readRegfile(A1);
+                u32 len = readRegfile(A2);
+                for (u32 i = 0; i < len; ++i) {
+                    if (!peekMem(address + i, value)) {
+                        return false;
+                    }
+                    printf("%c", (char)value);
+                    fflush(stdout);
+                }
+                break;
+            }
+            default:
+                LOG_WARNING_PRINTF("Unknown syscall code: [ %d ]", syscallCode);
+                break;
+        }
+    }
+
     return true;
 }
 
@@ -254,12 +285,11 @@ void flintRV::dump() {
 }
 
 bool flintRV::end() {
-    bool isEbreak = CPU(this)->p_ebreak[CPU(this)->EXEC] && !CPU(this)->pcJump;
     bool isFinished =
-        Verilated::gotFinish() || m_cycles > m_maxSimTime || isEbreak;
-    if (isEbreak) {
+        Verilated::gotFinish() || m_cycles > m_maxSimTime || m_endNow;
+    if (isFinished) {
         // Need to finish draining pipeline here...
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             loadStoreUpdate();
             tick(false);
         }
