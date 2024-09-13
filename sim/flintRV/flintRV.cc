@@ -289,10 +289,8 @@ bool flintRV::end() {
         Verilated::gotFinish() || m_cycles > m_maxSimTime || m_endNow;
     if (isFinished) {
         // Need to finish draining pipeline here...
-        for (int i = 0; i < 2; i++) {
-            loadStoreUpdate();
-            tick(false);
-        }
+        loadStoreUpdate();
+        tick(false);
     }
     return isFinished;
 }
