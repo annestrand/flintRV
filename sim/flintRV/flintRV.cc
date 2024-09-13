@@ -42,7 +42,7 @@ flintRV::~flintRV() {
 
 bool flintRV::create(VflintRV *cpu, const char *traceFile) {
     if (cpu == nullptr) {
-        LOG_ERROR("Failed to create Verilated flintRV module!\n");
+        LOG_ERROR("Failed to create Verilated flintRV module!");
         return false;
     }
     m_cpu = cpu;
@@ -50,7 +50,7 @@ bool flintRV::create(VflintRV *cpu, const char *traceFile) {
         Verilated::traceEverOn(true);
         m_trace = new VerilatedVcdC;
         if (m_trace == nullptr) {
-            LOG_WARNING("Failed to create flintRV VCD dumper!\n");
+            LOG_WARNING("Failed to create flintRV VCD dumper!");
         } else if (traceFile != nullptr) {
             m_cpu->trace(m_trace, 99);
             m_trace->open(traceFile);
@@ -62,13 +62,13 @@ bool flintRV::create(VflintRV *cpu, const char *traceFile) {
 
 bool flintRV::createMemory(size_t memSize) {
     if (memSize == 0) {
-        LOG_ERROR("Memory cannot be of size 0!\n");
+        LOG_ERROR("Memory cannot be of size 0!");
         return false;
     }
     m_memSize = memSize;
     m_mem = new char[memSize];
     if (m_mem == nullptr) {
-        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!\n", m_memSize);
+        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!", m_memSize);
         return false;
     }
     std::memset(m_mem, 0, m_memSize);
@@ -77,13 +77,13 @@ bool flintRV::createMemory(size_t memSize) {
 
 bool flintRV::createMemory(size_t memSize, std::string initHexfile) {
     if (memSize == 0) {
-        LOG_ERROR("Memory cannot be of size 0!\n");
+        LOG_ERROR("Memory cannot be of size 0!");
         return false;
     }
     m_memSize = memSize;
     m_mem = new char[memSize];
     if (m_mem == nullptr) {
-        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!\n", m_memSize);
+        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!", m_memSize);
         return false;
     }
     std::memset(m_mem, 0, m_memSize);
@@ -94,17 +94,17 @@ bool flintRV::createMemory(size_t memSize, std::string initHexfile) {
 bool flintRV::createMemory(size_t memSize, unsigned char *initHexarray,
                            unsigned int initHexarrayLen) {
     if (memSize == 0) {
-        LOG_ERROR("Memory cannot be of size 0!\n");
+        LOG_ERROR("Memory cannot be of size 0!");
         return false;
     }
     if (memSize < initHexarrayLen) {
-        LOG_ERROR("Cannot fit initialization hex char array into memory!\n");
+        LOG_ERROR("Cannot fit initialization hex char array into memory!");
         return false;
     }
     m_memSize = memSize;
     m_mem = new char[memSize];
     if (m_mem == nullptr) {
-        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!\n", m_memSize);
+        LOG_ERROR_PRINTF("Failed to allocate %ld bytes!", m_memSize);
         return false;
     }
     std::memset(m_mem, 0, m_memSize);
@@ -116,13 +116,13 @@ bool flintRV::createMemory(size_t memSize, unsigned char *initHexarray,
 bool flintRV::instructionUpdate() {
     // Error check
     if (m_mem == nullptr) {
-        LOG_ERROR("Cannot fetch instruction from NULL memory!\n");
+        LOG_ERROR("Cannot fetch instruction from NULL memory!");
         return false;
     }
     if (m_cpu->o_pcOut >= m_memSize) {
         LOG_ERROR_PRINTF(
             "PC address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx "
-            "]!\n",
+            "]!",
             m_cpu->o_pcOut, m_memSize);
         return false;
     }
@@ -168,12 +168,12 @@ bool flintRV::loadStoreUpdate() {
         return true;
     } // Skip if there was no load/store request
     if (m_mem == nullptr) {
-        LOG_ERROR("Cannot loadStoreUpdate on NULL memory!\n");
+        LOG_ERROR("Cannot loadStoreUpdate on NULL memory!");
         return false;
     }
     if (m_cpu->o_dataAddr >= m_memSize) {
         LOG_ERROR_PRINTF(
-            "Address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!\n",
+            "Address [ 0x%x ] is out-of-bounds from memory [ 0x0 - 0x%lx ]!",
             m_cpu->o_dataAddr, m_memSize);
         return false;
     }
@@ -197,13 +197,13 @@ bool flintRV::loadStoreUpdate() {
 bool flintRV::peekMem(size_t addr, int &val) {
     // Error check
     if (m_mem == nullptr) {
-        LOG_ERROR("Cannot 'peek' in NULL memory!\n");
+        LOG_ERROR("Cannot 'peek' in NULL memory!");
         return false;
     }
     if (addr >= m_memSize) {
         LOG_ERROR_PRINTF(
             "'Peek' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx "
-            "]!\n",
+            "]!",
             addr, m_memSize);
         return false;
     }
@@ -214,13 +214,13 @@ bool flintRV::peekMem(size_t addr, int &val) {
 bool flintRV::pokeMem(size_t addr, int val) {
     // Error check
     if (m_mem == nullptr) {
-        LOG_ERROR("Cannot 'poke' at NULL memory!\n");
+        LOG_ERROR("Cannot 'poke' at NULL memory!");
         return false;
     }
     if (addr >= m_memSize) {
         LOG_ERROR_PRINTF(
             "'Poke' address 0x%lx is out-of-bounds from memory [ 0x0 - 0x%lx "
-            "]!\n",
+            "]!",
             addr, m_memSize);
         return false;
     }

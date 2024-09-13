@@ -14,13 +14,12 @@
 bool loadMem(std::string filePath, char *mem, ssize_t memLen) {
     FILE *fp = fopen(filePath.c_str(), "rb+");
     if (fp == NULL) {
-        LOG_ERROR_PRINTF("Could not open [ %s ]!\n", filePath.c_str());
+        LOG_ERROR_PRINTF("Could not open [ %s ]!", filePath.c_str());
         return false;
     }
     for (ssize_t i = 0; feof(fp) == 0; ++i) {
         if (i >= memLen) {
-            LOG_ERROR_PRINTF("Cannot fit hexfile [ %s ] in mem!\n",
-                             filePath.c_str());
+            LOG_ERROR_PRINTF("Cannot fit hexfile in mem: %s", filePath.c_str());
             fclose(fp);
             return false;
         }
