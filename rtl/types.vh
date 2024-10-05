@@ -115,6 +115,4 @@
 `define ALU_OP_SGTE         5'b01110
 `define ALU_OP_SGTEU        5'b01111
 
-`define VP /*verilator public*/
-
 `endif /* TYPES_VH */

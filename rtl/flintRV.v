@@ -18,97 +18,60 @@ module flintRV (
     parameter REGFILE_ADDR_WIDTH    = 5;  // 4 for RV32E (otherwise 5)
 
     // Helper Aliases
-    localparam REG_0    `VP= 5'b00000; // Register x0
-    localparam EBREAK   `VP= 20;
-    localparam NOP      `VP= 32'h13;
-    localparam S_B_OP   `VP= 3'b000;
-    localparam S_H_OP   `VP= 3'b001;
-    localparam S_W_OP   `VP= 3'b010;
-    localparam S_BU_OP  `VP= 3'b100;
-    localparam S_HU_OP  `VP= 3'b101;
-    localparam L_B_OP   `VP= 3'b000;
-    localparam L_H_OP   `VP= 3'b001;
-    localparam L_W_OP   `VP= 3'b010;
-    localparam L_BU_OP  `VP= 3'b100;
-    localparam L_HU_OP  `VP= 3'b101;
+    localparam REG_0    /*verilator public*/ = 5'b00000; // Register x0
+    localparam EBREAK   /*verilator public*/ = 20;
+    localparam NOP      /*verilator public*/ = 32'h13;
+    localparam S_B_OP   /*verilator public*/ = 3'b000;
+    localparam S_H_OP   /*verilator public*/ = 3'b001;
+    localparam S_W_OP   /*verilator public*/ = 3'b010;
+    localparam S_BU_OP  /*verilator public*/ = 3'b100;
+    localparam S_HU_OP  /*verilator public*/ = 3'b101;
+    localparam L_B_OP   /*verilator public*/ = 3'b000;
+    localparam L_H_OP   /*verilator public*/ = 3'b001;
+    localparam L_W_OP   /*verilator public*/ = 3'b010;
+    localparam L_BU_OP  /*verilator public*/ = 3'b100;
+    localparam L_HU_OP  /*verilator public*/ = 3'b101;
 
     // Pipeline regs (p_*)
-    localparam  EXEC    `VP= 0;
-    localparam  MEM     `VP= 1;
-    localparam  WB      `VP= 2;
-    reg [XLEN-1:0]  p_rs1       [EXEC:WB]   `VP;
-    reg [XLEN-1:0]  p_rs2       [EXEC:WB]   `VP;
-    reg [XLEN-1:0]  p_aluOut    [EXEC:WB]   `VP;
-    reg [XLEN-1:0]  p_readData  [EXEC:WB]   `VP;
-    reg [XLEN-1:0]  p_PC        [EXEC:WB]   `VP;
-    reg [XLEN-1:0]  p_IMM       [EXEC:WB]   `VP;
-    reg [XLEN-1:0]  p_jumpAddr  [EXEC:WB]   `VP;
-    reg      [6:0]  p_funct7    [EXEC:WB]   `VP;
-    reg      [4:0]  p_rs1Addr   [EXEC:WB]   `VP;
-    reg      [4:0]  p_rs2Addr   [EXEC:WB]   `VP;
-    reg      [4:0]  p_rdAddr    [EXEC:WB]   `VP;
-    reg      [4:0]  p_aluOp     [EXEC:WB]   `VP;
-    reg      [2:0]  p_funct3    [EXEC:WB]   `VP;
-    reg             p_mem_w     [EXEC:WB]   `VP;
-    reg             p_reg_w     [EXEC:WB]   `VP;
-    reg             p_mem2reg   [EXEC:WB]   `VP;
-    reg             p_exec_a    [EXEC:WB]   `VP;
-    reg             p_exec_b    [EXEC:WB]   `VP;
-    reg             p_bra       [EXEC:WB]   `VP;
-    reg             p_jmp       [EXEC:WB]   `VP;
-    reg             p_ebreak    [EXEC:WB]   `VP;
-    reg             p_ecall     [EXEC:WB]   `VP;
-    reg             p_jalr      [EXEC:WB]   `VP;
+    localparam  EXEC                     /*verilator public*/= 0;
+    localparam  MEM                      /*verilator public*/= 1;
+    localparam  WB                       /*verilator public*/= 2;
+    reg [XLEN-1:0]  p_rs1       [EXEC:WB]/*verilator public*/;
+    reg [XLEN-1:0]  p_rs2       [EXEC:WB]/*verilator public*/;
+    reg [XLEN-1:0]  p_aluOut    [EXEC:WB]/*verilator public*/;
+    reg [XLEN-1:0]  p_readData  [EXEC:WB]/*verilator public*/;
+    reg [XLEN-1:0]  p_PC        [EXEC:WB]/*verilator public*/;
+    reg [XLEN-1:0]  p_IMM       [EXEC:WB]/*verilator public*/;
+    reg [XLEN-1:0]  p_jumpAddr  [EXEC:WB]/*verilator public*/;
+    reg      [6:0]  p_funct7    [EXEC:WB]/*verilator public*/;
+    reg      [4:0]  p_rs1Addr   [EXEC:WB]/*verilator public*/;
+    reg      [4:0]  p_rs2Addr   [EXEC:WB]/*verilator public*/;
+    reg      [4:0]  p_rdAddr    [EXEC:WB]/*verilator public*/;
+    reg      [4:0]  p_aluOp     [EXEC:WB]/*verilator public*/;
+    reg      [2:0]  p_funct3    [EXEC:WB]/*verilator public*/;
+    reg             p_mem_w     [EXEC:WB]/*verilator public*/;
+    reg             p_reg_w     [EXEC:WB]/*verilator public*/;
+    reg             p_mem2reg   [EXEC:WB]/*verilator public*/;
+    reg             p_exec_a    [EXEC:WB]/*verilator public*/;
+    reg             p_exec_b    [EXEC:WB]/*verilator public*/;
+    reg             p_bra       [EXEC:WB]/*verilator public*/;
+    reg             p_jmp       [EXEC:WB]/*verilator public*/;
+    reg             p_ebreak    [EXEC:WB]/*verilator public*/;
+    reg             p_ecall     [EXEC:WB]/*verilator public*/;
+    reg             p_jalr      [EXEC:WB]/*verilator public*/;
 
     // Internal regs
-    reg  [XLEN-1:0] PC;
-    reg  [XLEN-1:0] PCReg                   `VP;
-    reg  [XLEN-1:0] instrReg                `VP;
-    reg  [XLEN-1:0] loadData                `VP;
-    reg  [XLEN-1:0] storeData               `VP;
+    reg  [XLEN-1:0] PC, PCReg, instrReg, loadData, storeData;
     // Internal wires
-    wire [XLEN-1:0] IMM                     `VP;
-    wire [XLEN-1:0] aluOut                  `VP;
-    wire [XLEN-1:0] jumpAddr                `VP;
-    wire [XLEN-1:0] rs1Out                  `VP;
-    wire [XLEN-1:0] rs2Out                  `VP;
-    wire [XLEN-1:0] rs1Exec                 `VP;
-    wire [XLEN-1:0] rs2Exec                 `VP;
-    wire [XLEN-1:0] WB_result               `VP;
-    wire [XLEN-1:0] aluSrcA                 `VP;
-    wire [XLEN-1:0] aluSrcB                 `VP;
-    wire [XLEN-1:0] ctrlTransSrcA           `VP;
-    wire [XLEN-1:0] jmpResult               `VP;
-    wire     [13:0] ctrlSigs                `VP;
-    wire      [4:0] aluOp                   `VP;
-    wire            exec_a                  `VP;
-    wire            exec_b                  `VP;
-    wire            mem_w                   `VP;
-    wire            reg_w                   `VP;
-    wire            mem2reg                 `VP;
-    wire            bra                     `VP;
-    wire            jmp                     `VP;
-    wire            braOutcome              `VP;
-    wire            writeRd                 `VP;
-    wire            pcJump                  `VP;
-    wire            RS1_fwd_mem             `VP;
-    wire            RS1_fwd_wb              `VP;
-    wire            RS2_fwd_mem             `VP;
-    wire            RS2_fwd_wb              `VP;
-    wire            rdFwdRs1En              `VP;
-    wire            rdFwdRs2En              `VP;
-    wire            load_hazard             `VP;
-    wire            load_wait               `VP;
-    wire            FETCH_stall             `VP;
-    wire            EXEC_stall              `VP;
-    wire            MEM_stall               `VP;
-    wire            FETCH_flush             `VP;
-    wire            EXEC_flush              `VP;
-    wire            MEM_flush               `VP;
-    wire            WB_flush                `VP;
-    wire            ecall                   `VP;
-    wire            ebreak                  `VP;
-    wire            jalr                    `VP;
+    wire [XLEN-1:0] IMM, aluOut, jumpAddr, rs1Out, rs2Out, rs1Exec, rs2Exec, WB_result, 
+                    aluSrcA, aluSrcB, ctrlTransSrcA, jmpResult;
+    wire     [13:0] ctrlSigs;
+    wire      [4:0] aluOp;
+    wire            exec_a, exec_b, mem_w, reg_w, mem2reg, bra, jmp, braOutcome, writeRd, 
+                    pcJump /*verilator public*/, RS1_fwd_mem, RS1_fwd_wb, RS2_fwd_mem, 
+                    RS2_fwd_wb, rdFwdRs1En, rdFwdRs2En, load_hazard, load_wait, FETCH_stall, 
+                    EXEC_stall, MEM_stall, FETCH_flush, EXEC_flush, MEM_flush, WB_flush, 
+                    ecall, ebreak, jalr;
 
     // Branch/jump logic
     assign pcJump       = braOutcome || p_jmp[MEM];
@@ -204,9 +167,9 @@ module flintRV (
     end
     generate
         if (ICACHE_LATENCY == 1) begin : gen_ICACHE_LATENCY // BRAM-based I$
-            reg [XLEN-1:0]  PC2              `VP;
-            reg             FETCH_flush2     `VP;
-            wire            FETCH_flush_line `VP;
+            reg [XLEN-1:0]  PC2;
+            reg             FETCH_flush2;
+            wire            FETCH_flush_line;
             assign          FETCH_flush_line = FETCH_flush || FETCH_flush2;
             always @(posedge i_clk) begin
                 // Hold fetch-flush line for 1cc extra
