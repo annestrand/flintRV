@@ -1,6 +1,6 @@
 # flintRV
 
-<img src="https://devbored.io/images/flintRV_logo.png" width="20%" align="right"/>
+<img src="https://annestrand.com/images/flintRV_logo.png" width="20%" align="right"/>
 
 - RV32I ISA
 - 4-stage in-order pipelined processor
