@@ -6,7 +6,7 @@
 - 4-stage in-order pipelined processor
 - Simple RISC-V soft-core CPU aimed for use in FPGAs
 
-# Prerequisites ✅
+## Prerequisites ✅
 - Python >= 3.6
 - CMake >= 3.12 (**optional**)
 - C++14 compiler (or greater) (**optional**)
@@ -14,19 +14,18 @@
 - GoogleTest (**optional**)
 - GCC RISC-V compiler/cross-compiler toolchain (**optional**)
 
-# Pre-build ⚒️
 This repo uses git submodules - make sure to pull those first:
 
     git submodule update --init --recursive
 
-# Generate flintRV core
+## Generate flintRV core
 There is a convenience script to generate a singular core/CPU RTL file to stdout:
 
     python3 ./scripts/core_gen.py [opts]
 
 Use `-h` to list available options.
 
-# Generate flintRV SoC
+## Generate flintRV SoC
 `flintRVsoc/` directory provides a very basic example SoC using the flintRV soft-cpu, to generate just the SoC: 
 
     python3 ./scripts/flintRVsoc_gen.py
@@ -48,7 +47,7 @@ Output SoC Files: `<OUTPUT_DIR>/<RISCV_TOOLCHAIN_TRIPLE>/flintRVsoc`
     - 1KB Data RAM
     - 1 Output pin (e.g. hello-world LED blink)
 
-# Build rISA and flintRV simulators 🖥
+## Build rISA and flintRV simulators 🖥
 
     cmake -Bbuild
     cmake --build build
@@ -56,7 +55,7 @@ Output SoC Files: `<OUTPUT_DIR>/<RISCV_TOOLCHAIN_TRIPLE>/flintRVsoc`
 - [rISA Documentation](./sim/risa/README.md)
 - [flintRV Documentation](./sim/flintRV/README.md)
 
-# Build Tests 🧪
+## Build Tests 🧪
 Building tests require the above `optional` prerequisites.
 
 To build tests:
